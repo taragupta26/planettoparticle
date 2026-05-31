@@ -1,0 +1,127 @@
+{
+  "dataset": "Planetary Boundaries — control variables and status",
+  "sourceId": "planetary_boundaries_2023",
+  "sourceName": "Richardson et al. (2023), Science Advances; Stockholm Resilience Centre / Planetary Health Check (2024–25)",
+  "sourceUrl": "https://www.science.org/doi/10.1126/sciadv.adh2458",
+  "citation": "Richardson, K., Steffen, W., Lucht, W., et al. (2023). Earth beyond six of nine planetary boundaries. Science Advances 9(37): eadh2458. Zone-of-uncertainty ranges from Steffen et al. (2015), Science 347:1259855. Ocean-acidification update: Findlay et al. (2025), Global Change Biology / Planetary Health Check 2025.",
+  "note": "Global (not per-country) framework. As of the 2025 assessment, SEVEN of nine boundaries are transgressed — ocean acidification was formally assessed as crossed in 2025. Each boundary also has a zone of uncertainty (the band of increasing risk between the safe limit and the high-risk end); values transcribed from the published assessments, none invented.",
+  "asOf": "2023 (ocean acidification updated 2025)",
+  "summary": { "transgressed": 7, "within": 2, "total": 9 },
+  "boundaries": [
+    {
+      "name": "Climate change",
+      "controlVariable": "Atmospheric CO₂ concentration",
+      "boundary": "350 ppm",
+      "uncertainty": "350–450 ppm",
+      "current": "417 ppm",
+      "status": "transgressed",
+      "unit": "ppm"
+    },
+    {
+      "name": "Climate change (energy imbalance)",
+      "controlVariable": "Radiative forcing at top of atmosphere",
+      "boundary": "+1.0 W/m²",
+      "uncertainty": "+1.0 to +1.5 W/m²",
+      "current": "+2.91 W/m²",
+      "status": "transgressed",
+      "unit": "W/m²"
+    },
+    {
+      "name": "Biosphere integrity (genetic)",
+      "controlVariable": "Extinction rate (E/MSY)",
+      "boundary": "10 per million species-years",
+      "uncertainty": "10–100 per million species-years",
+      "current": ">100 per million species-years",
+      "status": "transgressed",
+      "unit": "E/MSY"
+    },
+    {
+      "name": "Biosphere integrity (functional)",
+      "controlVariable": "Human appropriation of net primary production (HANPP)",
+      "boundary": "10% of preindustrial NPP",
+      "current": "30% of preindustrial NPP",
+      "status": "transgressed",
+      "unit": "% of NPP"
+    },
+    {
+      "name": "Land-system change",
+      "controlVariable": "Forested land remaining (global)",
+      "boundary": "75% of original forest cover",
+      "uncertainty": "75–54% of original forest cover",
+      "current": "60% of original forest cover",
+      "status": "transgressed",
+      "unit": "% forest cover"
+    },
+    {
+      "name": "Freshwater change (green water)",
+      "controlVariable": "Land area with root-zone soil-moisture departures",
+      "boundary": "11.1% of ice-free land",
+      "current": "18.2% of ice-free land",
+      "status": "transgressed",
+      "unit": "% land area"
+    },
+    {
+      "name": "Freshwater change (blue water)",
+      "controlVariable": "Land area with streamflow departures",
+      "boundary": "10.2% of ice-free land",
+      "current": "18.2% of ice-free land",
+      "status": "transgressed",
+      "unit": "% land area"
+    },
+    {
+      "name": "Biogeochemical flows (nitrogen)",
+      "controlVariable": "Industrial + intentional biological N fixation",
+      "boundary": "62 Tg N/yr",
+      "uncertainty": "62–82 Tg N/yr",
+      "current": "190 Tg N/yr",
+      "status": "transgressed",
+      "unit": "Tg N/yr"
+    },
+    {
+      "name": "Biogeochemical flows (phosphorus)",
+      "controlVariable": "Phosphorus flow to oceans",
+      "boundary": "11 Tg P/yr",
+      "uncertainty": "11–100 Tg P/yr",
+      "current": "22.6 Tg P/yr",
+      "status": "transgressed",
+      "unit": "Tg P/yr"
+    },
+    {
+      "name": "Ocean acidification",
+      "controlVariable": "Surface-ocean aragonite saturation state (Ω-arag)",
+      "boundary": "≥2.86 (80% of preindustrial Ω 3.57)",
+      "uncertainty": "2.86 → 2.50 (80% → 70% of preindustrial)",
+      "current": "≈2.84 (2024 global-mean surface)",
+      "status": "transgressed",
+      "unit": "Ω-arag",
+      "note": "Formally assessed as crossed in 2025 — the 7th boundary outside the safe operating space. Polar/Arctic waters (Ω 1–2) are already far below; tropics (Ω 3.3–4.0) remain higher. Source: Findlay et al. (2025) / Planetary Health Check 2025.",
+      "source": "Findlay et al. (2025), Global Change Biology; Planetary Health Check 2025",
+      "sourceUrl": "https://www.planetaryhealthcheck.org/boundary/ocean-acidification/"
+    },
+    {
+      "name": "Atmospheric aerosol loading",
+      "controlVariable": "Interhemispheric aerosol optical depth difference",
+      "boundary": "0.1",
+      "current": "0.076",
+      "status": "within",
+      "unit": "AOD difference"
+    },
+    {
+      "name": "Stratospheric ozone depletion",
+      "controlVariable": "Stratospheric O₃ concentration (global mean)",
+      "boundary": "276 DU",
+      "uncertainty": "276–261 DU",
+      "current": "284.6 DU",
+      "status": "within",
+      "unit": "Dobson units"
+    },
+    {
+      "name": "Novel entities",
+      "controlVariable": "Synthetic chemicals / novel substances released without adequate safety assessment",
+      "boundary": "No release without safety verification",
+      "current": "Boundary exceeded (no safe operating space quantified)",
+      "status": "transgressed",
+      "unit": "qualitative"
+    }
+  ]
+}

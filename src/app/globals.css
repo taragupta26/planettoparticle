@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: #f3f8fc;
+  color: #1f3c5a;
+}
+
+/* Leaflet container needs an explicit height */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #dbeafe;
+  border-radius: 0.5rem;
+}
+
+.react-flow__attribution {
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 9px;
+}
