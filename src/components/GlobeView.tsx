@@ -11,6 +11,13 @@ import {
   type ClimateData,
   type ClimateMetric,
 } from "@/lib/climateMigration";
+import {
+  loadTradeFlows,
+  fmtUsdThousand,
+  TRADE_SOURCE,
+  type TradePayload,
+  type TradeFlow,
+} from "@/lib/trade";
 
 /* ------------------------------------------------------------------ */
 /* Data shapes (mirror /api/map)                                       */
@@ -193,6 +200,44 @@ function featureCentroid(feature: any): { lat: number; lng: number } | null {
   return { lng: sx / ring.length, lat: sy / ring.length };
 }
 
+// Sample points along the great-circle arc between two lat/lng points (slerp on
+// the unit sphere). Used to draw geographically faithful trade-flow arcs.
+function greatCircle(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+  steps = 48
+): { lat: number; lng: number }[] {
+  const toR = Math.PI / 180;
+  const toV = (lat: number, lng: number) => {
+    const la = lat * toR,
+      lo = lng * toR;
+    return [Math.cos(la) * Math.cos(lo), Math.cos(la) * Math.sin(lo), Math.sin(la)];
+  };
+  const a = toV(lat1, lng1);
+  const b = toV(lat2, lng2);
+  let dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  dot = Math.max(-1, Math.min(1, dot));
+  const omega = Math.acos(dot);
+  const out: { lat: number; lng: number }[] = [];
+  if (omega < 1e-6) return [{ lat: lat1, lng: lng1 }, { lat: lat2, lng: lng2 }];
+  const sinO = Math.sin(omega);
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const s1 = Math.sin((1 - t) * omega) / sinO;
+    const s2 = Math.sin(t * omega) / sinO;
+    const x = s1 * a[0] + s2 * b[0];
+    const y = s1 * a[1] + s2 * b[1];
+    const z = s1 * a[2] + s2 * b[2];
+    out.push({
+      lat: Math.atan2(z, Math.hypot(x, y)) / toR,
+      lng: Math.atan2(y, x) / toR,
+    });
+  }
+  return out;
+}
+
 function featureContains(feature: any, lng: number, lat: number): boolean {
   const g = feature.geometry;
   if (!g) return false;
@@ -225,6 +270,8 @@ export default function GlobeMap({
   showFarms = false,
   showCams = false,
   showClimate = false,
+  showTrade = false,
+  tradeIso,
 }: {
   mode: "globe" | "mercator" | "satellite";
   onSelectIso?: (iso: string | undefined) => void;
@@ -236,6 +283,8 @@ export default function GlobeMap({
   showFarms?: boolean; // global field boundaries (FTW · Sentinel-2 · PMTiles)
   showCams?: boolean; // live public traffic webcams (TfL JamCams, London)
   showClimate?: boolean; // US county climate-habitability (Rhodium/ProPublica)
+  showTrade?: boolean; // bilateral trade-flow arcs (World Bank WITS)
+  tradeIso?: string; // reporter country for trade flows (= selected country)
 }) {
   const layerKey = layers.join(",");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -281,6 +330,19 @@ export default function GlobeMap({
   const [countyTip, setCountyTip] = useState<{ x: number; y: number; f: any } | null>(
     null
   );
+  // Bilateral trade-flow arcs (World Bank WITS). Reporter = the selected country;
+  // arcs go reporter→partner, sized by real US$ value. Honest gap when absent.
+  const tradeRef = useRef<TradePayload | null>(null);
+  const showTradeRef = useRef(showTrade);
+  const tradeFlowRef = useRef<"X" | "M">("X");
+  const [tradeFlow, setTradeFlow] = useState<"X" | "M">("X");
+  const [tradeYear, setTradeYear] = useState<string>("2021");
+  const [tradeData, setTradeData] = useState<TradePayload | null>(null);
+  const [tradeTip, setTradeTip] = useState<{
+    x: number;
+    y: number;
+    f: TradeFlow;
+  } | null>(null);
   const [ptTip, setPtTip] = useState<{ x: number; y: number; p: OverlayPoint } | null>(
     null
   );
@@ -333,6 +395,51 @@ export default function GlobeMap({
   useEffect(() => {
     climateMetricRef.current = climateMetric;
   }, [climateMetric]);
+  useEffect(() => {
+    showTradeRef.current = showTrade;
+  }, [showTrade]);
+  useEffect(() => {
+    tradeFlowRef.current = tradeFlow;
+  }, [tradeFlow]);
+
+  // Load bilateral trade flows for the selected reporter whenever the overlay is
+  // on and the country / direction / year changes. Real WITS data; gap-aware.
+  useEffect(() => {
+    if (!showTrade) {
+      tradeRef.current = null;
+      setTradeData(null);
+      return;
+    }
+    if (!tradeIso) {
+      tradeRef.current = null;
+      setTradeData(null);
+      setOverlayNote("Trade flows: select a country to see who it trades with.");
+      return;
+    }
+    let cancelled = false;
+    setOverlayNote(
+      `Trade flows: loading ${tradeFlow === "M" ? "imports" : "exports"} for ${tradeIso} (${tradeYear})…`
+    );
+    loadTradeFlows(tradeIso, tradeFlow, tradeYear)
+      .then((data) => {
+        if (cancelled) return;
+        tradeRef.current = data.available ? data : null;
+        setTradeData(data);
+        if (data.available && data.flows) {
+          setOverlayNote(
+            `Trade flows: ${data.reporter?.name} ${tradeFlow === "M" ? "imports from" : "exports to"} ${data.flows.length} partners · World Bank WITS ${tradeYear}`
+          );
+        } else {
+          setOverlayNote(`Trade flows: ${data.reason ?? "no data"} (data gap)`);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setOverlayNote("Trade flows: load failed.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showTrade, tradeIso, tradeFlow, tradeYear]);
 
   // Load the US county climate dataset + geometry once, when first enabled.
   useEffect(() => {
@@ -980,6 +1087,66 @@ export default function GlobeMap({
       ctx!.restore();
     }
 
+    // Bilateral trade-flow arcs (World Bank WITS). Great-circle lines from the
+    // reporter to each partner, width ∝ real US$ value; a dot at each partner.
+    // Top flows only, to keep the picture legible. Export = warm, import = cool.
+    function drawTradeFlows() {
+      if (!showTradeRef.current) return;
+      const data = tradeRef.current;
+      if (!data || !data.available || !data.flows || !data.reporter) return;
+      const globe = modeRef.current === "globe";
+      const rep = data.reporter;
+      const flows = data.flows.slice(0, 60);
+      const max = flows[0]?.value || 1;
+      const isExport = (data.flow ?? "X") === "X";
+      const stroke = isExport ? "rgba(217,119,6,0.55)" : "rgba(2,132,199,0.55)";
+      const dotFill = isExport ? "#d97706" : "#0284c7";
+      ctx!.save();
+      ctx!.lineCap = "round";
+      for (const f of flows) {
+        const pts = greatCircle(rep.lat, rep.lon, f.lat, f.lon, 48);
+        ctx!.beginPath();
+        ctx!.lineWidth = 0.6 + 3.4 * Math.sqrt(f.value / max);
+        ctx!.strokeStyle = stroke;
+        let started = false;
+        for (const p of pts) {
+          const pr = project(p.lat, p.lng);
+          if (globe && !pr.vis) {
+            started = false; // break the line across the horizon
+            continue;
+          }
+          if (!started) {
+            ctx!.moveTo(pr.x, pr.y);
+            started = true;
+          } else ctx!.lineTo(pr.x, pr.y);
+        }
+        ctx!.stroke();
+      }
+      // partner end-dots, sized by value
+      for (const f of flows) {
+        const pr = project(f.lat, f.lon);
+        if (globe && !pr.vis) continue;
+        ctx!.beginPath();
+        ctx!.arc(pr.x, pr.y, 1.5 + 3 * Math.sqrt(f.value / max), 0, Math.PI * 2);
+        ctx!.fillStyle = dotFill;
+        ctx!.globalAlpha = 0.85;
+        ctx!.fill();
+        ctx!.globalAlpha = 1;
+      }
+      // reporter hub
+      const rp = project(rep.lat, rep.lon);
+      if (!globe || rp.vis) {
+        ctx!.beginPath();
+        ctx!.arc(rp.x, rp.y, 5, 0, Math.PI * 2);
+        ctx!.fillStyle = "#111827";
+        ctx!.fill();
+        ctx!.lineWidth = 2;
+        ctx!.strokeStyle = "#fff";
+        ctx!.stroke();
+      }
+      ctx!.restore();
+    }
+
     // US county climate-habitability choropleth. Each county is painted with the
     // SOURCE'S OWN legend color for the active hazard's published severity bin
     // (Rhodium Group via ProPublica/NYT). Counties absent from the dataset are
@@ -1194,6 +1361,7 @@ export default function GlobeMap({
       }
 
       drawCounties();
+      drawTradeFlows();
       drawFarms();
       drawLabels();
       drawMines();
@@ -1277,6 +1445,28 @@ export default function GlobeMap({
     return null;
   }
 
+  // Trade-partner node under the cursor (nearest projected dot within radius).
+  function hitTradeNode(mx: number, my: number): TradeFlow | null {
+    if (!showTradeRef.current) return null;
+    const data = tradeRef.current;
+    if (!data || !data.available || !data.flows) return null;
+    const globe = modeRef.current === "globe";
+    let best: TradeFlow | null = null;
+    let bestD = 144; // 12px pick radius²
+    for (const f of data.flows.slice(0, 60)) {
+      const pr = project(f.lat, f.lon);
+      if (globe && !pr.vis) continue;
+      const dx = pr.x - mx,
+        dy = pr.y - my;
+      const d = dx * dx + dy * dy;
+      if (d < bestD) {
+        bestD = d;
+        best = f;
+      }
+    }
+    return best;
+  }
+
   // US county under the cursor (point-in-polygon on county geometry)
   function hitCounty(mx: number, my: number): any | null {
     if (!showClimateRef.current) return null;
@@ -1357,6 +1547,16 @@ export default function GlobeMap({
     }
     setFarmTip(null);
 
+    // Trade-partner nodes sit above country fills — check before them.
+    const tn = hitTradeNode(mx, my);
+    if (tn) {
+      setTradeTip({ x: mx, y: my, f: tn });
+      setTooltip(null);
+      hoverIsoRef.current = undefined;
+      return;
+    }
+    setTradeTip(null);
+
     // US county climate choropleth — hit before the country fill underneath.
     const cf = hitCounty(mx, my);
     if (cf) {
@@ -1415,6 +1615,7 @@ export default function GlobeMap({
     setPtTip(null);
     setFarmTip(null);
     setCountyTip(null);
+    setTradeTip(null);
   }
 
   function zoomBy(factor: number) {
@@ -1781,6 +1982,115 @@ export default function GlobeMap({
           >
             {CM_SOURCE.name}
           </a>
+        </div>
+      )}
+      {tradeTip && tradeData?.available && (
+        <div
+          className="pointer-events-none absolute z-30 max-w-[240px] rounded-md border border-earth-200 bg-white/95 px-2.5 py-1.5 text-xs shadow-lg backdrop-blur-sm"
+          style={{
+            left: Math.min(tradeTip.x + 14, (sizeRef.current.w || 9999) - 250),
+            top: tradeTip.y + 14,
+            color: "#3b2a1a",
+          }}
+        >
+          <div className="font-semibold text-earth-900">
+            {tradeData.reporter?.name}{" "}
+            <span className="text-earth-400">
+              {tradeData.flow === "M" ? "←" : "→"}
+            </span>{" "}
+            {tradeTip.f.name}
+          </div>
+          <div className="text-[11px] text-earth-700">
+            {tradeData.flow === "M" ? "Imports" : "Exports"}:{" "}
+            <b className="tabular-nums">{fmtUsdThousand(tradeTip.f.value)}</b>{" "}
+            <span className="text-earth-400">
+              ({((tradeTip.f.value / (tradeData.total || 1)) * 100).toFixed(1)}% of
+              total)
+            </span>
+          </div>
+          <div className="mt-0.5 text-[9px] text-earth-400">
+            {TRADE_SOURCE.name} · {tradeData.year}
+          </div>
+        </div>
+      )}
+      {showTrade && (
+        <div className="absolute bottom-2 left-2 z-20 max-w-[300px] rounded-lg border border-earth-200 bg-white/90 px-2.5 py-2 text-[10px] shadow-md backdrop-blur-sm">
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="font-semibold text-earth-800">Bilateral trade</span>
+            <span className="inline-flex overflow-hidden rounded border border-earth-200">
+              {(["X", "M"] as const).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setTradeFlow(d)}
+                  className={`px-1.5 py-0.5 text-[9px] ${
+                    tradeFlow === d
+                      ? "bg-earth-800 text-white"
+                      : "bg-white text-earth-600 hover:bg-earth-100"
+                  }`}
+                >
+                  {d === "X" ? "Exports" : "Imports"}
+                </button>
+              ))}
+            </span>
+          </div>
+          {!tradeIso && (
+            <div className="text-earth-500">
+              Click a country to see who it {tradeFlow === "M" ? "buys from" : "sells to"}.
+            </div>
+          )}
+          {tradeIso && tradeData && !tradeData.available && (
+            <div className="text-earth-500">
+              {tradeData.reason ?? "No WITS data"} — shown as a data gap.
+            </div>
+          )}
+          {tradeData?.available && tradeData.flows && (
+            <div>
+              <div className="mb-1 text-earth-600">
+                <b>{tradeData.reporter?.name}</b> ·{" "}
+                {tradeFlow === "M" ? "top sources" : "top destinations"} ·{" "}
+                {tradeData.year}
+              </div>
+              <ol className="space-y-0.5">
+                {tradeData.flows.slice(0, 6).map((f, i) => (
+                  <li key={f.iso} className="flex items-baseline justify-between gap-2">
+                    <span className="text-earth-700">
+                      {i + 1}. {f.name}
+                    </span>
+                    <span className="tabular-nums font-medium text-earth-900">
+                      {fmtUsdThousand(f.value)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-1 text-earth-500">
+                Total {tradeFlow === "M" ? "imports" : "exports"}:{" "}
+                <b className="tabular-nums">{fmtUsdThousand(tradeData.total || 0)}</b>
+              </div>
+            </div>
+          )}
+          <div className="mt-1 flex items-center gap-1.5">
+            {["2019", "2020", "2021"].map((y) => (
+              <button
+                key={y}
+                onClick={() => setTradeYear(y)}
+                className={`rounded px-1 py-0.5 text-[9px] ${
+                  tradeYear === y
+                    ? "bg-earth-700 text-white"
+                    : "bg-earth-100 text-earth-600 hover:bg-earth-200"
+                }`}
+              >
+                {y}
+              </button>
+            ))}
+            <a
+              href={TRADE_SOURCE.url}
+              target="_blank"
+              rel="noreferrer"
+              className="ml-auto text-[9px] text-earth-400 underline decoration-dotted hover:text-earth-600"
+            >
+              {TRADE_SOURCE.name}
+            </a>
+          </div>
         </div>
       )}
       {overlayNote && (

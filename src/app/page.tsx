@@ -308,6 +308,7 @@ export default function Home() {
   const [showFarms, setShowFarms] = useState(false);
   const [showCams, setShowCams] = useState(false);
   const [showClimate, setShowClimate] = useState(false);
+  const [showTrade, setShowTrade] = useState(false);
   const [showDrawdown, setShowDrawdown] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(false);
   const [showBoundariesMap, setShowBoundariesMap] = useState(false);
@@ -462,6 +463,8 @@ export default function Home() {
           showFarms={showFarms}
           showCams={showCams}
           showClimate={showClimate}
+          showTrade={showTrade}
+          tradeIso={selectedIso}
           highlightIso={answerIso}
           onSelectIso={(iso) => {
             setSelectedIso(iso || undefined);
@@ -598,6 +601,7 @@ export default function Home() {
                 ["Field boundaries", showFarms, setShowFarms, "#16a34a", "Global Sentinel-2 field boundaries (Fields of The World, CC-BY-4.0) — zoom into cropland to load"],
                 ["Webcams", showCams, setShowCams, "#7c3aed", "Live public traffic cameras (TfL JamCams, London) — official feeds only"],
                 ["US climate risk", showClimate, setShowClimate, "#b91c1c", "US county climate-habitability projections (Rhodium Group via ProPublica/NYT) — zoom to the US"],
+                ["Trade flows", showTrade, setShowTrade, "#d97706", "Bilateral export/import flows for the selected country (World Bank WITS) — click a country"],
               ] as const
             ).map(([label, on, set, color, title]) => (
               <button
@@ -978,12 +982,11 @@ export default function Home() {
 
         <div className="border-t border-earth-100 p-3 text-[10px] leading-snug text-earth-500">
           Sources: USGS MCS 2024 &amp; PP1802 · World Bank Open Data (incl.
-          trade flows) · Our World in Data / FAOSTAT · NASA EONET · USGS
-          Earthquakes · Digitraffic AIS · Fields of The World (Sentinel-2,
-          CC-BY-4.0) · Project Drawdown ·
-          Planetary Boundaries (Richardson 2023) · Natural Earth. UN Comtrade
-          bilateral flows need a subscription key (shown as a data gap). No
-          mocked data.
+          trade flows) · World Bank WITS (bilateral trade) · Our World in Data /
+          FAOSTAT · NASA EONET · USGS Earthquakes · Digitraffic AIS · Fields of
+          The World (Sentinel-2, CC-BY-4.0) · Rhodium Group via ProPublica/NYT
+          (US climate) · Project Drawdown · Planetary Boundaries (Richardson
+          2023) · Natural Earth. No mocked data.
         </div>
       </aside>
     </main>

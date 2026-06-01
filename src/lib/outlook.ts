@@ -67,6 +67,17 @@ function geo(): Map<string, Centroid> {
   return GEO!;
 }
 
+// Natural Earth label-point centroid for an ISO3 (used to anchor trade-flow
+// arcs). Returns null for unknown codes — an honest gap, never a guess.
+export function getCentroid(
+  isoRaw: string
+): { iso: string; name: string; lat: number; lon: number } | null {
+  const iso = (isoRaw || "").trim().toUpperCase();
+  if (!iso) return null;
+  const c = geo().get(iso);
+  return c ? { iso, name: c.name, lat: c.lat, lon: c.lon } : null;
+}
+
 // Resolve a country named in free text → {iso, name}. Matches on a word
 // boundary so "iran" doesn't fire inside "iranian-made"; longest name wins.
 export function detectCountry(text: string): { iso: string; name: string } | null {
