@@ -18,6 +18,11 @@ import {
   type TradePayload,
   type TradeFlow,
 } from "@/lib/trade";
+import {
+  ENTITY_COLOR,
+  ENTITY_LABEL,
+  type PlanEntity,
+} from "@/lib/plans";
 
 /* ------------------------------------------------------------------ */
 /* Data shapes (mirror /api/map)                                       */
@@ -272,6 +277,8 @@ export default function GlobeMap({
   showClimate = false,
   showTrade = false,
   tradeIso,
+  planEntities,
+  planFocus,
 }: {
   mode: "globe" | "mercator" | "satellite";
   onSelectIso?: (iso: string | undefined) => void;
@@ -285,6 +292,8 @@ export default function GlobeMap({
   showClimate?: boolean; // US county climate-habitability (Rhodium/ProPublica)
   showTrade?: boolean; // bilateral trade-flow arcs (World Bank WITS)
   tradeIso?: string; // reporter country for trade flows (= selected country)
+  planEntities?: PlanEntity[]; // collaborative-plan points (OSM/Wikidata)
+  planFocus?: { lat: number; lon: number; zoom: number } | null; // fly-to target
 }) {
   const layerKey = layers.join(",");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -349,6 +358,13 @@ export default function GlobeMap({
   const [farmTip, setFarmTip] = useState<{ x: number; y: number; f: any } | null>(
     null
   );
+  // Collaborative-plan entities (real OSM/Wikidata tea gardens, BTRI, trial site).
+  const planRef = useRef<PlanEntity[]>(planEntities ?? []);
+  const [planTip, setPlanTip] = useState<{
+    x: number;
+    y: number;
+    e: PlanEntity;
+  } | null>(null);
   const [overlayNote, setOverlayNote] = useState<string | null>(null);
   // when exactly one world_share filter is active we can draw "% of world"
   // labels; otherwise the composite has no single share to show.
@@ -392,6 +408,26 @@ export default function GlobeMap({
   useEffect(() => {
     showClimateRef.current = showClimate;
   }, [showClimate]);
+  useEffect(() => {
+    planRef.current = planEntities ?? [];
+  }, [planEntities]);
+
+  // Fly the map to a plan's region (e.g. the Bangladesh tea belt) when a plan
+  // is opened. Centering is exact in globe mode (rotate to lon/lat); in any mode
+  // we set the shared zoom. We hold the view so the gardens stay framed.
+  useEffect(() => {
+    if (!planFocus) return;
+    rotYRef.current = -planFocus.lon;
+    rotXRef.current = Math.max(-55, Math.min(55, planFocus.lat));
+    panXRef.current = -planFocus.lon;
+    zoomRef.current = Math.max(0.6, Math.min(64, planFocus.zoom));
+    frozenRef.current = true;
+    const s = sizeRef.current;
+    if (baseRRef.current) {
+      sizeRef.current = { ...s, R: baseRRef.current * zoomRef.current };
+    }
+    setZoomTick((t) => t + 1);
+  }, [planFocus]);
   useEffect(() => {
     climateMetricRef.current = climateMetric;
   }, [climateMetric]);
@@ -1242,6 +1278,49 @@ export default function GlobeMap({
       ctx!.restore();
     }
 
+    // Collaborative-plan entities: real tea gardens (OSM/Wikidata), the research
+    // institute (BTRI) and the vermicompost trial site. Colored by type; back-
+    // hemisphere points are culled on the globe. Labels appear once zoomed in.
+    function drawPlanEntities() {
+      const pts = planRef.current;
+      if (!pts.length) return;
+      const globe = modeRef.current === "globe";
+      const showLabels = zoomRef.current >= 2.2;
+      ctx!.save();
+      for (const e of pts) {
+        const p = project(e.lat, e.lon);
+        if (globe && !p.vis) continue;
+        const color = ENTITY_COLOR[e.type] ?? "#16a34a";
+        const r = e.type === "garden" ? 4.5 : 5.5;
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx!.fillStyle = color;
+        ctx!.globalAlpha = 0.92;
+        ctx!.fill();
+        ctx!.globalAlpha = 1;
+        ctx!.lineWidth = 1.6;
+        ctx!.strokeStyle = "#ffffff";
+        ctx!.stroke();
+        // mark the research / trial sites with an inner white dot to stand out
+        if (e.type !== "garden") {
+          ctx!.beginPath();
+          ctx!.arc(p.x, p.y, 1.7, 0, Math.PI * 2);
+          ctx!.fillStyle = "#ffffff";
+          ctx!.fill();
+        }
+        if (showLabels) {
+          const label = e.name.replace(/ Tea (Estate|Garden|Gardens).*$/i, "");
+          ctx!.font = "600 11px ui-sans-serif, system-ui, sans-serif";
+          ctx!.lineWidth = 3;
+          ctx!.strokeStyle = "rgba(255,255,255,0.92)";
+          ctx!.strokeText(label, p.x + r + 3, p.y + 3.5);
+          ctx!.fillStyle = "#1f2937";
+          ctx!.fillText(label, p.x + r + 3, p.y + 3.5);
+        }
+      }
+      ctx!.restore();
+    }
+
     // Live point overlays (natural disasters, AIS vessels). Back-hemisphere
     // points are culled on the globe via vis.
     function drawOverlayPoints() {
@@ -1366,6 +1445,7 @@ export default function GlobeMap({
       drawLabels();
       drawMines();
       drawOverlayPoints();
+      drawPlanEntities();
 
       // auto-rotate unless interacting
       if (
@@ -1467,6 +1547,27 @@ export default function GlobeMap({
     return best;
   }
 
+  // Collaborative-plan entity (tea garden / BTRI / trial site) under the cursor.
+  function hitPlanEntity(mx: number, my: number): PlanEntity | null {
+    const pts = planRef.current;
+    if (!pts.length) return null;
+    const globe = modeRef.current === "globe";
+    let best: PlanEntity | null = null;
+    let bestD = 100; // 10px pick radius²
+    for (const e of pts) {
+      const pr = project(e.lat, e.lon);
+      if (globe && !pr.vis) continue;
+      const dx = pr.x - mx,
+        dy = pr.y - my;
+      const d = dx * dx + dy * dy;
+      if (d < bestD) {
+        bestD = d;
+        best = e;
+      }
+    }
+    return best;
+  }
+
   // US county under the cursor (point-in-polygon on county geometry)
   function hitCounty(mx: number, my: number): any | null {
     if (!showClimateRef.current) return null;
@@ -1512,6 +1613,22 @@ export default function GlobeMap({
       }
       return;
     }
+
+    // Collaborative-plan entities (tea gardens, BTRI, trial site) sit on top
+    // when a plan is open — check them first so each marker stays hoverable.
+    const pe = hitPlanEntity(mx, my);
+    if (pe) {
+      setPlanTip({ x: mx, y: my, e: pe });
+      setTooltip(null);
+      setMineTip(null);
+      setPtTip(null);
+      setFarmTip(null);
+      setTradeTip(null);
+      setCountyTip(null);
+      hoverIsoRef.current = undefined;
+      return;
+    }
+    setPlanTip(null);
 
     // Mine points sit on top — check them first so a marker is hoverable even
     // over a colored country.
@@ -1616,6 +1733,7 @@ export default function GlobeMap({
     setFarmTip(null);
     setCountyTip(null);
     setTradeTip(null);
+    setPlanTip(null);
   }
 
   function zoomBy(factor: number) {
@@ -2010,6 +2128,41 @@ export default function GlobeMap({
           </div>
           <div className="mt-0.5 text-[9px] text-earth-400">
             {TRADE_SOURCE.name} · {tradeData.year}
+          </div>
+        </div>
+      )}
+      {planTip && (
+        <div
+          className="pointer-events-none absolute z-30 max-w-[260px] rounded-md border border-earth-200 bg-white/95 px-2.5 py-1.5 text-xs shadow-lg backdrop-blur-sm"
+          style={{
+            left: Math.min(planTip.x + 14, (sizeRef.current.w || 9999) - 270),
+            top: planTip.y + 14,
+            color: "#3b2a1a",
+          }}
+        >
+          <div className="flex items-center gap-1.5 font-semibold text-earth-900">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full ring-1 ring-white"
+              style={{ background: ENTITY_COLOR[planTip.e.type] }}
+            />
+            {planTip.e.name}
+          </div>
+          <div className="text-[11px] text-earth-700">
+            {ENTITY_LABEL[planTip.e.type]}
+            {planTip.e.district ? ` · ${planTip.e.district}` : ""}
+          </div>
+          {planTip.e.note && (
+            <div className="mt-0.5 text-[10px] leading-snug text-earth-600">
+              {planTip.e.note}
+            </div>
+          )}
+          <div className="mt-0.5 text-[9px] text-earth-400">
+            {planTip.e.lat.toFixed(4)}, {planTip.e.lon.toFixed(4)} ·{" "}
+            {planTip.e.source === "wikidata"
+              ? "Wikidata"
+              : planTip.e.source === "osm"
+              ? "OpenStreetMap"
+              : "cited source"}
           </div>
         </div>
       )}

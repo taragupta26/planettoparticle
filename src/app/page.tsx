@@ -9,6 +9,8 @@ import DrawdownPanel from "@/components/DrawdownPanel";
 import PlanetaryBoundariesPanel from "@/components/PlanetaryBoundariesPanel";
 import PlanetaryBoundariesHUD from "@/components/PlanetaryBoundariesHUD";
 import CountryImpactPanel from "@/components/CountryImpactPanel";
+import CollabPlansPanel from "@/components/CollabPlansPanel";
+import type { CollabPlan, PlanEntity } from "@/lib/plans";
 
 interface LayerMeta {
   id: string;
@@ -312,6 +314,13 @@ export default function Home() {
   const [showDrawdown, setShowDrawdown] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(false);
   const [showBoundariesMap, setShowBoundariesMap] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
+  // The open plan drives both the panel detail and the map overlay/fly-to.
+  const [activePlanId, setActivePlanId] = useState<string | null>(null);
+  const [planEntities, setPlanEntities] = useState<PlanEntity[]>([]);
+  const [planFocus, setPlanFocus] = useState<
+    { lat: number; lon: number; zoom: number } | null
+  >(null);
   const [selectedIso, setSelectedIso] = useState<string | undefined>(undefined);
   const [layers, setLayers] = useState<LayerMeta[]>([]);
   // Layers are now FILTERS: any number can be active at once.
@@ -336,6 +345,23 @@ export default function Home() {
   function showLayer(id: string) {
     setActiveLayers((prev) => [...prev.filter((x) => x !== id), id]);
     setLeftOpen(true);
+  }
+
+  // Open a collaborative plan: load its mapped entities onto the globe and fly
+  // the camera to the plan focus. Force globe mode so the fly-to frames cleanly.
+  function openPlan(plan: CollabPlan) {
+    setActivePlanId(plan.id);
+    setPlanEntities(plan.entities);
+    setMode("globe");
+    // New object each open so GlobeView's focus effect re-fires.
+    setPlanFocus({ ...plan.focus });
+    setShowPlans(true);
+    setLeftOpen(true);
+  }
+  function closePlan() {
+    setActivePlanId(null);
+    setPlanEntities([]);
+    setPlanFocus(null);
   }
 
   // Suggestions follow the most recently added filter (then a general set).
@@ -465,6 +491,8 @@ export default function Home() {
           showClimate={showClimate}
           showTrade={showTrade}
           tradeIso={selectedIso}
+          planEntities={planEntities}
+          planFocus={planFocus}
           highlightIso={answerIso}
           onSelectIso={(iso) => {
             setSelectedIso(iso || undefined);
@@ -796,6 +824,28 @@ export default function Home() {
             {showDrawdown && (
               <div className="mt-2">
                 <DrawdownPanel />
+              </div>
+            )}
+          </section>
+
+          {/* ---- Collaborative transition plans ---- */}
+          <section className="rounded-xl border border-emerald-200 bg-emerald-50/30 p-3">
+            <button
+              onClick={() => setShowPlans((v) => !v)}
+              className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wide text-emerald-700"
+            >
+              <span>Collaborative plans</span>
+              <span className="text-emerald-500">
+                {showPlans ? "Hide ▲" : "Show ▼"}
+              </span>
+            </button>
+            {showPlans && (
+              <div className="mt-2">
+                <CollabPlansPanel
+                  activePlanId={activePlanId}
+                  onOpen={openPlan}
+                  onClose={closePlan}
+                />
               </div>
             )}
           </section>

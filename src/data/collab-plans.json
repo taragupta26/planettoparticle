@@ -1,0 +1,141 @@
+{
+  "provenance": {
+    "note": "Collaborative transition plans. Every mapped point is a real feature from OpenStreetMap or Wikidata (coordinates unaltered); every figure traces to a cited source. Where ownership, boundaries, or farm-level economics are not published, we show a data gap instead of inventing a value.",
+    "built": "2026-06"
+  },
+  "citations": [
+    {
+      "id": "osm",
+      "label": "OpenStreetMap contributors",
+      "publisher": "OpenStreetMap (ODbL)",
+      "url": "https://www.openstreetmap.org/copyright"
+    },
+    {
+      "id": "wikidata",
+      "label": "Wikidata — tea-estate items with coordinates (P625)",
+      "publisher": "Wikidata (CC0)",
+      "url": "https://www.wikidata.org"
+    },
+    {
+      "id": "wiki_teabd",
+      "label": "Tea production in Bangladesh",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Tea_production_in_Bangladesh"
+    },
+    {
+      "id": "btri",
+      "label": "Bangladesh Tea Research Institute — Soil Science Division (vermicompost & organic-input trials)",
+      "publisher": "Bangladesh Tea Research Institute, Srimangal",
+      "url": "https://btri.portal.gov.bd"
+    },
+    {
+      "id": "verm_bd",
+      "label": "Vermi-compost in agricultural production in Bangladesh (incl. Luskerpore Tea Estate trial, Habiganj)",
+      "publisher": "ResearchGate (peer-reviewed)",
+      "url": "https://www.researchgate.net/publication/324950109_Vermi-compost_in_agricultural_production_in_Bangladesh"
+    },
+    {
+      "id": "himachal",
+      "label": "Differential effects of organic inputs on soil fertility and growth of tea plants",
+      "publisher": "Current Agriculture Research Journal",
+      "url": "https://www.agriculturejournal.org/volume11number2/differential-effects-of-organic-inputs-on-soil-fertility-and-growth-of-tea-plants/"
+    },
+    {
+      "id": "earthworm_in",
+      "label": "Restoring soil fertility and enhancing productivity in Indian tea plantations with earthworms and organic fertilizers",
+      "publisher": "Academia.edu (research paper)",
+      "url": "https://www.academia.edu/144079166/Restoring_soil_fertility_and_enhancing_productivity_in_Indian_tea_plantations_with_earthworms_and_organic_fertilizers"
+    },
+    {
+      "id": "businsp",
+      "label": "Top tea companies in Bangladesh (estate counts, hectares, output)",
+      "publisher": "Business Inspection BD",
+      "url": "https://businessinspection.com.bd/top-tea-companies-in-bd/"
+    },
+    {
+      "id": "ispahani",
+      "label": "Ispahani Tea Limited — estates and market share",
+      "publisher": "M. M. Ispahani Limited",
+      "url": "https://ispahanibd.com/ispahani-tea-limited/"
+    }
+  ],
+  "plans": [
+    {
+      "id": "bd-tea-vermicompost",
+      "title": "Bangladesh tea: a vermicompost transition",
+      "subtitle": "Helping tea-garden farmers move from synthetic fertilizer to on-garden vermicompost",
+      "region": "Sylhet, Moulvibazar, Habiganj & Chattogram, Bangladesh",
+      "status": "draft — open for collaborators",
+      "focus": { "lat": 24.1, "lon": 91.75, "zoom": 4.6 },
+      "summary": "Bangladesh's tea belt runs through the hills of Sylhet, Moulvibazar, Habiganj and Chattogram. Decades of synthetic-fertilizer use have acidified and depleted many tea soils. This plan maps the real, named tea gardens and the national research body (BTRI), and lays out a phased switch to vermicompost — worm-composted garden bio-waste and cow dung — grounded in field trials from Bangladesh (Luskerpore Tea Estate) and the wider region. It is honest about the cost: organic conversion in tea typically dips yield for the first transition years before soil biology and output recover.",
+      "metrics": [
+        { "label": "Commercial tea estates", "value": "166", "unit": "estates", "source": "wiki_teabd" },
+        { "label": "Area under tea", "value": "56,846", "unit": "ha", "source": "wiki_teabd" },
+        { "label": "National production", "value": "97.08", "unit": "million kg", "year": "2019", "source": "wiki_teabd" },
+        { "label": "Plantation workers", "value": "300,000+", "unit": "workers (≈75% women)", "source": "wiki_teabd" },
+        { "label": "Global rank", "value": "9th", "unit": "largest producer (≈3% of world)", "source": "wiki_teabd" }
+      ],
+      "entities": [
+        { "id": "malnicherra", "name": "Malnicherra Tea Estate", "type": "garden", "lat": 24.930313, "lon": 91.866729, "district": "Sylhet", "note": "Oldest tea estate in the subcontinent — planted 1854.", "source": "wikidata" },
+        { "id": "lakkatura", "name": "Lakkatura Tea Garden", "type": "garden", "lat": 24.91233, "lon": 91.889035, "district": "Sylhet", "source": "wikidata" },
+        { "id": "kaliti", "name": "Kaliti Tea Estate", "type": "garden", "lat": 24.8956, "lon": 91.8775, "district": "Sylhet", "source": "osm" },
+        { "id": "aliboksh", "name": "Ali Boksh Tea Estate", "type": "garden", "lat": 24.9429, "lon": 91.8663, "district": "Sylhet", "source": "osm" },
+        { "id": "habibnagar", "name": "Habibnagar Tea Estate", "type": "garden", "lat": 24.9619, "lon": 92.0156, "district": "Sylhet", "source": "osm" },
+        { "id": "kalikabari", "name": "Kalikabari Tea Estate", "type": "garden", "lat": 24.7814, "lon": 92.2515, "district": "Sylhet", "source": "osm" },
+        { "id": "khasiapolli", "name": "Khasia Polli Tea Gardens", "type": "garden", "lat": 25.1698, "lon": 91.9935, "district": "Sylhet", "source": "osm" },
+        { "id": "kalighat", "name": "Kalighat Tea Garden", "type": "garden", "lat": 24.2683, "lon": 91.7309, "district": "Moulvibazar", "source": "osm" },
+        { "id": "makrichara", "name": "Makrichara Tea Garden", "type": "garden", "lat": 24.3262, "lon": 91.6373, "district": "Moulvibazar", "source": "osm" },
+        { "id": "deundi", "name": "Deundi Tea Estate", "type": "garden", "lat": 24.1905, "lon": 91.4423, "district": "Habiganj", "source": "osm" },
+        { "id": "lalchand", "name": "Lalchand Tea Estate", "type": "garden", "lat": 24.2381, "lon": 91.4091, "district": "Habiganj", "source": "osm" },
+        { "id": "waggachara", "name": "Waggachara Tea Estate", "type": "garden", "lat": 22.504, "lon": 92.1473, "district": "Chattogram", "source": "osm" },
+        { "id": "chandpurbelgaon", "name": "Chandpur Belgaon Tea Garden", "type": "garden", "lat": 22.134319, "lon": 91.951496, "district": "Banshkhali, Chattogram", "source": "wikidata" },
+        { "id": "btri", "name": "Bangladesh Tea Research Institute (BTRI)", "type": "research", "lat": 24.293872, "lon": 91.747956, "district": "Srimangal, Moulvibazar", "note": "National tea R&D body; its Soil Science Division runs vermicompost and organic-input trials on mature tea.", "source": "wikidata" },
+        { "id": "luskerpore", "name": "Luskerpore Tea Estate — vermicompost trial site", "type": "trial", "lat": 24.170722, "lon": 91.473231, "district": "Habiganj", "note": "Site of vermicompost field trials in Bangladeshi tea; a cow-dung + kitchen-residue + Eisenia foetida mix gave the best results in published work.", "source": "verm_bd" }
+      ],
+      "companies": [
+        { "name": "National Tea Company Ltd (NTCL)", "facts": "≈12 A-class estates across Sylhet, ≈10,000 ha, ≈5.2 million kg/yr.", "source": "businsp" },
+        { "name": "Duncan Brothers (Bangladesh) Ltd", "facts": "16 tea gardens, ≈9,100 ha, 12–13 million kg/yr.", "source": "businsp" },
+        { "name": "M. M. Ispahani Ltd", "facts": "4 estates (Mirzapore, Zareen, Neptune, Ghazipore), ≈2,100 ha; ≈50% of the domestic branded-tea market.", "source": "ispahani" },
+        { "name": "James Finlay successors", "facts": "Finlay's Bangladesh estates (Habiganj & Moulvibazar) now run by The Consolidated Tea & Lands Co (Bangladesh) Ltd and Baraoora (Sylhet) Tea Co Ltd.", "source": "wiki_teabd" }
+      ],
+      "steps": [
+        {
+          "title": "1 · Baseline soil & garden audit",
+          "body": "Test soil organic carbon, pH and N-P-K block by block, and map the worker villages tied to each garden. Decades of synthetic-N use have left many tea soils acidic and low in organic matter — the starting point BTRI's soil work targets.",
+          "evidence": ["btri", "osm"]
+        },
+        {
+          "title": "2 · Set up on-garden vermicompost units",
+          "body": "Culture earthworms (Eisenia foetida) on the garden's own bio-waste — prunings and factory residue — plus cow dung. In Bangladeshi trials at Luskerpore Tea Estate (Habiganj), a cow-dung + kitchen-residue + Eisenia foetida mix gave the highest-performing vermicompost.",
+          "evidence": ["verm_bd", "btri"]
+        },
+        {
+          "title": "3 · Phase in vermicompost, phase down synthetic N",
+          "body": "Substitute incrementally — e.g. start on a quarter of blocks. Be honest about the cost: organic-conversion research in tea reports a transition-period yield dip (often up to ~20% in the first conversion years) before soil biology and yield recover. Plan cash-flow and worker income around that dip.",
+          "evidence": ["earthworm_in", "himachal"],
+          "caveat": true
+        },
+        {
+          "title": "4 · Rebuild soil biology & carbon",
+          "body": "Vermicompost raises soil organic carbon, available nitrogen and microbial biomass. Field tea trials (e.g. vermicompost at 10 t/ha with jeevamrit) showed higher available N and microbial biomass carbon alongside improved growth and yield.",
+          "evidence": ["himachal", "earthworm_in"]
+        },
+        {
+          "title": "5 · Capture a quality / organic premium",
+          "body": "Organically grown tea tends to score higher on leaf-quality indicators, which can offset lower volume. A certification pathway lets converted gardens reach premium and export buyers.",
+          "evidence": ["verm_bd", "wiki_teabd"]
+        },
+        {
+          "title": "6 · Worker-cooperative economics & scale-up",
+          "body": "Bangladesh's gardens employ 300,000+ plantation workers, about three-quarters women. Vermicompost can be a worker-run input enterprise — keeping value and skills inside the garden community as the practice scales across estates.",
+          "evidence": ["wiki_teabd"]
+        }
+      ],
+      "dataGaps": [
+        "Per-garden ownership/operator is not consistently published. Gardens here are positioned from OpenStreetMap/Wikidata; company control is shown only where a company itself discloses it.",
+        "Farm-level cost, labour and net-income effects of switching to vermicompost in Bangladeshi tea are not quantified in the public literature — shown here as a gap, not estimated.",
+        "Most estates have no boundary polygon in OSM; each point marks a real labelled feature inside the estate, not its full extent."
+      ]
+    }
+  ]
+}
