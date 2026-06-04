@@ -130,9 +130,16 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   ["gas_production", "gas-production-by-country", "Gas production", "TWh", OWID_EI],
   // --- Land (UNCCD) ---
   ["land_degradation", "share-degraded-land", "Degraded land (SDG 15.3.1)", "%", OWID_UNCCD],
-  // --- Plastic pollution (per-country; production-by-country has no free source) ---
+  // --- Materials: plastics (per-country; PRIMARY-polymer production-by-country
+  //     has no free authoritative source, so we map the verifiable lifecycle —
+  //     waste generation, fate, and ocean leakage — not invented production) ---
   ["plastic_waste_pc", "plastic-waste-per-capita", "Plastic waste per capita", "kg/person/day", OWID_JAMBECK],
   ["plastic_to_ocean_share", "share-of-global-plastic-waste-emitted-to-the-ocean", "Share of global plastic emitted to ocean", "%", OWID_MEIJER],
+  ["plastic_waste_total", "plastic-waste-generation-total", "Plastic waste generation, total", "t", OWID_JAMBECK],
+  ["plastic_to_ocean_total", "plastic-waste-emitted-to-the-ocean", "Plastic emitted to ocean, total", "t/year", OWID_MEIJER],
+  // NOTE: OECD's "share mismanaged" is reported by REGION, not per country
+  // (only ~3 countries broken out) — omitted rather than ship a near-empty
+  // choropleth that would read as global coverage.
 ];
 
 const WB_INDICATORS = [
@@ -463,6 +470,24 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     OWID_MEIJER,
     "https://ourworldindata.org/grapher/share-of-global-plastic-waste-emitted-to-the-ocean",
+  ],
+  [
+    "plastic_waste_total",
+    "Plastic waste generation, total",
+    "t",
+    "world_share",
+    true,
+    OWID_JAMBECK,
+    "https://ourworldindata.org/grapher/plastic-waste-generation-total",
+  ],
+  [
+    "plastic_to_ocean_total",
+    "Plastic emitted to ocean, total",
+    "t/year",
+    "world_share",
+    true,
+    OWID_MEIJER,
+    "https://ourworldindata.org/grapher/plastic-waste-emitted-to-the-ocean",
   ],
   // ---- Biodiversity (World Bank → IUCN / UNEP-WCMC) ----
   [

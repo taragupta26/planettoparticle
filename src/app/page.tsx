@@ -110,6 +110,8 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   imports_value: "Largest importers",
   plastic_waste_pc: "Most plastic waste per person",
   plastic_to_ocean_share: "Largest share of ocean plastic",
+  plastic_waste_total: "Most plastic waste generated",
+  plastic_to_ocean_total: "Most plastic emitted to ocean",
   terrestrial_protected: "Most land protected",
   marine_protected: "Most ocean protected",
   threatened_birds: "Most threatened bird species",
@@ -119,6 +121,10 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
 // Per-layer question suggestions for the chat (varied — not just cobalt).
 // Picked by the active layer; falls back to a rotating general set.
 const LAYER_SUGGESTIONS: Record<string, string[]> = {
+  plastic_waste_total: [
+    "Where does the world's plastic waste come from, and where does it leak to the ocean?",
+    "How do oil and gas production connect to plastics and petrochemical feedstocks?",
+  ],
   cobalt_production: [
     "Who controls cobalt, who benefits, and what communities are affected?",
     "Where are the world's cobalt reserves concentrated?",
