@@ -10,7 +10,7 @@
     "build-db": "tsx scripts/build-db.ts",
     "dev": "next dev -p 3077",
     "build": "npm run build-db && next build",
-    "start": "next start -p 3077",
+    "start": "next start -p ${PORT:-3077}",
     "lint": "next lint"
   },
   "dependencies": {
