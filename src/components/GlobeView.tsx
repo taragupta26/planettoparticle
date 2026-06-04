@@ -115,6 +115,17 @@ interface MinePayload {
   sourceUrl: string;
   points: MinePoint[];
 }
+// Real cities (Natural Earth Populated Places, 10m). Compact keys to keep the
+// 7k-point file small: n=name, c=country, a=admin-1, p=pop_max, cap=capital flag.
+interface CityPoint {
+  n: string;
+  c: string;
+  a: string | null;
+  p: number;
+  cap: number;
+  lat: number;
+  lng: number;
+}
 // Primary commodity = first listed (compound entries read "Barite; Gallium").
 function primaryCommodity(c: string): string {
   return (c.split(";")[0] || c).trim();
@@ -270,6 +281,7 @@ export default function GlobeMap({
   highlightIso,
   layers = ["cobalt_production"],
   showMines = false,
+  showCities = false,
   showDisasters = false,
   showVessels = false,
   showFarms = false,
@@ -285,6 +297,7 @@ export default function GlobeMap({
   highlightIso?: string[]; // ISO3s referenced by the current answer
   layers?: string[]; // active data filters (one OR many, combined)
   showMines?: boolean; // overlay real mine/deposit points (USGS PP1802)
+  showCities?: boolean; // overlay real cities (Natural Earth Populated Places)
   showDisasters?: boolean; // live NASA EONET events + USGS earthquakes
   showVessels?: boolean; // live AIS vessel positions (Digitraffic)
   showFarms?: boolean; // global field boundaries (FTW · Sentinel-2 · PMTiles)
@@ -315,6 +328,15 @@ export default function GlobeMap({
   const minesRef = useRef<MinePoint[]>([]); // USGS PP1802 mine/deposit points
   const mineSrcRef = useRef<string>("");
   const showMinesRef = useRef(showMines);
+  // Real cities (Natural Earth Populated Places, 10m) — sorted by population so
+  // a zoom-aware threshold can show only the largest when zoomed out.
+  const citiesRef = useRef<CityPoint[]>([]);
+  const showCitiesRef = useRef(showCities);
+  const [cityTip, setCityTip] = useState<{
+    x: number;
+    y: number;
+    p: CityPoint;
+  } | null>(null);
   // Live overlays (fetched client-side from CORS-enabled public feeds).
   const disastersRef = useRef<OverlayPoint[]>([]); // NASA EONET + USGS quakes
   const vesselsRef = useRef<OverlayPoint[]>([]); // Digitraffic AIS positions
@@ -392,6 +414,10 @@ export default function GlobeMap({
   useEffect(() => {
     showMinesRef.current = showMines;
   }, [showMines]);
+
+  useEffect(() => {
+    showCitiesRef.current = showCities;
+  }, [showCities]);
 
   useEffect(() => {
     showDisastersRef.current = showDisasters;
@@ -734,6 +760,18 @@ export default function GlobeMap({
       })
       .catch(() => {});
   }, []);
+
+  // Load the real cities once, when first enabled (687KB static asset; sorted
+  // by population so the zoom-aware draw can cap the visible set cheaply).
+  useEffect(() => {
+    if (!showCities || citiesRef.current.length) return;
+    fetch("/cities.json")
+      .then((r) => r.json())
+      .then((d: { cities?: CityPoint[] }) => {
+        citiesRef.current = Array.isArray(d?.cities) ? d.cities : [];
+      })
+      .catch(() => {});
+  }, [showCities]);
 
   useEffect(() => {
     const set = new Set((highlightIso ?? []).filter(Boolean));
@@ -1123,6 +1161,40 @@ export default function GlobeMap({
       ctx!.restore();
     }
 
+    // Real cities (Natural Earth Populated Places). Level-of-detail: cities are
+    // sorted by population descending, so a zoom-derived minimum population lets
+    // us show only the largest when zoomed out and break the loop early. Dot
+    // size ∝ √population; capitals are amber, other cities teal.
+    function drawCities() {
+      if (!showCitiesRef.current) return;
+      const pts = citiesRef.current;
+      if (!pts.length) return;
+      const globe = modeRef.current === "globe";
+      const z = zoomRef.current;
+      const minPop = 6_000_000 / Math.pow(z, 1.5);
+      const { w, h } = sizeRef.current;
+      ctx!.save();
+      ctx!.lineWidth = 0.6;
+      let drawn = 0;
+      for (const c of pts) {
+        if (c.p < minPop) break; // pop-sorted: nothing smaller qualifies
+        const p = project(c.lat, c.lng);
+        if (globe && !p.vis) continue;
+        if (p.x < -20 || p.x > w + 20 || p.y < -20 || p.y > h + 20) continue;
+        const r = Math.max(1.4, Math.min(5, 1 + Math.sqrt(c.p) / 1400));
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx!.fillStyle = c.cap ? "#b45309" : "#0f766e";
+        ctx!.globalAlpha = 0.9;
+        ctx!.fill();
+        ctx!.globalAlpha = 1;
+        ctx!.strokeStyle = "rgba(255,255,255,0.9)";
+        ctx!.stroke();
+        if (++drawn > 1500) break; // safety cap on dense zoom-ins
+      }
+      ctx!.restore();
+    }
+
     // Bilateral trade-flow arcs (World Bank WITS). Great-circle lines from the
     // reporter to each partner, width ∝ real US$ value; a dot at each partner.
     // Top flows only, to keep the picture legible. Export = warm, import = cool.
@@ -1444,6 +1516,7 @@ export default function GlobeMap({
       drawFarms();
       drawLabels();
       drawMines();
+      drawCities();
       drawOverlayPoints();
       drawPlanEntities();
 
@@ -1484,6 +1557,32 @@ export default function GlobeMap({
       if (d < bestD) {
         bestD = d;
         best = mp;
+      }
+    }
+    return best;
+  }
+
+  // nearest visible city within a few px of the cursor (same pop/zoom threshold
+  // as drawCities, so only drawn cities are hoverable).
+  function hitCity(mx: number, my: number): CityPoint | null {
+    if (!showCitiesRef.current) return null;
+    const pts = citiesRef.current;
+    if (!pts.length) return null;
+    const globe = modeRef.current === "globe";
+    const z = zoomRef.current;
+    const minPop = 6_000_000 / Math.pow(z, 1.5);
+    let best: CityPoint | null = null;
+    let bestD = 8 * 8;
+    for (const c of pts) {
+      if (c.p < minPop) break;
+      const p = project(c.lat, c.lng);
+      if (globe && !p.vis) continue;
+      const dx = p.x - mx,
+        dy = p.y - my;
+      const d = dx * dx + dy * dy;
+      if (d < bestD) {
+        bestD = d;
+        best = c;
       }
     }
     return best;
@@ -1614,6 +1713,11 @@ export default function GlobeMap({
       return;
     }
 
+    // Clear the city tooltip on every move; the city branch below re-sets it
+    // when the cursor is actually over a city dot. Keeps it from lingering when
+    // a higher-priority marker (mine, plan, overlay) is hovered instead.
+    setCityTip(null);
+
     // Collaborative-plan entities (tea gardens, BTRI, trial site) sit on top
     // when a plan is open — check them first so each marker stays hoverable.
     const pe = hitPlanEntity(mx, my);
@@ -1684,6 +1788,15 @@ export default function GlobeMap({
     }
     setCountyTip(null);
 
+    // Cities (reference points) — hit before the bare country fill underneath.
+    const ct = hitCity(mx, my);
+    if (ct) {
+      setCityTip({ x: mx, y: my, p: ct });
+      setTooltip(null);
+      hoverIsoRef.current = undefined;
+      return;
+    }
+
     const iso = hitTest(mx, my);
     hoverIsoRef.current = iso;
     const data = dataRef.current;
@@ -1729,6 +1842,7 @@ export default function GlobeMap({
     hoverIsoRef.current = undefined;
     setTooltip(null);
     setMineTip(null);
+    setCityTip(null);
     setPtTip(null);
     setFarmTip(null);
     setCountyTip(null);
@@ -1922,6 +2036,41 @@ export default function GlobeMap({
           </div>
           <div className="mt-1 text-[10px] font-medium text-amber-700">
             Click marker → open satellite imagery ↗
+          </div>
+        </div>
+      )}
+      {cityTip && (
+        <div
+          className="pointer-events-none absolute z-30 max-w-[240px] rounded-md border border-earth-200 bg-white/90 px-2 py-1.5 text-xs shadow-md backdrop-blur-sm"
+          style={{
+            left: Math.min(cityTip.x + 14, (sizeRef.current.w || 9999) - 250),
+            top: cityTip.y + 14,
+            color: "#1f3c5a",
+          }}
+        >
+          <div className="flex items-center gap-1.5">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full ring-1 ring-white"
+              style={{ background: cityTip.p.cap ? "#b45309" : "#0f766e" }}
+            />
+            <span className="font-semibold">{cityTip.p.n}</span>
+            {cityTip.p.cap ? (
+              <span className="text-[9px] font-medium uppercase tracking-wide text-amber-700">
+                capital
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-0.5 text-[11px]">
+            <span className="opacity-70">Population: </span>
+            <b>{cityTip.p.p.toLocaleString()}</b>
+          </div>
+          <div className="text-[11px]">
+            <span className="opacity-70">Location: </span>
+            {[cityTip.p.a, cityTip.p.c].filter(Boolean).join(", ")}
+          </div>
+          <div className="mt-0.5 text-[9px] opacity-60">
+            Natural Earth · Populated Places (10m) · {cityTip.p.lat.toFixed(2)},{" "}
+            {cityTip.p.lng.toFixed(2)}
           </div>
         </div>
       )}
