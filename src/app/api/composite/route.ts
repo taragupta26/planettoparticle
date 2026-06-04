@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getLayer, type LayerMeta } from "@/lib/db";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * /api/composite?layer=a&layer=b (or ?layers=a,b)
