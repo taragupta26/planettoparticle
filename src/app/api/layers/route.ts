@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { listLayers } from "@/lib/db";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 // Lists the data layers available in the DuckDB store, for the UI switcher.
 // Each layer is real and source-attributed; nothing is synthesized here.
