@@ -312,6 +312,7 @@ export default function Home() {
   const [showGraph, setShowGraph] = useState(false);
   const [showMines, setShowMines] = useState(false);
   const [showCities, setShowCities] = useState(false);
+  const [showStates, setShowStates] = useState(false);
   const [showDisasters, setShowDisasters] = useState(false);
   const [showVessels, setShowVessels] = useState(false);
   const [showFarms, setShowFarms] = useState(false);
@@ -492,6 +493,7 @@ export default function Home() {
           layers={activeLayers}
           showMines={showMines}
           showCities={showCities}
+          showStates={showStates}
           showDisasters={showDisasters}
           showVessels={showVessels}
           showFarms={showFarms}
@@ -633,6 +635,7 @@ export default function Home() {
             {(
               [
                 ["Cities", showCities, setShowCities, "#0f766e", "7,342 real cities sized by population (Natural Earth Populated Places, 10m) — capitals in amber; zoom in to reveal smaller cities"],
+                ["States/provinces", showStates, setShowStates, "#7c5ca8", "3,909 admin-1 states/provinces worldwide (Natural Earth 10m) — outlines appear when you zoom in; hover for name & country"],
                 ["Disasters", showDisasters, setShowDisasters, "#dc2626", "Live NASA EONET events + USGS earthquakes"],
                 ["Vessels", showVessels, setShowVessels, "#0284c7", "Live global AIS vessel positions (AISStream.io — needs a free API key)"],
                 ["Field boundaries", showFarms, setShowFarms, "#16a34a", "Global Sentinel-2 field boundaries (Fields of The World, CC-BY-4.0) — zoom into cropland to load"],

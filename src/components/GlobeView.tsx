@@ -282,6 +282,7 @@ export default function GlobeMap({
   layers = ["cobalt_production"],
   showMines = false,
   showCities = false,
+  showStates = false,
   showDisasters = false,
   showVessels = false,
   showFarms = false,
@@ -298,6 +299,7 @@ export default function GlobeMap({
   layers?: string[]; // active data filters (one OR many, combined)
   showMines?: boolean; // overlay real mine/deposit points (USGS PP1802)
   showCities?: boolean; // overlay real cities (Natural Earth Populated Places)
+  showStates?: boolean; // overlay admin-1 states/provinces (Natural Earth 10m)
   showDisasters?: boolean; // live NASA EONET events + USGS earthquakes
   showVessels?: boolean; // live AIS vessel positions (Digitraffic)
   showFarms?: boolean; // global field boundaries (FTW · Sentinel-2 · PMTiles)
@@ -336,6 +338,15 @@ export default function GlobeMap({
     x: number;
     y: number;
     p: CityPoint;
+  } | null>(null);
+  // Admin-1 states/provinces (Natural Earth 10m, simplified). Drawn as outlines,
+  // zoom-gated so the ~3.9k subdivisions only appear once zoomed in.
+  const statesRef = useRef<any[]>([]);
+  const showStatesRef = useRef(showStates);
+  const [stateTip, setStateTip] = useState<{
+    x: number;
+    y: number;
+    f: any;
   } | null>(null);
   // Live overlays (fetched client-side from CORS-enabled public feeds).
   const disastersRef = useRef<OverlayPoint[]>([]); // NASA EONET + USGS quakes
@@ -418,6 +429,10 @@ export default function GlobeMap({
   useEffect(() => {
     showCitiesRef.current = showCities;
   }, [showCities]);
+
+  useEffect(() => {
+    showStatesRef.current = showStates;
+  }, [showStates]);
 
   useEffect(() => {
     showDisastersRef.current = showDisasters;
@@ -772,6 +787,18 @@ export default function GlobeMap({
       })
       .catch(() => {});
   }, [showCities]);
+
+  // Load admin-1 states/provinces once, when first enabled (3MB simplified
+  // Natural Earth asset). Each feature carries name/admin/type/iso.
+  useEffect(() => {
+    if (!showStates || statesRef.current.length) return;
+    fetch("/admin1.geo.json")
+      .then((r) => r.json())
+      .then((d: { features?: any[] }) => {
+        statesRef.current = Array.isArray(d?.features) ? d.features : [];
+      })
+      .catch(() => {});
+  }, [showStates]);
 
   useEffect(() => {
     const set = new Set((highlightIso ?? []).filter(Boolean));
@@ -1195,6 +1222,51 @@ export default function GlobeMap({
       ctx!.restore();
     }
 
+    // Admin-1 states/provinces (Natural Earth 10m, simplified). Outlines only,
+    // zoom-gated: ~3.9k subdivisions would clutter and cost too much zoomed out,
+    // so they appear only past a zoom threshold, culled to what's on screen.
+    function drawStates() {
+      if (!showStatesRef.current) return;
+      if (zoomRef.current < 2.2) return;
+      const feats = statesRef.current;
+      if (!feats.length) return;
+      const globe = modeRef.current === "globe";
+      const { w, h } = sizeRef.current;
+      ctx!.save();
+      ctx!.lineWidth = 0.5;
+      ctx!.strokeStyle = "rgba(124,92,168,0.55)"; // muted violet, distinct from country borders
+      for (const f of feats) {
+        const g = f.geometry;
+        if (!g) continue;
+        const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+        for (const rings of polys) {
+          const ring = rings?.[0];
+          if (!ring || ring.length < 3) continue;
+          ctx!.beginPath();
+          let started = false;
+          let anyVis = false;
+          for (const pt of ring) {
+            const pr = project(pt[1], pt[0]);
+            if (globe && !pr.vis) {
+              started = false;
+              continue;
+            }
+            if (pr.x < -40 || pr.x > w + 40 || pr.y < -40 || pr.y > h + 40) {
+              started = false;
+              continue;
+            }
+            anyVis = true;
+            if (!started) {
+              ctx!.moveTo(pr.x, pr.y);
+              started = true;
+            } else ctx!.lineTo(pr.x, pr.y);
+          }
+          if (anyVis) ctx!.stroke();
+        }
+      }
+      ctx!.restore();
+    }
+
     // Bilateral trade-flow arcs (World Bank WITS). Great-circle lines from the
     // reporter to each partner, width ∝ real US$ value; a dot at each partner.
     // Top flows only, to keep the picture legible. Export = warm, import = cool.
@@ -1511,6 +1583,7 @@ export default function GlobeMap({
         drawCountries();
       }
 
+      drawStates();
       drawCounties();
       drawTradeFlows();
       drawFarms();
@@ -1586,6 +1659,18 @@ export default function GlobeMap({
       }
     }
     return best;
+  }
+
+  // admin-1 state/province under the cursor (zoom-gated to match drawStates).
+  function hitState(mx: number, my: number): any | null {
+    if (!showStatesRef.current) return null;
+    if (zoomRef.current < 2.2) return null;
+    const feats = statesRef.current;
+    if (!feats.length) return null;
+    const ll = unproject(mx, my);
+    if (!ll) return null;
+    for (const f of feats) if (featureContains(f, ll.lng, ll.lat)) return f;
+    return null;
   }
 
   // nearest live overlay point (disaster/vessel) within a few px of the cursor
@@ -1713,10 +1798,11 @@ export default function GlobeMap({
       return;
     }
 
-    // Clear the city tooltip on every move; the city branch below re-sets it
-    // when the cursor is actually over a city dot. Keeps it from lingering when
-    // a higher-priority marker (mine, plan, overlay) is hovered instead.
+    // Clear the city/state tooltips on every move; their branches below re-set
+    // them when the cursor is actually over a city dot / state. Keeps them from
+    // lingering when a higher-priority marker (mine, plan, overlay) is hovered.
     setCityTip(null);
+    setStateTip(null);
 
     // Collaborative-plan entities (tea gardens, BTRI, trial site) sit on top
     // when a plan is open — check them first so each marker stays hoverable.
@@ -1797,6 +1883,16 @@ export default function GlobeMap({
       return;
     }
 
+    // Admin-1 states/provinces — hit before the bare country fill underneath
+    // (only when zoomed in, matching the draw gate).
+    const st = hitState(mx, my);
+    if (st) {
+      setStateTip({ x: mx, y: my, f: st });
+      setTooltip(null);
+      hoverIsoRef.current = undefined;
+      return;
+    }
+
     const iso = hitTest(mx, my);
     hoverIsoRef.current = iso;
     const data = dataRef.current;
@@ -1843,6 +1939,7 @@ export default function GlobeMap({
     setTooltip(null);
     setMineTip(null);
     setCityTip(null);
+    setStateTip(null);
     setPtTip(null);
     setFarmTip(null);
     setCountyTip(null);
@@ -2071,6 +2168,38 @@ export default function GlobeMap({
           <div className="mt-0.5 text-[9px] opacity-60">
             Natural Earth · Populated Places (10m) · {cityTip.p.lat.toFixed(2)},{" "}
             {cityTip.p.lng.toFixed(2)}
+          </div>
+        </div>
+      )}
+      {stateTip && (
+        <div
+          className="pointer-events-none absolute z-30 max-w-[240px] rounded-md border border-earth-200 bg-white/90 px-2 py-1.5 text-xs shadow-md backdrop-blur-sm"
+          style={{
+            left: Math.min(stateTip.x + 14, (sizeRef.current.w || 9999) - 250),
+            top: stateTip.y + 14,
+            color: "#1f3c5a",
+          }}
+        >
+          <div className="flex items-center gap-1.5">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full ring-1 ring-white"
+              style={{ background: "rgb(124,92,168)" }}
+            />
+            <span className="font-semibold">{stateTip.f.properties.name}</span>
+          </div>
+          {stateTip.f.properties.type && (
+            <div className="mt-0.5 text-[11px]">
+              <span className="opacity-70">Type: </span>
+              {stateTip.f.properties.type}
+            </div>
+          )}
+          <div className="text-[11px]">
+            <span className="opacity-70">Country: </span>
+            {stateTip.f.properties.admin}
+          </div>
+          <div className="mt-0.5 text-[9px] opacity-60">
+            Natural Earth · Admin-1 (10m)
+            {stateTip.f.properties.iso ? ` · ${stateTip.f.properties.iso}` : ""}
           </div>
         </div>
       )}
