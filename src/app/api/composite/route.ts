@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getLayer, type LayerMeta } from "@/lib/db";
 
 export const runtime = "nodejs";
+// Reads the DuckDB store per-request; never prerender at build time (the store
+// is populated by `npm run build-db`, which runs as part of the build).
+export const dynamic = "force-dynamic";
 
 /**
  * /api/composite?layer=a&layer=b (or ?layers=a,b)

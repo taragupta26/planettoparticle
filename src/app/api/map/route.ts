@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getLayer } from "@/lib/db";
 
 export const runtime = "nodejs";
+// Reads the DuckDB store per-request; never prerender at build time (the store
+// is populated by `npm run build-db`, which runs as part of the build).
+export const dynamic = "force-dynamic";
 
 // Per-country values for one data layer, keyed by ISO3 for choropleth shading.
 // Every value comes from the preloaded DuckDB store and carries its source.
