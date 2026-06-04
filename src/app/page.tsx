@@ -313,6 +313,8 @@ export default function Home() {
   const [showMines, setShowMines] = useState(false);
   const [showCities, setShowCities] = useState(false);
   const [showStates, setShowStates] = useState(false);
+  const [showCountyData, setShowCountyData] = useState(false);
+  const [countyMetric, setCountyMetric] = useState("income");
   const [showDisasters, setShowDisasters] = useState(false);
   const [showVessels, setShowVessels] = useState(false);
   const [showFarms, setShowFarms] = useState(false);
@@ -494,6 +496,8 @@ export default function Home() {
           showMines={showMines}
           showCities={showCities}
           showStates={showStates}
+          showCountyData={showCountyData}
+          countyMetric={countyMetric}
           showDisasters={showDisasters}
           showVessels={showVessels}
           showFarms={showFarms}
@@ -640,6 +644,7 @@ export default function Home() {
                 ["Vessels", showVessels, setShowVessels, "#0284c7", "Live global AIS vessel positions (AISStream.io — needs a free API key)"],
                 ["Field boundaries", showFarms, setShowFarms, "#16a34a", "Global Sentinel-2 field boundaries (Fields of The World, CC-BY-4.0) — zoom into cropland to load"],
                 ["Webcams", showCams, setShowCams, "#7c3aed", "Live public traffic cameras (TfL JamCams, London) — official feeds only"],
+                ["US county data", showCountyData, setShowCountyData, "#16a34a", "US county choropleth from County Health Rankings 2024 (Univ. of Wisconsin / RWJF) — income, poverty, life expectancy & more; green=better, red=worse"],
                 ["US climate risk", showClimate, setShowClimate, "#b91c1c", "US county climate-habitability projections (Rhodium Group via ProPublica/NYT) — zoom to the US"],
                 ["Trade flows", showTrade, setShowTrade, "#d97706", "Bilateral export/import flows for the selected country (World Bank WITS) — click a country"],
               ] as const
@@ -663,6 +668,42 @@ export default function Home() {
               </button>
             ))}
           </div>
+          {showCountyData && (
+            <div className="mb-2 rounded-lg border border-green-200 bg-green-50/60 px-2 py-1.5">
+              <div className="mb-1 text-[9px] font-semibold uppercase tracking-wide text-green-700">
+                County metric · County Health Rankings 2024
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(
+                  [
+                    ["income", "Median income"],
+                    ["child_pov", "Child poverty"],
+                    ["uninsured", "Uninsured"],
+                    ["life_exp", "Life expectancy"],
+                    ["premature_death", "Premature death"],
+                    ["obesity", "Adult obesity"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    onClick={() => setCountyMetric(id)}
+                    aria-pressed={countyMetric === id}
+                    className={`rounded-full border px-2 py-0.5 text-[10px] transition ${
+                      countyMetric === id
+                        ? "border-green-600 bg-green-600 text-white"
+                        : "border-green-300 bg-white text-green-800 hover:bg-green-100"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-1 text-[9px] text-green-700/80">
+                Green = better outcome · red = worse. Hover a county for all
+                values &amp; source.
+              </div>
+            </div>
+          )}
           <p className="mb-2 -mt-0.5 text-[9.5px] leading-snug text-earth-400">
             Live overlays fetch real-time data client-side (EONET · USGS · AIS ·
             FTW Sentinel-2 fields · TfL webcams). Hover any marker or parcel for

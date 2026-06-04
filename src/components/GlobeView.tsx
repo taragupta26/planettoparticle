@@ -275,6 +275,26 @@ function featureContains(feature: any, lng: number, lat: number): boolean {
   return false;
 }
 
+// Sequential green(good)→yellow→red(bad) ramp for a 0..1 "severity". Used by the
+// US county choropleth so higher severity (worse) reads red regardless of the
+// metric's raw direction.
+function rampGYR(t: number): string {
+  t = Math.max(0, Math.min(1, t));
+  let r: number, g: number, b: number;
+  if (t < 0.5) {
+    const u = t / 0.5; // green -> yellow
+    r = 16 + u * (234 - 16);
+    g = 150 + u * (179 - 150);
+    b = 90 + u * (8 - 90);
+  } else {
+    const u = (t - 0.5) / 0.5; // yellow -> red
+    r = 234 + u * (190 - 234);
+    g = 179 + u * (30 - 179);
+    b = 8 + u * (30 - 8);
+  }
+  return `rgb(${r | 0},${g | 0},${b | 0})`;
+}
+
 export default function GlobeMap({
   mode,
   onSelectIso,
@@ -283,6 +303,8 @@ export default function GlobeMap({
   showMines = false,
   showCities = false,
   showStates = false,
+  showCountyData = false,
+  countyMetric = "income",
   showDisasters = false,
   showVessels = false,
   showFarms = false,
@@ -300,6 +322,8 @@ export default function GlobeMap({
   showMines?: boolean; // overlay real mine/deposit points (USGS PP1802)
   showCities?: boolean; // overlay real cities (Natural Earth Populated Places)
   showStates?: boolean; // overlay admin-1 states/provinces (Natural Earth 10m)
+  showCountyData?: boolean; // US county choropleth (County Health Rankings 2024)
+  countyMetric?: string; // which CHR metric to paint counties by
   showDisasters?: boolean; // live NASA EONET events + USGS earthquakes
   showVessels?: boolean; // live AIS vessel positions (Digitraffic)
   showFarms?: boolean; // global field boundaries (FTW · Sentinel-2 · PMTiles)
@@ -344,6 +368,25 @@ export default function GlobeMap({
   const statesRef = useRef<any[]>([]);
   const showStatesRef = useRef(showStates);
   const [stateTip, setStateTip] = useState<{
+    x: number;
+    y: number;
+    f: any;
+  } | null>(null);
+  // US county choropleth from County Health Rankings 2024 (real, FIPS-keyed,
+  // keyless). Geometry (us-counties.geo.json) joined to per-county metrics; the
+  // active metric is selectable. Per-metric min/max precomputed for coloring.
+  const countyDataRef = useRef<any[]>([]); // county features with .cd record
+  const countyMetaRef = useRef<{
+    metrics: { id: string; label: string; unit: string; hiw: boolean }[];
+    source: string;
+    source_url: string;
+  } | null>(null);
+  const countyStatsRef = useRef<Record<string, { min: number; max: number }>>(
+    {}
+  );
+  const showCountyDataRef = useRef(showCountyData);
+  const countyMetricRef = useRef(countyMetric);
+  const [countyDataTip, setCountyDataTip] = useState<{
     x: number;
     y: number;
     f: any;
@@ -433,6 +476,14 @@ export default function GlobeMap({
   useEffect(() => {
     showStatesRef.current = showStates;
   }, [showStates]);
+
+  useEffect(() => {
+    showCountyDataRef.current = showCountyData;
+  }, [showCountyData]);
+
+  useEffect(() => {
+    countyMetricRef.current = countyMetric;
+  }, [countyMetric]);
 
   useEffect(() => {
     showDisastersRef.current = showDisasters;
@@ -799,6 +850,57 @@ export default function GlobeMap({
       })
       .catch(() => {});
   }, [showStates]);
+
+  // Load US county geometry + County Health Rankings data once, when first
+  // enabled. Join CHR records onto county features by 5-digit FIPS (= GEOID),
+  // and precompute each metric's min/max across counties for the color ramp.
+  useEffect(() => {
+    if (!showCountyData || countyDataRef.current.length) return;
+    let cancelled = false;
+    setOverlayNote("US county data: loading County Health Rankings 2024…");
+    Promise.all([
+      fetch("/us-counties.geo.json").then((r) => r.json()),
+      fetch("/us-county-data.json").then((r) => r.json()),
+    ])
+      .then(([geo, data]) => {
+        if (cancelled) return;
+        const byFips: Record<string, any> = data?.byFips ?? {};
+        const feats = (geo?.features ?? []).map((f: any) => {
+          const fips = f.id || f.properties?.geoid;
+          return { ...f, cd: byFips[fips] ?? null };
+        });
+        const stats: Record<string, { min: number; max: number }> = {};
+        for (const m of data?.metrics ?? []) {
+          let mn = Infinity,
+            mx = -Infinity;
+          for (const f of feats) {
+            const v = f.cd?.[m.id];
+            if (typeof v === "number") {
+              if (v < mn) mn = v;
+              if (v > mx) mx = v;
+            }
+          }
+          if (mn <= mx) stats[m.id] = { min: mn, max: mx };
+        }
+        countyDataRef.current = feats;
+        countyMetaRef.current = {
+          metrics: data?.metrics ?? [],
+          source: data?.source ?? "County Health Rankings 2024",
+          source_url: data?.source_url ?? "https://www.countyhealthrankings.org/",
+        };
+        countyStatsRef.current = stats;
+        const withData = feats.filter((f: any) => f.cd).length;
+        setOverlayNote(
+          `US county data: ${withData.toLocaleString()} counties · County Health Rankings 2024`
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setOverlayNote("US county data: load failed.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showCountyData]);
 
   useEffect(() => {
     const set = new Set((highlightIso ?? []).filter(Boolean));
@@ -1267,6 +1369,61 @@ export default function GlobeMap({
       ctx!.restore();
     }
 
+    // US county choropleth (County Health Rankings 2024). Each county is filled
+    // by the active metric's value, normalized across all counties, on a
+    // green(good)→red(bad) ramp respecting the metric's direction. Counties
+    // missing the metric are left unpainted (honest data gap).
+    function drawCountyData() {
+      if (!showCountyDataRef.current) return;
+      const feats = countyDataRef.current;
+      const meta = countyMetaRef.current;
+      if (!feats.length || !meta) return;
+      const m =
+        meta.metrics.find((x) => x.id === countyMetricRef.current) ||
+        meta.metrics[0];
+      if (!m) return;
+      const st = countyStatsRef.current[m.id];
+      if (!st || st.max <= st.min) return;
+      const span = st.max - st.min;
+      const globe = modeRef.current === "globe";
+      ctx!.save();
+      ctx!.lineWidth = 0.2;
+      ctx!.strokeStyle = "rgba(40,40,40,0.25)";
+      for (const f of feats) {
+        const v = f.cd?.[m.id];
+        if (typeof v !== "number") continue;
+        const norm = (v - st.min) / span;
+        const color = rampGYR(m.hiw ? norm : 1 - norm);
+        const g = f.geometry;
+        if (!g) continue;
+        const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+        ctx!.fillStyle = color;
+        ctx!.globalAlpha = 0.8;
+        for (const rings of polys) {
+          const ring = rings?.[0];
+          if (!ring || ring.length < 3) continue;
+          ctx!.beginPath();
+          let started = false;
+          let anyVis = false;
+          for (const pt of ring) {
+            const pr = project(pt[1], pt[0]);
+            if (globe && !pr.vis) continue;
+            anyVis = true;
+            if (!started) {
+              ctx!.moveTo(pr.x, pr.y);
+              started = true;
+            } else ctx!.lineTo(pr.x, pr.y);
+          }
+          if (anyVis) {
+            ctx!.closePath();
+            ctx!.fill();
+            ctx!.stroke();
+          }
+        }
+      }
+      ctx!.restore();
+    }
+
     // Bilateral trade-flow arcs (World Bank WITS). Great-circle lines from the
     // reporter to each partner, width ∝ real US$ value; a dot at each partner.
     // Top flows only, to keep the picture legible. Export = warm, import = cool.
@@ -1583,6 +1740,7 @@ export default function GlobeMap({
         drawCountries();
       }
 
+      drawCountyData();
       drawStates();
       drawCounties();
       drawTradeFlows();
@@ -1670,6 +1828,18 @@ export default function GlobeMap({
     const ll = unproject(mx, my);
     if (!ll) return null;
     for (const f of feats) if (featureContains(f, ll.lng, ll.lat)) return f;
+    return null;
+  }
+
+  // US county under the cursor that has County Health Rankings data.
+  function hitCountyData(mx: number, my: number): any | null {
+    if (!showCountyDataRef.current) return null;
+    const feats = countyDataRef.current;
+    if (!feats.length) return null;
+    const ll = unproject(mx, my);
+    if (!ll) return null;
+    for (const f of feats)
+      if (f.cd && featureContains(f, ll.lng, ll.lat)) return f;
     return null;
   }
 
@@ -1803,6 +1973,7 @@ export default function GlobeMap({
     // lingering when a higher-priority marker (mine, plan, overlay) is hovered.
     setCityTip(null);
     setStateTip(null);
+    setCountyDataTip(null);
 
     // Collaborative-plan entities (tea gardens, BTRI, trial site) sit on top
     // when a plan is open — check them first so each marker stays hoverable.
@@ -1874,6 +2045,15 @@ export default function GlobeMap({
     }
     setCountyTip(null);
 
+    // US county data choropleth — hit before the bare country fill underneath.
+    const cd = hitCountyData(mx, my);
+    if (cd) {
+      setCountyDataTip({ x: mx, y: my, f: cd });
+      setTooltip(null);
+      hoverIsoRef.current = undefined;
+      return;
+    }
+
     // Cities (reference points) — hit before the bare country fill underneath.
     const ct = hitCity(mx, my);
     if (ct) {
@@ -1940,6 +2120,7 @@ export default function GlobeMap({
     setMineTip(null);
     setCityTip(null);
     setStateTip(null);
+    setCountyDataTip(null);
     setPtTip(null);
     setFarmTip(null);
     setCountyTip(null);
@@ -2203,6 +2384,48 @@ export default function GlobeMap({
           </div>
         </div>
       )}
+      {countyDataTip &&
+        countyDataTip.f.cd &&
+        (() => {
+          const meta = countyMetaRef.current;
+          const rec = countyDataTip.f.cd;
+          const fmt = (m: any) => {
+            const v = rec[m.id];
+            if (typeof v !== "number") return null;
+            const val =
+              m.unit === "$"
+                ? `$${v.toLocaleString()}`
+                : m.unit === "%"
+                ? `${v}%`
+                : `${v.toLocaleString()} ${m.unit}`;
+            return (
+              <div key={m.id} className="text-[11px]">
+                <span className="opacity-70">{m.label}: </span>
+                <b>{val}</b>
+              </div>
+            );
+          };
+          return (
+            <div
+              className="pointer-events-none absolute z-30 max-w-[250px] rounded-md border border-earth-200 bg-white/90 px-2 py-1.5 text-xs shadow-md backdrop-blur-sm"
+              style={{
+                left: Math.min(countyDataTip.x + 14, (sizeRef.current.w || 9999) - 260),
+                top: countyDataTip.y + 14,
+                color: "#1f3c5a",
+              }}
+            >
+              <div className="font-semibold">
+                {rec.n}, {rec.s}
+              </div>
+              <div className="mt-0.5">
+                {(meta?.metrics ?? []).map(fmt).filter(Boolean)}
+              </div>
+              <div className="mt-0.5 text-[9px] opacity-60">
+                County Health Rankings 2024 · Univ. of Wisconsin / RWJF
+              </div>
+            </div>
+          );
+        })()}
       {ptTip && (
         <div
           className="pointer-events-none absolute z-30 max-w-[260px] rounded-md border border-earth-200 bg-white/90 px-2 py-1.5 text-xs shadow-md backdrop-blur-sm"
