@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { GroundedAnswer } from "@/lib/types";
 import EvidencePanel from "@/components/EvidencePanel";
@@ -285,6 +285,467 @@ const GENERAL_SUGGESTIONS = [
   "Where are the biggest data gaps?",
 ];
 
+// ─── Layer category definitions ────────────────────────────────────────────
+const LAYER_CATEGORIES: {
+  id: string;
+  label: string;
+  color: string;
+  ids: string[];
+}[] = [
+  {
+    id: "critical_minerals",
+    label: "Critical Minerals",
+    color: "#7c3aed",
+    ids: [
+      "cobalt_production","cobalt_reserves","lithium_production","graphite_production",
+      "copper_production","nickel_production","rare_earths_production","tin_production",
+      "tungsten_production","tantalum_production","manganese_production","gold_production",
+      "silver_production","iron_ore_production","zinc_production","lead_production",
+      "bauxite_production","antimony_production","molybdenum_production",
+      "phosphate_production","potash_production",
+    ],
+  },
+  {
+    id: "agriculture",
+    label: "Agriculture & Food",
+    color: "#d97706",
+    ids: [
+      "wheat_production","maize_production","rice_production","soybean_production",
+      "coffee_production","cocoa_production","palm_oil_production","sugarcane_production",
+      "banana_production","potato_production","cassava_production","meat_production",
+      "milk_production","cereal_yield","fertilizer_use",
+    ],
+  },
+  {
+    id: "water_land",
+    label: "Water & Land",
+    color: "#0284c7",
+    ids: [
+      "water_access_basic","renew_water_pc","water_stress","forest_area",
+      "forest_rents","land_degradation","terrestrial_protected","marine_protected",
+    ],
+  },
+  {
+    id: "energy",
+    label: "Energy",
+    color: "#dc2626",
+    ids: [
+      "coal_production","oil_production","gas_production","renewable_energy",
+      "coal_rents","oil_rents","gas_rents","resource_rents_total","mineral_rents",
+    ],
+  },
+  {
+    id: "human_dev",
+    label: "Human Development",
+    color: "#16a34a",
+    ids: [
+      "poverty_headcount","undernourishment","electricity_access","clean_cooking",
+      "gini","exports_value","imports_value",
+    ],
+  },
+  {
+    id: "emissions",
+    label: "Emissions & Pollution",
+    color: "#374151",
+    ids: [
+      "co2_per_capita","co2_total","methane_total","plastic_waste_pc",
+      "plastic_to_ocean_share","plastic_waste_total","plastic_to_ocean_total",
+    ],
+  },
+  {
+    id: "biodiversity",
+    label: "Biodiversity",
+    color: "#059669",
+    ids: ["threatened_birds","threatened_plants"],
+  },
+];
+
+// ─── Layer Browser sub-component ────────────────────────────────────────────
+function LeftLayerBrowser({
+  layers,
+  activeLayers,
+  setActiveLayers,
+}: {
+  layers: LayerMeta[];
+  activeLayers: string[];
+  setActiveLayers: React.Dispatch<React.SetStateAction<string[]>>;
+}) {
+  const [open, setOpen] = useState(true);
+  const [search, setSearch] = useState("");
+  const [openCats, setOpenCats] = useState<Record<string, boolean>>({});
+
+  const layerById = Object.fromEntries(layers.map((l) => [l.id, l]));
+
+  const filtered = search.trim()
+    ? layers.filter(
+        (l) =>
+          l.label.toLowerCase().includes(search.toLowerCase()) ||
+          l.id.toLowerCase().includes(search.toLowerCase())
+      )
+    : null;
+
+  function selectLayer(id: string) {
+    // Radio-style: single active layer
+    setActiveLayers([id]);
+  }
+
+  function toggleCat(catId: string) {
+    setOpenCats((prev) => ({ ...prev, [catId]: !prev[catId] }));
+  }
+
+  return (
+    <section className="border-b border-earth-100">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-3 py-2.5 text-[9.5px] font-semibold uppercase tracking-widest text-earth-400 hover:bg-earth-50/60"
+      >
+        <span>Browse all layers</span>
+        <span className="text-earth-300">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="px-3 pb-3">
+          {/* Search */}
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search layers…"
+            className="mb-2.5 w-full rounded-lg border border-earth-200 bg-white px-2.5 py-1.5 text-[11px] text-earth-800 outline-none focus:border-earth-400 focus:ring-1 focus:ring-earth-200 placeholder:text-earth-400"
+          />
+
+          {filtered ? (
+            // Flat search results
+            <div className="space-y-1">
+              {filtered.length === 0 ? (
+                <p className="text-[11px] text-earth-400 italic">No layers match.</p>
+              ) : (
+                filtered.map((l) => {
+                  const active = activeLayers.includes(l.id);
+                  return (
+                    <button
+                      key={l.id}
+                      onClick={() => selectLayer(l.id)}
+                      className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[11px] transition ${
+                        active
+                          ? "bg-earth-100 font-medium text-earth-900"
+                          : "text-earth-700 hover:bg-earth-50"
+                      }`}
+                    >
+                      <span
+                        className={`h-3 w-3 shrink-0 rounded-full border-2 transition ${
+                          active ? "border-earth-700 bg-earth-700" : "border-earth-300 bg-white"
+                        }`}
+                      />
+                      <span className="truncate">{l.label}</span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          ) : (
+            // Categorized view
+            <div className="space-y-1">
+              {LAYER_CATEGORIES.map((cat) => {
+                const catLayers = cat.ids
+                  .map((id) => layerById[id])
+                  .filter(Boolean) as LayerMeta[];
+                if (catLayers.length === 0) return null;
+                const isCatOpen = openCats[cat.id] ?? false;
+                const activeCount = catLayers.filter((l) =>
+                  activeLayers.includes(l.id)
+                ).length;
+                return (
+                  <div key={cat.id}>
+                    <button
+                      onClick={() => toggleCat(cat.id)}
+                      className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left hover:bg-earth-50/60"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{ background: cat.color }}
+                        />
+                        <span className="text-[11px] font-medium text-earth-800">
+                          {cat.label}
+                        </span>
+                        {activeCount > 0 && (
+                          <span
+                            className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold text-white"
+                            style={{ background: cat.color }}
+                          >
+                            {activeCount}
+                          </span>
+                        )}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-[9px] text-earth-400">
+                          {catLayers.length}
+                        </span>
+                        <span className="text-[9px] text-earth-300">
+                          {isCatOpen ? "▲" : "▼"}
+                        </span>
+                      </span>
+                    </button>
+                    {isCatOpen && (
+                      <div className="ml-4 mt-0.5 space-y-0.5">
+                        {catLayers.map((l) => {
+                          const active = activeLayers.includes(l.id);
+                          return (
+                            <button
+                              key={l.id}
+                              onClick={() => selectLayer(l.id)}
+                              title={`${l.source_name} · ${l.unit}`}
+                              className={`flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[10.5px] transition ${
+                                active
+                                  ? "bg-earth-100 font-medium text-earth-900"
+                                  : "text-earth-600 hover:bg-earth-50 hover:text-earth-800"
+                              }`}
+                            >
+                              <span
+                                className={`h-3 w-3 shrink-0 rounded-full border-2 transition`}
+                                style={{
+                                  borderColor: active ? cat.color : "#d1d5db",
+                                  background: active ? cat.color : "white",
+                                }}
+                              />
+                              <span className="truncate">{l.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ─── Live Overlays sub-component ────────────────────────────────────────────
+function LeftOverlaysSection({
+  showMines, setShowMines,
+  showBoundariesMap, setShowBoundariesMap,
+  showCities, setShowCities,
+  showPorts, setShowPorts,
+  showStates, setShowStates,
+  showDisasters, setShowDisasters,
+  showVessels, setShowVessels,
+  showFarms, setShowFarms,
+  showCams, setShowCams,
+  showCountyData, setShowCountyData,
+  showClimate, setShowClimate,
+  showTrade, setShowTrade,
+  countyMetric, setCountyMetric,
+}: {
+  showMines: boolean; setShowMines: React.Dispatch<React.SetStateAction<boolean>>;
+  showBoundariesMap: boolean; setShowBoundariesMap: React.Dispatch<React.SetStateAction<boolean>>;
+  showCities: boolean; setShowCities: React.Dispatch<React.SetStateAction<boolean>>;
+  showPorts: boolean; setShowPorts: React.Dispatch<React.SetStateAction<boolean>>;
+  showStates: boolean; setShowStates: React.Dispatch<React.SetStateAction<boolean>>;
+  showDisasters: boolean; setShowDisasters: React.Dispatch<React.SetStateAction<boolean>>;
+  showVessels: boolean; setShowVessels: React.Dispatch<React.SetStateAction<boolean>>;
+  showFarms: boolean; setShowFarms: React.Dispatch<React.SetStateAction<boolean>>;
+  showCams: boolean; setShowCams: React.Dispatch<React.SetStateAction<boolean>>;
+  showCountyData: boolean; setShowCountyData: React.Dispatch<React.SetStateAction<boolean>>;
+  showClimate: boolean; setShowClimate: React.Dispatch<React.SetStateAction<boolean>>;
+  showTrade: boolean; setShowTrade: React.Dispatch<React.SetStateAction<boolean>>;
+  countyMetric: string; setCountyMetric: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const overlays: [string, boolean, React.Dispatch<React.SetStateAction<boolean>>, string, string][] = [
+    ["Mines & deposits", showMines, setShowMines, "#d97706", "2,121 real mines, deposits & districts of critical minerals (USGS Professional Paper 1802)"],
+    ["Planetary boundaries", showBoundariesMap, setShowBoundariesMap, "#0d9488", "9 planetary boundaries (6 transgressed) as a global wedge ring — Richardson et al. 2023"],
+    ["Cities", showCities, setShowCities, "#0f766e", "7,342 real cities sized by population (Natural Earth Populated Places, 10m)"],
+    ["Ports", showPorts, setShowPorts, "#1e3a8a", "1,081 global ports (Natural Earth 10m)"],
+    ["States/provinces", showStates, setShowStates, "#7c5ca8", "3,909 admin-1 states/provinces worldwide (Natural Earth 10m)"],
+    ["Disasters", showDisasters, setShowDisasters, "#dc2626", "Live NASA EONET events + USGS earthquakes"],
+    ["Vessels", showVessels, setShowVessels, "#0284c7", "Live global AIS vessel positions (AISStream.io)"],
+    ["Field boundaries", showFarms, setShowFarms, "#16a34a", "Global Sentinel-2 field boundaries (Fields of The World, CC-BY-4.0)"],
+    ["Webcams", showCams, setShowCams, "#7c3aed", "Live public traffic cameras (TfL JamCams, London)"],
+    ["US county data", showCountyData, setShowCountyData, "#16a34a", "US county choropleth from County Health Rankings 2024 (Univ. of Wisconsin / RWJF)"],
+    ["US climate risk", showClimate, setShowClimate, "#b91c1c", "US county climate-habitability projections (Rhodium Group via ProPublica/NYT)"],
+    ["Trade flows", showTrade, setShowTrade, "#d97706", "Bilateral export/import flows (World Bank WITS) — click a country"],
+  ];
+
+  const activeCount = overlays.filter(([, on]) => on).length;
+
+  return (
+    <section className="border-b border-earth-100">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-3 py-2.5 text-[9.5px] font-semibold uppercase tracking-widest text-earth-400 hover:bg-earth-50/60"
+      >
+        <span className="flex items-center gap-1.5">
+          Live overlays
+          {activeCount > 0 && (
+            <span className="rounded-full bg-earth-600 px-1.5 py-0.5 text-[9px] font-semibold text-white">
+              {activeCount}
+            </span>
+          )}
+        </span>
+        <span className="text-earth-300">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="px-3 pb-3">
+          <div className="grid grid-cols-2 gap-1">
+            {overlays.map(([label, on, set, color, title]) => (
+              <button
+                key={label}
+                onClick={() => set((v) => !v)}
+                aria-pressed={on}
+                title={title}
+                className={`flex items-center gap-1 rounded-lg border px-2 py-1.5 text-[10px] font-medium transition ${
+                  on
+                    ? "border-earth-400 bg-earth-50 text-earth-900"
+                    : "border-earth-200 bg-white text-earth-600 hover:bg-earth-50"
+                }`}
+              >
+                <span
+                  className="inline-block h-2 w-2 shrink-0 rounded-full"
+                  style={{ background: on ? color : "#cbd5e1" }}
+                />
+                <span className="truncate">{label}</span>
+              </button>
+            ))}
+          </div>
+
+          {showCountyData && (
+            <div className="mt-2 rounded-lg border border-green-200 bg-green-50/60 px-2 py-1.5">
+              <div className="mb-1 text-[9px] font-semibold uppercase tracking-wide text-green-700">
+                County metric · County Health Rankings 2024
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(
+                  [
+                    ["income", "Median income"],
+                    ["child_pov", "Child poverty"],
+                    ["uninsured", "Uninsured"],
+                    ["life_exp", "Life expectancy"],
+                    ["premature_death", "Premature death"],
+                    ["obesity", "Adult obesity"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    onClick={() => setCountyMetric(id)}
+                    aria-pressed={countyMetric === id}
+                    className={`rounded-full border px-2 py-0.5 text-[10px] transition ${
+                      countyMetric === id
+                        ? "border-green-600 bg-green-600 text-white"
+                        : "border-green-300 bg-white text-green-800 hover:bg-green-100"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-1 text-[9px] text-green-700/80">
+                Green = better outcome · red = worse.
+              </div>
+            </div>
+          )}
+
+          <p className="mt-1.5 text-[9px] leading-snug text-earth-400">
+            Live data fetched client-side (EONET · USGS · AIS · Sentinel-2 · TfL).
+            Hover any marker for its source.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ─── Context sub-component ───────────────────────────────────────────────────
+function LeftContextSection({
+  showBoundaries, setShowBoundaries,
+  showDrawdown, setShowDrawdown,
+  showPlans, setShowPlans,
+  activePlanId,
+  openPlan,
+  closePlan,
+}: {
+  showBoundaries: boolean; setShowBoundaries: React.Dispatch<React.SetStateAction<boolean>>;
+  showDrawdown: boolean; setShowDrawdown: React.Dispatch<React.SetStateAction<boolean>>;
+  showPlans: boolean; setShowPlans: React.Dispatch<React.SetStateAction<boolean>>;
+  activePlanId: string | null;
+  openPlan: (plan: CollabPlan) => void;
+  closePlan: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <section className="border-b border-earth-100">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-3 py-2.5 text-[9.5px] font-semibold uppercase tracking-widest text-earth-400 hover:bg-earth-50/60"
+      >
+        <span>Context</span>
+        <span className="text-earth-300">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="space-y-2 px-3 pb-3">
+          {/* Planetary boundaries */}
+          <div className="rounded-xl border border-earth-200 p-2.5">
+            <button
+              onClick={() => setShowBoundaries((v) => !v)}
+              className="flex w-full items-center justify-between text-[11px] font-semibold text-earth-600"
+            >
+              <span>Planetary boundaries</span>
+              <span className="text-earth-400">{showBoundaries ? "▲" : "▼"}</span>
+            </button>
+            {showBoundaries && (
+              <div className="mt-2">
+                <PlanetaryBoundariesPanel />
+              </div>
+            )}
+          </div>
+
+          {/* Drawdown */}
+          <div className="rounded-xl border border-earth-200 p-2.5">
+            <button
+              onClick={() => setShowDrawdown((v) => !v)}
+              className="flex w-full items-center justify-between text-[11px] font-semibold text-earth-600"
+            >
+              <span>Climate solutions (Drawdown)</span>
+              <span className="text-earth-400">{showDrawdown ? "▲" : "▼"}</span>
+            </button>
+            {showDrawdown && (
+              <div className="mt-2">
+                <DrawdownPanel />
+              </div>
+            )}
+          </div>
+
+          {/* Collaborative plans */}
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/30 p-2.5">
+            <button
+              onClick={() => setShowPlans((v) => !v)}
+              className="flex w-full items-center justify-between text-[11px] font-semibold text-emerald-700"
+            >
+              <span>Collaborative plans</span>
+              <span className="text-emerald-500">{showPlans ? "▲" : "▼"}</span>
+            </button>
+            {showPlans && (
+              <div className="mt-2">
+                <CollabPlansPanel
+                  activePlanId={activePlanId}
+                  onOpen={openPlan}
+                  onClose={closePlan}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 const GlobeMap = dynamic(() => import("@/components/GlobeView"), {
   ssr: false,
   loading: () => (
@@ -546,33 +1007,24 @@ export default function Home() {
             : "pointer-events-none -translate-x-[120%] opacity-0"
         }`}
       >
-        <div className="border-b border-earth-100 p-4">
-          <div className="flex items-start justify-between gap-2">
-            <h1 className="text-lg font-bold text-earth-900">
+        {/* ── Header ── */}
+        <div className="shrink-0 border-b border-earth-100 px-4 pt-4 pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="text-[13px] font-bold tracking-tight text-earth-900">
               Planet to Particle
             </h1>
             <button
               onClick={() => setLeftOpen(false)}
-              className="-mr-1 -mt-0.5 shrink-0 rounded-md px-1.5 py-0.5 text-earth-400 hover:bg-earth-100 hover:text-earth-700"
+              className="-mr-1 shrink-0 rounded-md px-1.5 py-0.5 text-earth-400 hover:bg-earth-100 hover:text-earth-700"
               title="Collapse panel"
               aria-label="Collapse panel"
             >
               ‹
             </button>
           </div>
-          <p className="mt-0.5 text-[11px] leading-tight text-earth-600">
-            Who controls resources, who benefits, who bears the costs — grounded
-            only in real sources.
-          </p>
-          <div className="mt-3 rounded-lg border-l-2 border-earth-600 bg-earth-50/70 px-3 py-2 text-[12px] italic leading-snug text-earth-800">
-            This was created to turn our “tragedy of the commons” into
-            stewardship.
-          </div>
-        </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="border-b border-earth-100 p-4">
-          <div className="mb-2 flex overflow-hidden rounded-lg border border-earth-200">
+          {/* ── View toggles ── */}
+          <div className="mt-2.5 flex overflow-hidden rounded-lg border border-earth-200">
             {(
               [
                 ["globe", "3D Globe"],
@@ -583,7 +1035,7 @@ export default function Home() {
               <button
                 key={m}
                 onClick={() => setMode(m)}
-                className={`flex-1 px-2 py-1.5 text-xs font-medium transition ${
+                className={`flex-1 px-2 py-1.5 text-[11px] font-medium transition ${
                   mode === m
                     ? "bg-earth-700 text-white"
                     : "bg-white text-earth-700 hover:bg-earth-50"
@@ -593,319 +1045,256 @@ export default function Home() {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => setShowMines((v) => !v)}
-            aria-pressed={showMines}
-            className={`mb-2 flex w-full items-center justify-between rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-              showMines
-                ? "border-amber-500 bg-amber-50 text-amber-800"
-                : "border-earth-200 bg-white text-earth-700 hover:bg-earth-50"
-            }`}
-            title="Overlay 2,121 real mines, deposits & districts of critical minerals (USGS Professional Paper 1802)"
-          >
-            <span className="flex items-center gap-1.5">
-              <span
-                className={`inline-block h-2.5 w-2.5 rounded-full ${
-                  showMines ? "bg-amber-500" : "bg-earth-300"
-                }`}
-              />
-              Mines &amp; deposits
-            </span>
-            <span className="text-[10px] opacity-70">
-              {showMines ? "2,121 pts on" : "off"}
-            </span>
-          </button>
-          <button
-            onClick={() => setShowBoundariesMap((v) => !v)}
-            aria-pressed={showBoundariesMap}
-            className={`mb-2 flex w-full items-center justify-between rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-              showBoundariesMap
-                ? "border-teal-500 bg-teal-50 text-teal-800"
-                : "border-earth-200 bg-white text-earth-700 hover:bg-earth-50"
-            }`}
-            title="Show the 9 planetary boundaries (6 transgressed) as a global wedge ring on the map — Richardson et al. 2023. Global framework, not per-country."
-          >
-            <span className="flex items-center gap-1.5">
-              <span
-                className={`inline-block h-2.5 w-2.5 rounded-full ${
-                  showBoundariesMap ? "bg-teal-500" : "bg-earth-300"
-                }`}
-              />
-              Planetary boundaries ring
-            </span>
-            <span className="text-[10px] opacity-70">
-              {showBoundariesMap ? "6/9 on map" : "off"}
-            </span>
-          </button>
-          <div className="mb-2 grid grid-cols-2 gap-1.5">
-            {(
-              [
-                ["Cities", showCities, setShowCities, "#0f766e", "7,342 real cities sized by population (Natural Earth Populated Places, 10m) — capitals in amber; zoom in to reveal smaller cities"],
-                ["Ports", showPorts, setShowPorts, "#1e3a8a", "1,081 global ports (Natural Earth 10m) — logistics chokepoints; navy squares, major ports first, zoom in for more"],
-                ["States/provinces", showStates, setShowStates, "#7c5ca8", "3,909 admin-1 states/provinces worldwide (Natural Earth 10m) — outlines appear when you zoom in; hover for name & country"],
-                ["Disasters", showDisasters, setShowDisasters, "#dc2626", "Live NASA EONET events + USGS earthquakes"],
-                ["Vessels", showVessels, setShowVessels, "#0284c7", "Live global AIS vessel positions (AISStream.io — needs a free API key)"],
-                ["Field boundaries", showFarms, setShowFarms, "#16a34a", "Global Sentinel-2 field boundaries (Fields of The World, CC-BY-4.0) — zoom into cropland to load"],
-                ["Webcams", showCams, setShowCams, "#7c3aed", "Live public traffic cameras (TfL JamCams, London) — official feeds only"],
-                ["US county data", showCountyData, setShowCountyData, "#16a34a", "US county choropleth from County Health Rankings 2024 (Univ. of Wisconsin / RWJF) — income, poverty, life expectancy & more; green=better, red=worse"],
-                ["US climate risk", showClimate, setShowClimate, "#b91c1c", "US county climate-habitability projections (Rhodium Group via ProPublica/NYT) — zoom to the US"],
-                ["Trade flows", showTrade, setShowTrade, "#d97706", "Bilateral export/import flows for the selected country (World Bank WITS) — click a country"],
-              ] as const
-            ).map(([label, on, set, color, title]) => (
-              <button
-                key={label}
-                onClick={() => set((v: boolean) => !v)}
-                aria-pressed={on}
-                title={title}
-                className={`flex items-center gap-1 rounded-lg border px-2 py-1.5 text-[10.5px] font-medium transition ${
-                  on
-                    ? "border-earth-400 bg-earth-50 text-earth-900"
-                    : "border-earth-200 bg-white text-earth-600 hover:bg-earth-50"
-                }`}
-              >
-                <span
-                  className="inline-block h-2 w-2 shrink-0 rounded-full"
-                  style={{ background: on ? color : "#cbd5e1" }}
-                />
-                <span className="truncate">{label}</span>
-              </button>
-            ))}
-          </div>
-          {showCountyData && (
-            <div className="mb-2 rounded-lg border border-green-200 bg-green-50/60 px-2 py-1.5">
-              <div className="mb-1 text-[9px] font-semibold uppercase tracking-wide text-green-700">
-                County metric · County Health Rankings 2024
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {(
-                  [
-                    ["income", "Median income"],
-                    ["child_pov", "Child poverty"],
-                    ["uninsured", "Uninsured"],
-                    ["life_exp", "Life expectancy"],
-                    ["premature_death", "Premature death"],
-                    ["obesity", "Adult obesity"],
-                  ] as const
-                ).map(([id, label]) => (
-                  <button
-                    key={id}
-                    onClick={() => setCountyMetric(id)}
-                    aria-pressed={countyMetric === id}
-                    className={`rounded-full border px-2 py-0.5 text-[10px] transition ${
-                      countyMetric === id
-                        ? "border-green-600 bg-green-600 text-white"
-                        : "border-green-300 bg-white text-green-800 hover:bg-green-100"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <div className="mt-1 text-[9px] text-green-700/80">
-                Green = better outcome · red = worse. Hover a county for all
-                values &amp; source.
-              </div>
+        </div>
+
+        {/* ── Scrollable body ── */}
+        <div className="flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto">
+
+          {/* ════════════════════════════════════════
+              ACTIVE LAYER SECTION
+          ════════════════════════════════════════ */}
+          <section className="border-b border-earth-100 p-3">
+            <div className="mb-1.5 text-[9.5px] font-semibold uppercase tracking-widest text-earth-400">
+              Active layer
             </div>
-          )}
-          <p className="mb-2 -mt-0.5 text-[9.5px] leading-snug text-earth-400">
-            Live overlays fetch real-time data client-side (EONET · USGS · AIS ·
-            FTW Sentinel-2 fields · TfL webcams). Hover any marker or parcel for
-            its source; click a mine for satellite imagery.
-          </p>
-          {layers.length > 0 && (
-            <>
-              <div className="mb-1 flex items-center justify-between">
-                <label className="block text-[10px] font-semibold uppercase tracking-wide text-earth-500">
-                  Data filters{" "}
-                  {activeLayers.length > 0 && `(${activeLayers.length} on)`}
-                </label>
-                {activeLayers.length > 0 && (
-                  <button
-                    onClick={() => setActiveLayers([])}
-                    className="text-[10px] text-earth-500 underline decoration-dotted hover:text-earth-700"
-                  >
-                    clear
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {layers.map((l) => {
-                  const on = activeLayers.includes(l.id);
-                  return (
-                    <button
-                      key={l.id}
-                      onClick={() => toggleLayer(l.id)}
-                      aria-pressed={on}
-                      className={`rounded-full border px-2.5 py-1 text-[11px] transition ${
-                        on
-                          ? "border-earth-700 bg-earth-700 text-white"
-                          : "border-earth-200 bg-white text-earth-700 hover:border-earth-400"
-                      }`}
-                      title={`${l.source_name} · ${l.unit}`}
-                    >
-                      {l.label}
-                    </button>
-                  );
-                })}
-              </div>
-              {activeLayers.length > 1 && (
-                <p className="mt-1.5 text-[10px] leading-snug text-earth-500">
-                  Map shows a <span className="font-medium">combined severity</span>{" "}
-                  — the mean of each active filter&apos;s normalized 0–1 score.
-                  Hover a country to see every real value &amp; source.
-                </p>
-              )}
-            </>
-          )}
-        </div>
 
-        <div className="space-y-4 p-4">
-          {/* dynamic layer highlight */}
-          <section>
-            <h2 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-earth-500">
-              {highlights?.heading ?? "Layer highlights"}
-            </h2>
-            {activeLayers.length === 0 ? (
-              <p className="text-[11px] text-earth-400">
-                Turn on a filter above to rank countries.
+            {activeLayers.length === 0 || !composite ? (
+              <p className="text-[11px] text-earth-400 italic">
+                {activeLayers.length === 0
+                  ? "Select a layer below to see country data."
+                  : "Loading…"}
               </p>
-            ) : !composite ? (
-              <p className="text-[11px] text-earth-400">Loading layer data…</p>
-            ) : highlights && highlights.top.length > 0 ? (
-              <ol className="space-y-1">
-                {highlights.top.map((d, i) => (
-                  <li
-                    key={d.country + i}
-                    className="flex items-baseline justify-between gap-2 text-[12px] text-earth-800"
-                  >
-                    <span className="truncate">{d.country}</span>
-                    <span className="shrink-0 font-medium tabular-nums">
-                      {d.label}
-                    </span>
-                  </li>
-                ))}
-              </ol>
             ) : (
-              <p className="text-[11px] text-earth-400">
-                No data for the active filters.
-              </p>
-            )}
-            {highlights && (
-              <p className="mt-2 text-[10px] text-earth-500">
-                {highlights.multi
-                  ? `${highlights.count} countries ranked by combined severity · the rest are data gaps (no value invented).`
-                  : `${highlights.count} countries with data · the rest are shown as data gaps (no value invented).`}
-              </p>
-            )}
-          </section>
+              <>
+                {/* Layer name + year */}
+                {activeMetas.length > 0 && (
+                  <div className="mb-2">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-[13px] font-semibold leading-tight text-earth-900">
+                        {activeMetas.length === 1
+                          ? activeMetas[0].label
+                          : `${activeMetas.length} combined filters`}
+                      </span>
+                    </div>
+                    {activeMetas.length === 1 && (
+                      <div className="mt-0.5 text-[10px] text-earth-500">
+                        {activeMetas[0].unit}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-          {/* legend */}
-          {activeMetas.length > 0 && (
-            <section className="rounded-lg border border-earth-100 bg-earth-50/40 p-3">
-              <div className="mb-1 text-[11px] font-semibold text-earth-700">
-                {activeMetas.length === 1
-                  ? activeMetas[0].label
-                  : `Combined severity — ${activeMetas.length} filters`}
-              </div>
-              <div className="flex items-center gap-1 text-[11px] text-earth-700">
-                <span className="inline-block h-3 w-5 rounded-sm bg-[#440154]" />
-                <span className="inline-block h-3 w-5 rounded-sm bg-[#31688e]" />
-                <span className="inline-block h-3 w-5 rounded-sm bg-[#1f9e89]" />
-                <span className="inline-block h-3 w-5 rounded-sm bg-[#6ece58]" />
-                <span className="inline-block h-3 w-5 rounded-sm bg-[#fde725]" />
-                <span className="ml-1">
-                  {activeMetas.length > 1
-                    ? "less → more affected"
-                    : activeMetas[0].display !== "world_share"
-                    ? activeMetas[0].higher_is_worse
-                      ? "better → worse"
-                      : "worse → better"
-                    : "low → high"}
-                </span>
-              </div>
-              <div className="mt-1.5 text-[10px] leading-snug text-earth-500">
-                {activeMetas.length === 1 ? (
+                {/* Gradient bar */}
+                {activeMetas.length > 0 && (
+                  <div className="mb-3">
+                    <div className="flex h-3 w-full overflow-hidden rounded-sm">
+                      {["#440154","#31688e","#1f9e89","#6ece58","#fde725"].map((c) => (
+                        <span key={c} className="flex-1" style={{ background: c }} />
+                      ))}
+                    </div>
+                    <div className="mt-0.5 flex justify-between text-[9.5px] text-earth-500">
+                      <span>
+                        {activeMetas.length > 1
+                          ? "less affected"
+                          : activeMetas[0].higher_is_worse
+                          ? "better"
+                          : activeMetas[0].display === "world_share"
+                          ? "low"
+                          : "worse"}
+                      </span>
+                      <span>
+                        {activeMetas.length > 1
+                          ? "more affected"
+                          : activeMetas[0].higher_is_worse
+                          ? "worse"
+                          : activeMetas[0].display === "world_share"
+                          ? "high"
+                          : "better"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ranked country list */}
+                {highlights && highlights.top.length > 0 && (
                   <>
-                    Source:{" "}
-                    <a
-                      href={activeMetas[0].source_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline decoration-dotted hover:text-earth-700"
-                    >
-                      {activeMetas[0].source_name}
-                    </a>{" "}
-                    · Natural Earth · hover a country for detail.
-                  </>
-                ) : (
-                  <>
-                    Combining:{" "}
-                    {activeMetas.map((m) => m.label).join(", ")}. Each value is
-                    real and shown with its source on hover.
+                    <div className="mb-1 text-[9.5px] font-semibold uppercase tracking-wide text-earth-400">
+                      {highlights.heading}
+                    </div>
+                    <ol className="space-y-1.5">
+                      {(() => {
+                        // Compute max value for bar widths
+                        const rawValues = Object.values(composite.byIso)
+                          .map((e) => {
+                            if (activeMetas.length === 1) {
+                              const lv = e.layers[activeMetas[0].id];
+                              return lv ? lv.value : 0;
+                            }
+                            return e.composite;
+                          });
+                        const maxVal = Math.max(...rawValues, 1);
+                        const worldTotal = activeMetas.length === 1
+                          ? (composite.worldTotals[activeMetas[0].id] ?? 0)
+                          : 0;
+
+                        return highlights.top.slice(0, 8).map((d, i) => {
+                          // Find raw value for bar width
+                          const entry = Object.values(composite.byIso).find(
+                            (e) => e.name === d.country
+                          );
+                          let rawVal = 0;
+                          if (entry) {
+                            if (activeMetas.length === 1) {
+                              rawVal = entry.layers[activeMetas[0].id]?.value ?? 0;
+                            } else {
+                              rawVal = entry.composite;
+                            }
+                          }
+                          const pctBar = Math.round((rawVal / maxVal) * 100);
+                          const pctWorld =
+                            activeMetas.length === 1 &&
+                            activeMetas[0].display === "world_share" &&
+                            worldTotal > 0
+                              ? ((rawVal / worldTotal) * 100).toFixed(1)
+                              : null;
+
+                          return (
+                            <li key={d.country + i} className="group">
+                              <div className="flex items-baseline justify-between gap-1 text-[11px]">
+                                <span className="flex items-baseline gap-1 truncate text-earth-800">
+                                  <span className="w-3.5 shrink-0 text-[9px] text-earth-400 tabular-nums">
+                                    {i + 1}.
+                                  </span>
+                                  <span className="truncate">{d.country}</span>
+                                </span>
+                                <span className="shrink-0 font-medium tabular-nums text-earth-700">
+                                  {pctWorld !== null ? `${pctWorld}%` : d.label}
+                                </span>
+                              </div>
+                              <div className="mt-0.5 ml-4 h-1.5 w-full overflow-hidden rounded-full bg-earth-100">
+                                <div
+                                  className="h-full rounded-full bg-earth-500/60 transition-all"
+                                  style={{ width: `${pctBar}%` }}
+                                />
+                              </div>
+                            </li>
+                          );
+                        });
+                      })()}
+                    </ol>
+                    <p className="mt-2 text-[9.5px] leading-snug text-earth-400">
+                      {highlights.multi
+                        ? `${highlights.count} countries ranked by combined severity · rest are data gaps (no value invented).`
+                        : `${highlights.count} countries with data · rest are data gaps (no value invented).`}
+                    </p>
                   </>
                 )}
-              </div>
-            </section>
-          )}
 
-          {/* ---- Planetary boundaries (global context) ---- */}
-          <section className="rounded-xl border border-earth-200 p-3">
-            <button
-              onClick={() => setShowBoundaries((v) => !v)}
-              className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wide text-earth-500"
-            >
-              <span>Planetary boundaries</span>
-              <span className="text-earth-400">
-                {showBoundaries ? "Hide ▲" : "Show ▼"}
-              </span>
-            </button>
-            {showBoundaries && (
-              <div className="mt-2">
-                <PlanetaryBoundariesPanel />
-              </div>
+                {/* Source + action buttons */}
+                {activeMetas.length === 1 && (
+                  <div className="mt-2.5 border-t border-earth-100 pt-2">
+                    <div className="mb-1.5 text-[9.5px] text-earth-500">
+                      Source:{" "}
+                      <a
+                        href={activeMetas[0].source_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline decoration-dotted hover:text-earth-700"
+                      >
+                        {activeMetas[0].source_name}
+                      </a>
+                    </div>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => {
+                          const citation = `${activeMetas[0].label}. ${activeMetas[0].source_name}. Retrieved from ${activeMetas[0].source_url}`;
+                          navigator.clipboard.writeText(citation);
+                        }}
+                        className="flex-1 rounded-md border border-earth-200 bg-white px-2 py-1 text-[10px] font-medium text-earth-700 hover:bg-earth-50 active:bg-earth-100"
+                      >
+                        Copy citation
+                      </button>
+                      <a
+                        href={`/api/composite?layer=${encodeURIComponent(activeLayers[activeLayers.length - 1])}&format=csv`}
+                        download
+                        className="flex-1 rounded-md border border-earth-200 bg-white px-2 py-1 text-center text-[10px] font-medium text-earth-700 hover:bg-earth-50"
+                      >
+                        Data (CSV)
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </section>
 
-          {/* ---- Drawdown climate solutions ---- */}
-          <section className="rounded-xl border border-earth-200 p-3">
-            <button
-              onClick={() => setShowDrawdown((v) => !v)}
-              className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wide text-earth-500"
-            >
-              <span>Climate solutions (Drawdown)</span>
-              <span className="text-earth-400">
-                {showDrawdown ? "Hide ▲" : "Show ▼"}
-              </span>
-            </button>
-            {showDrawdown && (
-              <div className="mt-2">
-                <DrawdownPanel />
-              </div>
-            )}
+          {/* ════════════════════════════════════════
+              BROWSE ALL LAYERS SECTION
+          ════════════════════════════════════════ */}
+          <LeftLayerBrowser
+            layers={layers}
+            activeLayers={activeLayers}
+            setActiveLayers={setActiveLayers}
+          />
+
+          {/* ════════════════════════════════════════
+              LIVE OVERLAYS SECTION
+          ════════════════════════════════════════ */}
+          <LeftOverlaysSection
+            showMines={showMines} setShowMines={setShowMines}
+            showBoundariesMap={showBoundariesMap} setShowBoundariesMap={setShowBoundariesMap}
+            showCities={showCities} setShowCities={setShowCities}
+            showPorts={showPorts} setShowPorts={setShowPorts}
+            showStates={showStates} setShowStates={setShowStates}
+            showDisasters={showDisasters} setShowDisasters={setShowDisasters}
+            showVessels={showVessels} setShowVessels={setShowVessels}
+            showFarms={showFarms} setShowFarms={setShowFarms}
+            showCams={showCams} setShowCams={setShowCams}
+            showCountyData={showCountyData} setShowCountyData={setShowCountyData}
+            showClimate={showClimate} setShowClimate={setShowClimate}
+            showTrade={showTrade} setShowTrade={setShowTrade}
+            countyMetric={countyMetric} setCountyMetric={setCountyMetric}
+          />
+
+          {/* ════════════════════════════════════════
+              CONTEXT SECTION
+          ════════════════════════════════════════ */}
+          <LeftContextSection
+            showBoundaries={showBoundaries} setShowBoundaries={setShowBoundaries}
+            showDrawdown={showDrawdown} setShowDrawdown={setShowDrawdown}
+            showPlans={showPlans} setShowPlans={setShowPlans}
+            activePlanId={activePlanId}
+            openPlan={openPlan}
+            closePlan={closePlan}
+          />
+
+          {/* ════════════════════════════════════════
+              START HERE SECTION
+          ════════════════════════════════════════ */}
+          <section className="p-3">
+            <div className="mb-1.5 text-[9.5px] font-semibold uppercase tracking-widest text-earth-400">
+              Start here
+            </div>
+            <div className="space-y-1.5">
+              {suggestions.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => {
+                    setQuestion(s);
+                    ask(s);
+                    setRightOpen(true);
+                  }}
+                  className="w-full rounded-lg border border-earth-200 bg-earth-50/60 px-2.5 py-2 text-left text-[11px] leading-snug text-earth-700 hover:border-earth-400 hover:bg-earth-100 transition"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-[9px] leading-snug text-earth-400">
+              Answers are grounded only in real sources — gaps shown, never invented.
+            </p>
           </section>
 
-          {/* ---- Collaborative transition plans ---- */}
-          <section className="rounded-xl border border-emerald-200 bg-emerald-50/30 p-3">
-            <button
-              onClick={() => setShowPlans((v) => !v)}
-              className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wide text-emerald-700"
-            >
-              <span>Collaborative plans</span>
-              <span className="text-emerald-500">
-                {showPlans ? "Hide ▲" : "Show ▼"}
-              </span>
-            </button>
-            {showPlans && (
-              <div className="mt-2">
-                <CollabPlansPanel
-                  activePlanId={activePlanId}
-                  onOpen={openPlan}
-                  onClose={closePlan}
-                />
-              </div>
-            )}
-          </section>
-        </div>
         </div>
       </aside>
 
