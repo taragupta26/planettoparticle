@@ -1500,50 +1500,71 @@ export default function GlobeMap({
       const globe = modeRef.current === "globe";
       const rep = data.reporter;
       const flows = data.flows.slice(0, 60);
-      const max = flows[0]?.value || 1;
+      if (!flows.length) return;
       const isExport = (data.flow ?? "X") === "X";
-      const stroke = isExport ? "rgba(217,119,6,0.55)" : "rgba(2,132,199,0.55)";
+      const baseHue = isExport ? "217,119,6" : "2,132,199";  // amber : sky
       const dotFill = isExport ? "#d97706" : "#0284c7";
+
+      // Normalise values against the top flow using a square-root scale so the
+      // #1 partner gets a thick arc and small partners still register visually.
+      const max = flows[0].value || 1;
+      // Use the 10th-percentile as a soft floor so tiny partners don't vanish.
+      const floor = flows[Math.min(flows.length - 1, 9)].value / max;
+
+      // Width range: 0.8px (smallest) → 8px (top partner).
+      // Opacity: 0.3 (smallest) → 0.8 (top), so dominant flows pop.
+      function flowWidth(v: number) {
+        const t = Math.max(floor, Math.sqrt(v / max));
+        return 0.8 + 7.2 * t;
+      }
+      function flowAlpha(v: number) {
+        const t = Math.max(floor, Math.sqrt(v / max));
+        return 0.28 + 0.52 * t;
+      }
+
       ctx!.save();
       ctx!.lineCap = "round";
-      for (const f of flows) {
+
+      // Draw arcs back-to-front (smallest first) so thick arcs sit on top.
+      for (let i = flows.length - 1; i >= 0; i--) {
+        const f = flows[i];
         const pts = greatCircle(rep.lat, rep.lon, f.lat, f.lon, 48);
+        const w = flowWidth(f.value);
+        const a = flowAlpha(f.value);
         ctx!.beginPath();
-        ctx!.lineWidth = 0.6 + 3.4 * Math.sqrt(f.value / max);
-        ctx!.strokeStyle = stroke;
+        ctx!.lineWidth = w;
+        ctx!.strokeStyle = `rgba(${baseHue},${a.toFixed(2)})`;
         let started = false;
         for (const p of pts) {
           const pr = project(p.lat, p.lng);
-          if (globe && !pr.vis) {
-            started = false; // break the line across the horizon
-            continue;
-          }
-          if (!started) {
-            ctx!.moveTo(pr.x, pr.y);
-            started = true;
-          } else ctx!.lineTo(pr.x, pr.y);
+          if (globe && !pr.vis) { started = false; continue; }
+          if (!started) { ctx!.moveTo(pr.x, pr.y); started = true; }
+          else ctx!.lineTo(pr.x, pr.y);
         }
         ctx!.stroke();
       }
-      // partner end-dots, sized by value
+
+      // Partner end-dots: radius proportional to width, fully opaque.
       for (const f of flows) {
         const pr = project(f.lat, f.lon);
         if (globe && !pr.vis) continue;
+        const r = 1.2 + 4 * Math.sqrt(f.value / max);
         ctx!.beginPath();
-        ctx!.arc(pr.x, pr.y, 1.5 + 3 * Math.sqrt(f.value / max), 0, Math.PI * 2);
+        ctx!.arc(pr.x, pr.y, r, 0, Math.PI * 2);
         ctx!.fillStyle = dotFill;
-        ctx!.globalAlpha = 0.85;
+        ctx!.globalAlpha = 0.9;
         ctx!.fill();
         ctx!.globalAlpha = 1;
       }
-      // reporter hub
+
+      // Reporter hub — solid dark circle with white ring.
       const rp = project(rep.lat, rep.lon);
       if (!globe || rp.vis) {
         ctx!.beginPath();
-        ctx!.arc(rp.x, rp.y, 5, 0, Math.PI * 2);
+        ctx!.arc(rp.x, rp.y, 6, 0, Math.PI * 2);
         ctx!.fillStyle = "#111827";
         ctx!.fill();
-        ctx!.lineWidth = 2;
+        ctx!.lineWidth = 2.5;
         ctx!.strokeStyle = "#fff";
         ctx!.stroke();
       }
