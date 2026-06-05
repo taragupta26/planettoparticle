@@ -126,6 +126,15 @@ interface CityPoint {
   lat: number;
   lng: number;
 }
+// Real ports (Natural Earth Ports, 10m). n=name, w=website, s=natlscale (5..75,
+// larger = more significant → drives the zoom level-of-detail).
+interface PortPoint {
+  n: string;
+  w: string | null;
+  s: number;
+  lat: number;
+  lng: number;
+}
 // Primary commodity = first listed (compound entries read "Barite; Gallium").
 function primaryCommodity(c: string): string {
   return (c.split(";")[0] || c).trim();
@@ -302,6 +311,7 @@ export default function GlobeMap({
   layers = ["cobalt_production"],
   showMines = false,
   showCities = false,
+  showPorts = false,
   showStates = false,
   showCountyData = false,
   countyMetric = "income",
@@ -321,6 +331,7 @@ export default function GlobeMap({
   layers?: string[]; // active data filters (one OR many, combined)
   showMines?: boolean; // overlay real mine/deposit points (USGS PP1802)
   showCities?: boolean; // overlay real cities (Natural Earth Populated Places)
+  showPorts?: boolean; // overlay real ports (Natural Earth Ports 10m)
   showStates?: boolean; // overlay admin-1 states/provinces (Natural Earth 10m)
   showCountyData?: boolean; // US county choropleth (County Health Rankings 2024)
   countyMetric?: string; // which CHR metric to paint counties by
@@ -362,6 +373,14 @@ export default function GlobeMap({
     x: number;
     y: number;
     p: CityPoint;
+  } | null>(null);
+  // Real ports (Natural Earth Ports 10m), sorted by natlscale desc for LOD.
+  const portsRef = useRef<PortPoint[]>([]);
+  const showPortsRef = useRef(showPorts);
+  const [portTip, setPortTip] = useState<{
+    x: number;
+    y: number;
+    p: PortPoint;
   } | null>(null);
   // Admin-1 states/provinces (Natural Earth 10m, simplified). Drawn as outlines,
   // zoom-gated so the ~3.9k subdivisions only appear once zoomed in.
@@ -472,6 +491,10 @@ export default function GlobeMap({
   useEffect(() => {
     showCitiesRef.current = showCities;
   }, [showCities]);
+
+  useEffect(() => {
+    showPortsRef.current = showPorts;
+  }, [showPorts]);
 
   useEffect(() => {
     showStatesRef.current = showStates;
@@ -838,6 +861,18 @@ export default function GlobeMap({
       })
       .catch(() => {});
   }, [showCities]);
+
+  // Load the real ports once, when first enabled (77KB static asset, pop/scale
+  // sorted so the zoom-aware draw can cap the visible set cheaply).
+  useEffect(() => {
+    if (!showPorts || portsRef.current.length) return;
+    fetch("/ports.json")
+      .then((r) => r.json())
+      .then((d: { ports?: PortPoint[] }) => {
+        portsRef.current = Array.isArray(d?.ports) ? d.ports : [];
+      })
+      .catch(() => {});
+  }, [showPorts]);
 
   // Load admin-1 states/provinces once, when first enabled (3MB simplified
   // Natural Earth asset). Each feature carries name/admin/type/iso.
@@ -1324,6 +1359,37 @@ export default function GlobeMap({
       ctx!.restore();
     }
 
+    // Real ports (Natural Earth Ports 10m). Navy squares (distinct from round
+    // city dots). Level-of-detail by natlscale (sorted desc): show only major
+    // ports when zoomed out, more as you zoom in.
+    function drawPorts() {
+      if (!showPortsRef.current) return;
+      const pts = portsRef.current;
+      if (!pts.length) return;
+      const globe = modeRef.current === "globe";
+      const z = zoomRef.current;
+      const minScale = 45 / z;
+      const { w, h } = sizeRef.current;
+      ctx!.save();
+      ctx!.lineWidth = 0.6;
+      ctx!.strokeStyle = "rgba(255,255,255,0.9)";
+      let drawn = 0;
+      for (const p of pts) {
+        if (p.s < minScale) break; // scale-sorted: nothing smaller qualifies
+        const pr = project(p.lat, p.lng);
+        if (globe && !pr.vis) continue;
+        if (pr.x < -20 || pr.x > w + 20 || pr.y < -20 || pr.y > h + 20) continue;
+        const r = p.s >= 50 ? 3 : 2.3;
+        ctx!.fillStyle = "#1e3a8a"; // navy
+        ctx!.globalAlpha = 0.9;
+        ctx!.fillRect(pr.x - r, pr.y - r, r * 2, r * 2);
+        ctx!.globalAlpha = 1;
+        ctx!.strokeRect(pr.x - r, pr.y - r, r * 2, r * 2);
+        if (++drawn > 1200) break;
+      }
+      ctx!.restore();
+    }
+
     // Admin-1 states/provinces (Natural Earth 10m, simplified). Outlines only,
     // zoom-gated: ~3.9k subdivisions would clutter and cost too much zoomed out,
     // so they appear only past a zoom threshold, culled to what's on screen.
@@ -1748,6 +1814,7 @@ export default function GlobeMap({
       drawLabels();
       drawMines();
       drawCities();
+      drawPorts();
       drawOverlayPoints();
       drawPlanEntities();
 
@@ -1814,6 +1881,31 @@ export default function GlobeMap({
       if (d < bestD) {
         bestD = d;
         best = c;
+      }
+    }
+    return best;
+  }
+
+  // nearest visible port within a few px of the cursor (same scale/zoom gate
+  // as drawPorts, so only drawn ports are hoverable).
+  function hitPort(mx: number, my: number): PortPoint | null {
+    if (!showPortsRef.current) return null;
+    const pts = portsRef.current;
+    if (!pts.length) return null;
+    const globe = modeRef.current === "globe";
+    const minScale = 45 / zoomRef.current;
+    let best: PortPoint | null = null;
+    let bestD = 8 * 8;
+    for (const p of pts) {
+      if (p.s < minScale) break;
+      const pr = project(p.lat, p.lng);
+      if (globe && !pr.vis) continue;
+      const dx = pr.x - mx,
+        dy = pr.y - my;
+      const d = dx * dx + dy * dy;
+      if (d < bestD) {
+        bestD = d;
+        best = p;
       }
     }
     return best;
@@ -1972,6 +2064,7 @@ export default function GlobeMap({
     // them when the cursor is actually over a city dot / state. Keeps them from
     // lingering when a higher-priority marker (mine, plan, overlay) is hovered.
     setCityTip(null);
+    setPortTip(null);
     setStateTip(null);
     setCountyDataTip(null);
 
@@ -2063,6 +2156,15 @@ export default function GlobeMap({
       return;
     }
 
+    // Ports — hit before the bare country fill underneath.
+    const pt = hitPort(mx, my);
+    if (pt) {
+      setPortTip({ x: mx, y: my, p: pt });
+      setTooltip(null);
+      hoverIsoRef.current = undefined;
+      return;
+    }
+
     // Admin-1 states/provinces — hit before the bare country fill underneath
     // (only when zoomed in, matching the draw gate).
     const st = hitState(mx, my);
@@ -2119,6 +2221,7 @@ export default function GlobeMap({
     setTooltip(null);
     setMineTip(null);
     setCityTip(null);
+    setPortTip(null);
     setStateTip(null);
     setCountyDataTip(null);
     setPtTip(null);
@@ -2349,6 +2452,34 @@ export default function GlobeMap({
           <div className="mt-0.5 text-[9px] opacity-60">
             Natural Earth · Populated Places (10m) · {cityTip.p.lat.toFixed(2)},{" "}
             {cityTip.p.lng.toFixed(2)}
+          </div>
+        </div>
+      )}
+      {portTip && (
+        <div
+          className="pointer-events-none absolute z-30 max-w-[230px] rounded-md border border-earth-200 bg-white/90 px-2 py-1.5 text-xs shadow-md backdrop-blur-sm"
+          style={{
+            left: Math.min(portTip.x + 14, (sizeRef.current.w || 9999) - 240),
+            top: portTip.y + 14,
+            color: "#1f3c5a",
+          }}
+        >
+          <div className="flex items-center gap-1.5">
+            <span
+              className="inline-block h-2.5 w-2.5 ring-1 ring-white"
+              style={{ background: "#1e3a8a" }}
+            />
+            <span className="font-semibold">{portTip.p.n}</span>
+          </div>
+          <div className="mt-0.5 text-[11px]">
+            <span className="opacity-70">Port</span>
+            {portTip.p.w ? (
+              <span className="opacity-70"> · {portTip.p.w}</span>
+            ) : null}
+          </div>
+          <div className="mt-0.5 text-[9px] opacity-60">
+            Natural Earth · Ports (10m) · {portTip.p.lat.toFixed(2)},{" "}
+            {portTip.p.lng.toFixed(2)}
           </div>
         </div>
       )}

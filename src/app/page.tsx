@@ -312,6 +312,7 @@ export default function Home() {
   const [showGraph, setShowGraph] = useState(false);
   const [showMines, setShowMines] = useState(false);
   const [showCities, setShowCities] = useState(false);
+  const [showPorts, setShowPorts] = useState(false);
   const [showStates, setShowStates] = useState(false);
   const [showCountyData, setShowCountyData] = useState(false);
   const [countyMetric, setCountyMetric] = useState("income");
@@ -495,6 +496,7 @@ export default function Home() {
           layers={activeLayers}
           showMines={showMines}
           showCities={showCities}
+          showPorts={showPorts}
           showStates={showStates}
           showCountyData={showCountyData}
           countyMetric={countyMetric}
@@ -639,6 +641,7 @@ export default function Home() {
             {(
               [
                 ["Cities", showCities, setShowCities, "#0f766e", "7,342 real cities sized by population (Natural Earth Populated Places, 10m) — capitals in amber; zoom in to reveal smaller cities"],
+                ["Ports", showPorts, setShowPorts, "#1e3a8a", "1,081 global ports (Natural Earth 10m) — logistics chokepoints; navy squares, major ports first, zoom in for more"],
                 ["States/provinces", showStates, setShowStates, "#7c5ca8", "3,909 admin-1 states/provinces worldwide (Natural Earth 10m) — outlines appear when you zoom in; hover for name & country"],
                 ["Disasters", showDisasters, setShowDisasters, "#dc2626", "Live NASA EONET events + USGS earthquakes"],
                 ["Vessels", showVessels, setShowVessels, "#0284c7", "Live global AIS vessel positions (AISStream.io — needs a free API key)"],
