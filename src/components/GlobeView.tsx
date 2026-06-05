@@ -472,6 +472,7 @@ export default function GlobeMap({
   const rotYRef = useRef(-18); // longitude spin
   const rotXRef = useRef(16); // equator tilt
   const panXRef = useRef(0); // mercator horizontal pan (degrees)
+  const panYRef = useRef(0); // mercator vertical pan (screen pixels)
   const hoverIsoRef = useRef<string | undefined>(undefined);
   const highlightRef = useRef<Set<string>>(new Set()); // answer's countries
   const frozenRef = useRef(false); // click to stop/resume auto-rotation
@@ -482,6 +483,9 @@ export default function GlobeMap({
 
   useEffect(() => {
     modeRef.current = mode;
+    // Reset vertical pan when switching back to globe — flat panY has no
+    // meaning in 3D and would misplace all projected points otherwise.
+    if (mode === "globe") panYRef.current = 0;
   }, [mode]);
 
   useEffect(() => {
@@ -1012,7 +1016,7 @@ export default function GlobeMap({
       const x = cx + lon * RAD * scale;
       const clat = Math.max(-82, Math.min(82, lat));
       const merc = Math.log(Math.tan(Math.PI / 4 + (clat * RAD) / 2));
-      const y = cy - scale * merc;
+      const y = cy - scale * merc + panYRef.current;
       return { x, y, z: 1, vis: true };
     }
     const phi = lat * RAD;
@@ -1033,7 +1037,7 @@ export default function GlobeMap({
       const { w } = sizeRef.current;
       const scale = (w / (2 * Math.PI)) * zoomRef.current;
       const lonDeg = (mx - cx) / scale / RAD;
-      const merc = (cy - my) / scale;
+      const merc = (cy - (my - panYRef.current)) / scale;
       const lat = (2 * Math.atan(Math.exp(merc)) - Math.PI / 2) / RAD;
       let lng = lonDeg - panXRef.current;
       lng = ((((lng + 180) % 360) + 360) % 360) - 180;
@@ -2077,6 +2081,7 @@ export default function GlobeMap({
         rotXRef.current = Math.max(-78, Math.min(78, rotXRef.current - dy * 0.3));
       } else {
         panXRef.current += dx * 0.25;
+        panYRef.current += dy; // vertical pan in pixel space
       }
       return;
     }
@@ -2265,6 +2270,7 @@ export default function GlobeMap({
   function resetView() {
     zoomRef.current = 1;
     panXRef.current = 0;
+    panYRef.current = 0;
     rotYRef.current = -18;
     rotXRef.current = 16;
     frozenRef.current = false;
