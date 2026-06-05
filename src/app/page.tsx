@@ -385,8 +385,8 @@ function LeftLayerBrowser({
     : null;
 
   function selectLayer(id: string) {
-    // Radio-style: single active layer
-    setActiveLayers([id]);
+    // Radio-style: clicking the active layer clears it; otherwise select it.
+    setActiveLayers((prev) => (prev.includes(id) ? [] : [id]));
   }
 
   function toggleCat(catId: string) {
@@ -1054,8 +1054,19 @@ export default function Home() {
               ACTIVE LAYER SECTION
           ════════════════════════════════════════ */}
           <section className="border-b border-earth-100 p-3">
-            <div className="mb-1.5 text-[9.5px] font-semibold uppercase tracking-widest text-earth-400">
-              Active layer
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-[9.5px] font-semibold uppercase tracking-widest text-earth-400">
+                Active layer
+              </span>
+              {activeLayers.length > 0 && (
+                <button
+                  onClick={() => setActiveLayers([])}
+                  className="text-[10px] text-earth-400 hover:text-earth-700 underline decoration-dotted"
+                  title="Clear active layer"
+                >
+                  clear
+                </button>
+              )}
             </div>
 
             {activeLayers.length === 0 || !composite ? (
