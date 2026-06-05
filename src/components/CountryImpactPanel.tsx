@@ -150,6 +150,7 @@ export default function CountryImpactPanel({
 }) {
   const [data, setData] = useState<Payload | null>(null);
   const [err, setErr] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     setData(null);
@@ -174,14 +175,24 @@ export default function CountryImpactPanel({
   return (
     <div className="pointer-events-auto absolute left-1/2 top-4 z-30 max-h-[calc(100vh-2rem)] w-[360px] max-w-[calc(100vw-2rem)] -translate-x-1/2 overflow-hidden rounded-2xl border border-earth-200 bg-white/95 shadow-2xl backdrop-blur-md">
       <div className="flex items-start justify-between gap-2 border-b border-earth-100 px-4 py-3">
-        <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-earth-400">
-            What this place means for the people in it
+        <button
+          onClick={() => setCollapsed((v) => !v)}
+          className="min-w-0 flex-1 text-left"
+          aria-expanded={!collapsed}
+          title={collapsed ? "Expand" : "Collapse"}
+        >
+          <div className="flex items-center gap-1">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-earth-400">
+              What this place means for the people in it
+            </div>
+            <span className="text-[10px] text-earth-400 transition-transform" style={{ display:"inline-block", transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)" }}>
+              ▾
+            </span>
           </div>
           <h2 className="text-base font-bold text-earth-900">
             {data?.name ?? iso}
           </h2>
-        </div>
+        </button>
         <button
           onClick={onClose}
           className="-mr-1 shrink-0 rounded-md px-1.5 py-0.5 text-earth-400 hover:bg-earth-100 hover:text-earth-700"
@@ -191,7 +202,7 @@ export default function CountryImpactPanel({
         </button>
       </div>
 
-      <div className="max-h-[calc(100vh-7rem)] overflow-y-auto px-4 py-3">
+      {!collapsed && <div className="max-h-[calc(100vh-7rem)] overflow-y-auto px-4 py-3">
         {err && (
           <p className="text-[12px] text-earth-500">Country data unavailable.</p>
         )}
@@ -276,7 +287,7 @@ export default function CountryImpactPanel({
           Every figure is a real, source-attributed value. Missing indicators
           are data gaps, never filled in.
         </p>
-      </div>
+      </div>}
     </div>
   );
 }
