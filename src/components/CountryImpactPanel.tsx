@@ -29,9 +29,15 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   water_access_basic: { label: "Basic drinking water", meaning: "share with at least basic water access", bucket: 0 },
   electricity_access: { label: "Electricity at home", meaning: "share of people with power", bucket: 0 },
   clean_cooking: { label: "Clean cooking fuel", meaning: "share not breathing cooking smoke", bucket: 0 },
+  basic_sanitation: { label: "Basic sanitation", meaning: "share with at least basic toilet/latrine", bucket: 0 },
+  life_expectancy: { label: "Life expectancy", meaning: "years a newborn is expected to live", bucket: 0 },
+  child_mortality: { label: "Child mortality (under-5)", meaning: "deaths per 1,000 live births", bucket: 0 },
   gini: { label: "Income inequality", meaning: "0 = equal, 100 = most unequal", bucket: 0 },
   // 1 — the environment people live in
   water_stress: { label: "Water stress", meaning: "freshwater withdrawn vs. what's available", bucket: 1 },
+  agri_land: { label: "Agricultural land", meaning: "share of land used for farming", bucket: 1 },
+  pm25_exposure: { label: "Air pollution (PM2.5)", meaning: "annual mean fine-particle exposure (WHO safe limit: 5 µg/m³)", bucket: 1 },
+  n2o_total: { label: "Nitrous oxide (N₂O)", meaning: "total national N₂O emissions (agriculture + industry)", bucket: 1 },
   co2_per_capita: { label: "CO₂ per person", meaning: "emissions each resident is tied to", bucket: 1 },
   plastic_waste_pc: { label: "Plastic waste per person", meaning: "plastic thrown away per person daily", bucket: 1 },
   plastic_to_ocean_share: { label: "Plastic reaching the ocean", meaning: "this country's share of ocean plastic — it re-enters food via fish", bucket: 1 },
@@ -43,6 +49,8 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   threatened_plants: { label: "Threatened plant species", meaning: "plants at risk of disappearing here", bucket: 1 },
   renewable_energy: { label: "Renewable energy", meaning: "share of energy from renewables", bucket: 1 },
   // 2 — what the land & resources generate (and who captures it)
+  fish_catch: { label: "Fish & seafood catch", meaning: "wild-caught fish and seafood (tonnes/year)", bucket: 2 },
+  aquaculture: { label: "Aquaculture production", meaning: "farmed fish and seafood (tonnes/year)", bucket: 2 },
   resource_rents_total: { label: "Resource rents", meaning: "value of all natural resources as % of GDP", bucket: 2 },
   mineral_rents: { label: "Mineral rents", meaning: "mining value as % of GDP", bucket: 2 },
   oil_rents: { label: "Oil rents", meaning: "oil value as % of GDP", bucket: 2 },
@@ -65,6 +73,15 @@ function fmt(m: CountryMetric): string {
       maximumFractionDigits: 1,
     }).format(m.value);
   if (m.unit === "species") return `${Math.round(m.value)} species`;
+  if (m.unit === "years") return `${m.value.toFixed(1)} yrs`;
+  if (m.unit === "per 1000") return `${m.value.toFixed(1)} per 1,000`;
+  if (m.unit === "µg/m³") return `${m.value.toFixed(1)} µg/m³`;
+  if (m.unit === "t" || m.unit === "t/year") {
+    return new Intl.NumberFormat(undefined, {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(m.value) + " t";
+  }
   return `${m.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${m.unit}`;
 }
 

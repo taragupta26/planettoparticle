@@ -116,6 +116,15 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   marine_protected: "Most ocean protected",
   threatened_birds: "Most threatened bird species",
   threatened_plants: "Most threatened plant species",
+  cobalt_reserves: "Largest reserves",
+  fish_catch: "Largest fish & seafood catch",
+  aquaculture: "Largest aquaculture producers",
+  pm25_exposure: "Most polluted air (PM2.5)",
+  basic_sanitation: "Lowest sanitation access",
+  n2o_total: "Highest N₂O emitters",
+  agri_land: "Most agricultural land",
+  life_expectancy: "Lowest life expectancy",
+  child_mortality: "Highest child mortality",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -277,6 +286,38 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which countries import the most by value?",
     "How does import dependence map onto resource flows?",
   ],
+  fish_catch: [
+    "Which countries catch the most fish, and who depends on it for food?",
+    "How does fish catch connect to ocean health and food security?",
+  ],
+  aquaculture: [
+    "Which countries produce the most farmed fish?",
+    "How is aquaculture reshaping food systems and coastal ecosystems?",
+  ],
+  pm25_exposure: [
+    "Where is air pollution worst, and who bears the health burden?",
+    "How does PM2.5 exposure overlap with poverty and industry?",
+  ],
+  child_mortality: [
+    "Where do children face the highest risk of death before age 5?",
+    "How does child mortality map onto resource wealth and poverty?",
+  ],
+  life_expectancy: [
+    "Where is life expectancy lowest, and what drives the gap?",
+    "How does life expectancy differ between resource-rich and resource-poor countries?",
+  ],
+  basic_sanitation: [
+    "Where do the most people still lack basic sanitation?",
+    "How does sanitation access map onto water stress and poverty?",
+  ],
+  n2o_total: [
+    "Which countries emit the most nitrous oxide?",
+    "How do agriculture and industry drive N₂O emissions?",
+  ],
+  agri_land: [
+    "Which countries have the most agricultural land?",
+    "How does agricultural land use connect to deforestation and water stress?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -313,7 +354,8 @@ const LAYER_CATEGORIES: {
       "wheat_production","maize_production","rice_production","soybean_production",
       "coffee_production","cocoa_production","palm_oil_production","sugarcane_production",
       "banana_production","potato_production","cassava_production","meat_production",
-      "milk_production","cereal_yield","fertilizer_use",
+      "milk_production","fish_catch","aquaculture","cereal_yield","fertilizer_use",
+      "agri_land",
     ],
   },
   {
@@ -340,7 +382,8 @@ const LAYER_CATEGORIES: {
     color: "#16a34a",
     ids: [
       "poverty_headcount","undernourishment","electricity_access","clean_cooking",
-      "gini","exports_value","imports_value",
+      "basic_sanitation","gini","life_expectancy","child_mortality",
+      "exports_value","imports_value",
     ],
   },
   {
@@ -348,7 +391,8 @@ const LAYER_CATEGORIES: {
     label: "Emissions & Pollution",
     color: "#374151",
     ids: [
-      "co2_per_capita","co2_total","methane_total","plastic_waste_pc",
+      "co2_per_capita","co2_total","methane_total","n2o_total",
+      "pm25_exposure","plastic_waste_pc",
       "plastic_to_ocean_share","plastic_waste_total","plastic_to_ocean_total",
     ],
   },

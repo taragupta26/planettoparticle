@@ -99,6 +99,7 @@ const OWID_EI = "Our World in Data — Energy Institute Statistical Review";
 const OWID_UNCCD = "Our World in Data — UNCCD (SDG 15.3.1)";
 const OWID_JAMBECK = "Our World in Data — Jambeck et al. (2015), Science";
 const OWID_MEIJER = "Our World in Data — Meijer et al. (2021), Science Advances";
+const OWID_FAO_FISH = "Our World in Data — FAO FishStat";
 
 // metric, OWID grapher slug, label, unit, source_name — OWID/grapher CSV series.
 // Each series is a single value column (entity,code,year,value), parsed from the
@@ -120,6 +121,11 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Livestock (FAOSTAT, tonnes) ---
   ["meat_production", "meat-production-tonnes", "Meat production, total", "t", OWID_FAO],
   ["milk_production", "milk-production-tonnes", "Milk production", "t", OWID_FAO],
+  // --- Fisheries (FAO FishStat via OWID, tonnes) ---
+  // Verified slugs (2025-06-11): fish-seafood-production ~206 countries,
+  // aquaculture-farmed-fish-production ~212 countries.
+  ["fish_catch", "fish-seafood-production", "Wild fish & seafood catch", "t", OWID_FAO_FISH],
+  ["aquaculture", "aquaculture-farmed-fish-production", "Aquaculture production", "t", OWID_FAO_FISH],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -173,6 +179,14 @@ const WB_INDICATORS = [
   { metric: "marine_protected", code: "ER.MRN.PTMR.ZS", unit: "%" },
   { metric: "threatened_birds", code: "EN.BIR.THRD.NO", unit: "species" },
   { metric: "threatened_plants", code: "EN.HPT.THRD.NO", unit: "species" },
+  // ---- Health & air quality (World Bank) ----
+  // Verified 2025-06-11: all return 240–261 real countries.
+  { metric: "pm25_exposure", code: "EN.ATM.PM25.MC.M3", unit: "µg/m³" },
+  { metric: "basic_sanitation", code: "SH.STA.BASS.ZS", unit: "%" },
+  { metric: "n2o_total", code: "EN.GHG.N2O.MT.CE.AR5", unit: "Mt" },
+  { metric: "agri_land", code: "AG.LND.AGRI.ZS", unit: "%" },
+  { metric: "life_expectancy", code: "SP.DYN.LE00.IN", unit: "years" },
+  { metric: "child_mortality", code: "SH.DYN.MORT", unit: "per 1000" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -180,6 +194,15 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
   [
     "cobalt_production",
     "Cobalt mine production (2023)",
+    "t",
+    "world_share",
+    true,
+    USGS.name,
+    USGS.url,
+  ],
+  [
+    "cobalt_reserves",
+    "Cobalt reserves (2023)",
     "t",
     "world_share",
     true,
@@ -300,6 +323,22 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
         "world_share",
         false,
         OWID_FAO,
+        `https://ourworldindata.org/grapher/${slug}`,
+      ] as [string, string, string, string, boolean, string, string]
+  )),
+  // ---- Fisheries (FAO FishStat via OWID), world-share of production ----
+  ...([
+    ["fish_catch", "Wild fish & seafood catch (FAO)", "fish-seafood-production"],
+    ["aquaculture", "Aquaculture production (FAO)", "aquaculture-farmed-fish-production"],
+  ].map(
+    ([id, label, slug]) =>
+      [
+        id,
+        label,
+        "t",
+        "world_share",
+        false,
+        OWID_FAO_FISH,
         `https://ourworldindata.org/grapher/${slug}`,
       ] as [string, string, string, string, boolean, string, string]
   )),
@@ -488,6 +527,61 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     OWID_MEIJER,
     "https://ourworldindata.org/grapher/plastic-waste-emitted-to-the-ocean",
+  ],
+  // ---- Health, air quality & land (World Bank) ----
+  [
+    "pm25_exposure",
+    "PM2.5 air pollution (annual mean)",
+    "µg/m³",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EN.ATM.PM25.MC.M3",
+  ],
+  [
+    "basic_sanitation",
+    "Basic sanitation access",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.STA.BASS.ZS",
+  ],
+  [
+    "n2o_total",
+    "Nitrous oxide emissions, total",
+    "Mt",
+    "world_share",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EN.GHG.N2O.MT.CE.AR5",
+  ],
+  [
+    "agri_land",
+    "Agricultural land (% of land area)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/AG.LND.AGRI.ZS",
+  ],
+  [
+    "life_expectancy",
+    "Life expectancy at birth",
+    "years",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SP.DYN.LE00.IN",
+  ],
+  [
+    "child_mortality",
+    "Under-5 mortality rate",
+    "per 1000",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.DYN.MORT",
   ],
   // ---- Biodiversity (World Bank → IUCN / UNEP-WCMC) ----
   [
