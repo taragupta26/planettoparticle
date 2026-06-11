@@ -116,7 +116,6 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   marine_protected: "Most ocean protected",
   threatened_birds: "Most threatened bird species",
   threatened_plants: "Most threatened plant species",
-  cobalt_reserves: "Largest reserves",
   fish_catch: "Largest fish & seafood catch",
   aquaculture: "Largest aquaculture producers",
   pm25_exposure: "Most polluted air (PM2.5)",
@@ -790,6 +789,78 @@ function LeftContextSection({
   );
 }
 
+// ─── Map Legend overlay ───────────────────────────────────────────────────────
+// Floating legend anchored bottom-center of the globe canvas. Shows the viridis
+// ramp with actual min/max values from the live data — not invented ranges.
+// Only renders for a single active layer (multi-layer composite gets no legend).
+function MapLegend({
+  activeMetas,
+  composite,
+}: {
+  activeMetas: LayerMeta[];
+  composite: CompositePayload | null;
+}) {
+  if (activeMetas.length !== 1 || !composite) return null;
+  const meta = activeMetas[0];
+
+  const vals = Object.values(composite.byIso)
+    .map((e) => e.layers[meta.id]?.value)
+    .filter((v): v is number => v != null && Number.isFinite(v) && v > 0);
+  if (vals.length === 0) return null;
+
+  const minVal = Math.min(...vals);
+  const maxVal = Math.max(...vals);
+
+  function fmtV(v: number): string {
+    const u = meta.unit;
+    if (u === "%") return `${v.toFixed(1)}%`;
+    if (u === "years") return `${v.toFixed(0)} yrs`;
+    if (u === "per 1000") return `${v.toFixed(0)}/1k`;
+    if (u === "µg/m³") return `${v.toFixed(0)} µg/m³`;
+    if (u === "species" || u === "index") return `${Math.round(v)}`;
+    if (u === "t/capita") return `${v.toFixed(1)} ${u}`;
+    if (u === "m³/capita") return `${new Intl.NumberFormat(undefined,{notation:"compact",maximumFractionDigits:1}).format(v)} ${u}`;
+    if (u === "kg/ha") return `${Math.round(v).toLocaleString()} ${u}`;
+    // large quantities (t, TWh, Mt, US$)
+    return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(v) + (u && u !== "US$" ? ` ${u}` : "");
+  }
+
+  // viridis ramp: severity 0 = dark purple, severity 1 = yellow.
+  // For higher_is_worse or world_share: low value → purple, high → yellow.
+  // For NOT higher_is_worse (magnitude/percent): high value → purple, low → yellow.
+  const isPosDir = meta.higher_is_worse || meta.display === "world_share";
+  const leftVal  = isPosDir ? minVal : maxVal;
+  const rightVal = isPosDir ? maxVal : minVal;
+
+  return (
+    <div className="pointer-events-none absolute bottom-16 left-1/2 z-20 -translate-x-1/2">
+      <div className="rounded-xl border border-earth-200 bg-white/92 px-3 py-2 shadow-lg backdrop-blur-sm">
+        <div className="mb-1.5 max-w-[300px] truncate text-center text-[10px] font-semibold text-earth-700">
+          {meta.label}
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="min-w-[48px] text-right">
+            <div className="text-[10px] font-medium tabular-nums text-earth-700">{fmtV(leftVal)}</div>
+            <div className="text-[8px] text-earth-400">{isPosDir ? "least" : "most"}</div>
+          </div>
+          <div className="flex h-3 w-44 shrink-0 overflow-hidden rounded-sm">
+            {["#440154","#31688e","#1f9e89","#6ece58","#fde725"].map((c) => (
+              <span key={c} className="flex-1" style={{ background: c }} />
+            ))}
+          </div>
+          <div className="min-w-[48px]">
+            <div className="text-[10px] font-medium tabular-nums text-earth-700">{fmtV(rightVal)}</div>
+            <div className="text-[8px] text-earth-400">{isPosDir ? "most" : "least"}</div>
+          </div>
+        </div>
+        <div className="mt-1 text-center text-[8px] text-earth-400">
+          {vals.length} countries with data · {meta.source_name}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const GlobeMap = dynamic(() => import("@/components/GlobeView"), {
   ssr: false,
   loading: () => (
@@ -1020,6 +1091,7 @@ export default function Home() {
             if (iso && isoToEvidence[iso]) setHighlight(isoToEvidence[iso]);
           }}
         />
+        <MapLegend activeMetas={activeMetas} composite={composite} />
         {selectedIso && (
           <CountryImpactPanel
             iso={selectedIso}
@@ -1140,35 +1212,61 @@ export default function Home() {
                 )}
 
                 {/* Gradient bar */}
-                {activeMetas.length > 0 && (
-                  <div className="mb-3">
-                    <div className="flex h-3 w-full overflow-hidden rounded-sm">
-                      {["#440154","#31688e","#1f9e89","#6ece58","#fde725"].map((c) => (
-                        <span key={c} className="flex-1" style={{ background: c }} />
-                      ))}
+                {activeMetas.length > 0 && (() => {
+                  if (activeMetas.length > 1) {
+                    return (
+                      <div className="mb-3">
+                        <div className="flex h-3 w-full overflow-hidden rounded-sm">
+                          {["#440154","#31688e","#1f9e89","#6ece58","#fde725"].map((c) => (
+                            <span key={c} className="flex-1" style={{ background: c }} />
+                          ))}
+                        </div>
+                        <div className="mt-0.5 flex justify-between text-[9.5px] text-earth-500">
+                          <span>less affected</span>
+                          <span>more affected</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  // Single layer — compute actual min/max from composite data.
+                  const m = activeMetas[0];
+                  const vals = composite
+                    ? Object.values(composite.byIso)
+                        .map((e) => e.layers[m.id]?.value)
+                        .filter((v): v is number => v != null && Number.isFinite(v) && v > 0)
+                    : [];
+                  const minV = vals.length ? Math.min(...vals) : null;
+                  const maxV = vals.length ? Math.max(...vals) : null;
+                  function fmtBar(v: number): string {
+                    const u = m.unit;
+                    if (u === "%") return `${v.toFixed(1)}%`;
+                    if (u === "years") return `${v.toFixed(0)} yrs`;
+                    if (u === "per 1000") return `${v.toFixed(0)}/1k`;
+                    if (u === "µg/m³") return `${v.toFixed(0)} µg/m³`;
+                    if (u === "species" || u === "index") return `${Math.round(v)}`;
+                    return new Intl.NumberFormat(undefined,{notation:"compact",maximumFractionDigits:1}).format(v) + (u && u !== "US$" ? ` ${u}` : "");
+                  }
+                  const isPosDir = m.higher_is_worse || m.display === "world_share";
+                  const leftV  = isPosDir ? minV : maxV;
+                  const rightV = isPosDir ? maxV : minV;
+                  return (
+                    <div className="mb-3">
+                      <div className="flex h-3 w-full overflow-hidden rounded-sm">
+                        {["#440154","#31688e","#1f9e89","#6ece58","#fde725"].map((c) => (
+                          <span key={c} className="flex-1" style={{ background: c }} />
+                        ))}
+                      </div>
+                      <div className="mt-0.5 flex justify-between text-[9.5px] text-earth-500">
+                        <span className="tabular-nums">
+                          {leftV != null ? fmtBar(leftV) : (isPosDir ? "low" : "high")}
+                        </span>
+                        <span className="tabular-nums">
+                          {rightV != null ? fmtBar(rightV) : (isPosDir ? "high" : "low")}
+                        </span>
+                      </div>
                     </div>
-                    <div className="mt-0.5 flex justify-between text-[9.5px] text-earth-500">
-                      <span>
-                        {activeMetas.length > 1
-                          ? "less affected"
-                          : activeMetas[0].higher_is_worse
-                          ? "better"
-                          : activeMetas[0].display === "world_share"
-                          ? "low"
-                          : "worse"}
-                      </span>
-                      <span>
-                        {activeMetas.length > 1
-                          ? "more affected"
-                          : activeMetas[0].higher_is_worse
-                          ? "worse"
-                          : activeMetas[0].display === "world_share"
-                          ? "high"
-                          : "better"}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Ranked country list */}
                 {highlights && highlights.top.length > 0 && (

@@ -75,9 +75,18 @@ async function query<T = Record<string, unknown>>(
 }
 
 export async function listLayers(): Promise<LayerMeta[]> {
+  // Only return layers that actually have data in metric_by_country — this
+  // prevents layers from appearing in the UI when the upstream source was
+  // unreachable at build time (e.g. ScienceBase returning empty for a
+  // particular commodity). A layer with 0 rows is a data gap, not a feature.
   return query<LayerMeta>(
-    `SELECT id, label, unit, display, higher_is_worse, source_name, source_url
-     FROM layer ORDER BY id`
+    `SELECT l.id, l.label, l.unit, l.display, l.higher_is_worse,
+            l.source_name, l.source_url
+     FROM layer l
+     WHERE EXISTS (
+       SELECT 1 FROM metric_by_country m WHERE m.metric = l.id LIMIT 1
+     )
+     ORDER BY l.id`
   );
 }
 
