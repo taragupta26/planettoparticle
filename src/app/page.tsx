@@ -909,6 +909,7 @@ export default function Home() {
     { lat: number; lon: number; zoom: number } | null
   >(null);
   const [selectedIso, setSelectedIso] = useState<string | undefined>(undefined);
+  const [countryPanelOpen, setCountryPanelOpen] = useState(true);
   const [layers, setLayers] = useState<LayerMeta[]>([]);
   // Layers are now FILTERS: any number can be active at once.
   const [activeLayers, setActiveLayers] = useState<string[]>([
@@ -1088,15 +1089,40 @@ export default function Home() {
           highlightIso={answerIso}
           onSelectIso={(iso) => {
             setSelectedIso(iso || undefined);
+            setCountryPanelOpen(true); // auto-reopen panel on new country click
             if (iso && isoToEvidence[iso]) setHighlight(isoToEvidence[iso]);
           }}
         />
         <MapLegend activeMetas={activeMetas} composite={composite} />
-        {selectedIso && (
+
+        {/* Country panel — shown when open; minimized pill when hidden */}
+        {selectedIso && countryPanelOpen && (
           <CountryImpactPanel
             iso={selectedIso}
-            onClose={() => setSelectedIso(undefined)}
+            onClose={() => { setSelectedIso(undefined); setCountryPanelOpen(false); }}
+            onMinimize={() => setCountryPanelOpen(false)}
           />
+        )}
+        {selectedIso && !countryPanelOpen && (
+          <div className="pointer-events-auto absolute top-4 left-1/2 z-30 -translate-x-1/2 flex items-center gap-1.5 rounded-full border border-earth-300 bg-white/95 pl-3 pr-1.5 py-1.5 shadow-lg backdrop-blur-sm">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-earth-500" />
+            <span className="text-[11px] font-medium text-earth-800">
+              {composite?.byIso[selectedIso]?.name ?? selectedIso}
+            </span>
+            <button
+              onClick={() => setCountryPanelOpen(true)}
+              className="ml-0.5 rounded-full bg-earth-100 px-2 py-0.5 text-[10px] font-medium text-earth-700 hover:bg-earth-200"
+            >
+              expand ›
+            </button>
+            <button
+              onClick={() => { setSelectedIso(undefined); setCountryPanelOpen(false); }}
+              className="rounded-full px-1.5 py-0.5 text-[10px] text-earth-400 hover:bg-earth-100 hover:text-earth-700"
+              aria-label="Clear country"
+            >
+              ✕
+            </button>
+          </div>
         )}
         {showBoundariesMap && (
           <PlanetaryBoundariesHUD

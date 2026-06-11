@@ -161,9 +161,11 @@ function CurrentWeatherStrip({ iso }: { iso: string }) {
 export default function CountryImpactPanel({
   iso,
   onClose,
+  onMinimize,
 }: {
   iso: string;
   onClose: () => void;
+  onMinimize?: () => void;
 }) {
   const [data, setData] = useState<Payload | null>(null);
   const [err, setErr] = useState(false);
@@ -210,13 +212,26 @@ export default function CountryImpactPanel({
             {data?.name ?? iso}
           </h2>
         </button>
-        <button
-          onClick={onClose}
-          className="-mr-1 shrink-0 rounded-md px-1.5 py-0.5 text-earth-400 hover:bg-earth-100 hover:text-earth-700"
-          aria-label="Close"
-        >
-          ✕
-        </button>
+        <div className="flex shrink-0 items-center gap-0.5">
+          {onMinimize && (
+            <button
+              onClick={onMinimize}
+              className="rounded-md px-1.5 py-0.5 text-earth-400 hover:bg-earth-100 hover:text-earth-700"
+              aria-label="Minimize — keep trade flows visible"
+              title="Minimize — trade flows stay on map"
+            >
+              ⊟
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="-mr-1 rounded-md px-1.5 py-0.5 text-earth-400 hover:bg-earth-100 hover:text-earth-700"
+            aria-label="Close"
+            title="Close and clear"
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       {!collapsed && <div className="max-h-[calc(100vh-7rem)] overflow-y-auto px-4 py-3">
