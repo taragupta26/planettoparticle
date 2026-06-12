@@ -166,6 +166,12 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   suicide_rate: "Highest suicide mortality",
   control_of_corruption: "Weakest anti-corruption control",
   tobacco_deaths: "Highest tobacco mortality",
+  alcohol_consumption: "Highest alcohol consumption",
+  hydro_electricity: "Most hydro-dependent electricity",
+  renewable_electricity_xhydro: "Most solar/wind electricity",
+  tech_exports: "Highest tech export share",
+  gross_savings: "Lowest gross savings rate",
+  current_account: "Largest current account deficit",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -523,6 +529,30 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Where does tobacco cause the most deaths per person?",
     "How do tobacco supply chains and marketing connect to mortality burden?",
   ],
+  alcohol_consumption: [
+    "Where is alcohol consumption highest per person?",
+    "How does drinking connect to health burden, poverty, and food systems?",
+  ],
+  hydro_electricity: [
+    "Which countries rely most on hydropower for electricity?",
+    "How does hydro dependence connect to water stress and climate risk?",
+  ],
+  renewable_electricity_xhydro: [
+    "Which countries have the highest share of solar and wind in their electricity mix?",
+    "Where is the clean energy transition moving fastest beyond hydropower?",
+  ],
+  tech_exports: [
+    "Which countries export the highest share of high-technology goods?",
+    "How does technological sophistication connect to supply chain positioning?",
+  ],
+  gross_savings: [
+    "Which countries have the lowest savings rates, and what does it mean for investment?",
+    "How does savings capacity connect to resource dependence and economic vulnerability?",
+  ],
+  current_account: [
+    "Which countries run the largest current account deficits?",
+    "How does trade balance connect to commodity export dependence?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -579,7 +609,8 @@ const LAYER_CATEGORIES: {
     color: "#dc2626",
     ids: [
       "coal_production","oil_production","gas_production","renewable_energy",
-      "energy_per_capita","electricity_per_capita","coal_rents","oil_rents","gas_rents",
+      "energy_per_capita","electricity_per_capita","hydro_electricity",
+      "renewable_electricity_xhydro","coal_rents","oil_rents","gas_rents",
       "resource_rents_total","mineral_rents",
     ],
   },
@@ -593,7 +624,7 @@ const LAYER_CATEGORIES: {
       "tuberculosis","physicians","neonatal_mortality","hiv_incidence",
       "diabetes_prevalence","hospital_beds","road_deaths","safe_sanitation",
       "food_insecurity_severe","stunting","suicide_rate","tobacco_deaths",
-      "exports_value","imports_value",
+      "alcohol_consumption","exports_value","imports_value",
     ],
   },
   {
@@ -623,6 +654,7 @@ const LAYER_CATEGORIES: {
       "women_in_parliament","trade_openness","remittances","education_expenditure",
       "manuf_value_added","agri_value_added","inflation","poverty_gap",
       "unemployment","adult_literacy","mobile_subscriptions","control_of_corruption",
+      "tech_exports","gross_savings","current_account",
     ],
   },
 ];

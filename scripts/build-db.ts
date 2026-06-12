@@ -144,6 +144,9 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Tobacco mortality (IHME GBD via OWID) ---
   // Verified 2025-06-12: ~185 countries, deaths per 100,000.
   ["tobacco_deaths", "death-rates-from-smoking", "Death rates from smoking", "per 100k", OWID_IHME],
+  // --- Alcohol consumption (WHO via OWID) ---
+  // Verified 2025-06-12: ~180 countries, litres of pure alcohol per capita/year.
+  ["alcohol_consumption", "total-alcohol-consumption-per-capita", "Alcohol consumption per capita", "L/capita", OWID_IHME],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -254,6 +257,13 @@ const WB_INDICATORS = [
   { metric: "suicide_rate", code: "SH.STA.SUIC.P5", unit: "per 100k" },
   { metric: "control_of_corruption", code: "CC.EST", unit: "score" },
   { metric: "threatened_fish", code: "EN.FSH.THRD.NO", unit: "species" },
+  // ---- Energy mix details (World Bank) ----
+  { metric: "hydro_electricity", code: "EG.ELC.HYRO.ZS", unit: "%" },
+  { metric: "renewable_electricity_xhydro", code: "EG.ELC.RNWX.ZS", unit: "%" },
+  // ---- Economic structure (World Bank) ----
+  { metric: "tech_exports", code: "TX.VAL.TECH.MF.ZS", unit: "%" },
+  { metric: "gross_savings", code: "NY.GNS.ICTR.ZS", unit: "%" },
+  { metric: "current_account", code: "BN.CAB.XOKA.GD.ZS", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -955,6 +965,63 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     WB.name,
     "https://data.worldbank.org/indicator/SI.POV.GAPS",
+  ],
+  // ---- Energy mix details (World Bank) ----
+  [
+    "hydro_electricity",
+    "Electricity from hydropower (% of total)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.ELC.HYRO.ZS",
+  ],
+  [
+    "renewable_electricity_xhydro",
+    "Electricity from renewables excl. hydro (% of total)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.ELC.RNWX.ZS",
+  ],
+  // ---- Economic structure (World Bank) ----
+  [
+    "tech_exports",
+    "High-technology exports (% of manufactured exports)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/TX.VAL.TECH.MF.ZS",
+  ],
+  [
+    "gross_savings",
+    "Gross savings (% of GNI)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/NY.GNS.ICTR.ZS",
+  ],
+  [
+    "current_account",
+    "Current account balance (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/BN.CAB.XOKA.GD.ZS",
+  ],
+  // ---- Alcohol consumption (IHME/WHO via OWID) ----
+  [
+    "alcohol_consumption",
+    "Alcohol consumption per capita (litres/year)",
+    "L/capita",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/total-alcohol-consumption-per-capita",
   ],
   // ---- Labor, connectivity, governance (World Bank) ----
   [

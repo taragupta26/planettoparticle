@@ -57,6 +57,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   suicide_rate: { label: "Suicide mortality rate", meaning: "deaths by suicide per 100,000 people — reflects mental health and social conditions", bucket: 0 },
   adult_literacy: { label: "Adult literacy rate", meaning: "share of adults aged 15+ who can read and write", bucket: 0 },
   mobile_subscriptions: { label: "Mobile phone subscriptions", meaning: "subscriptions per 100 people — can exceed 100 where people hold multiple SIMs", bucket: 0 },
+  alcohol_consumption: { label: "Alcohol consumption per capita", meaning: "litres of pure alcohol per person per year", bucket: 0 },
   // 1 — the environment people live in
   water_stress: { label: "Water stress", meaning: "freshwater withdrawn vs. what's available", bucket: 1 },
   agri_land: { label: "Agricultural land", meaning: "share of land used for farming", bucket: 1 },
@@ -66,6 +67,8 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   air_pollution_deaths: { label: "Deaths from air pollution", meaning: "age-standardized death rate from outdoor and household air pollution (per 100,000)", bucket: 1 },
   n2o_total: { label: "Nitrous oxide (N₂O)", meaning: "total national N₂O emissions (agriculture + industry)", bucket: 1 },
   electricity_per_capita: { label: "Electricity use per person", meaning: "kilowatt-hours of electricity consumed per person per year", bucket: 1 },
+  hydro_electricity: { label: "Hydropower share", meaning: "share of electricity generated from hydropower — connects energy to water availability", bucket: 1 },
+  renewable_electricity_xhydro: { label: "Solar/wind electricity share", meaning: "share from renewables excluding hydro — shows the pace of the clean energy transition", bucket: 1 },
   co2_per_capita: { label: "CO₂ per person", meaning: "emissions each resident is tied to", bucket: 1 },
   plastic_waste_pc: { label: "Plastic waste per person", meaning: "plastic thrown away per person daily", bucket: 1 },
   plastic_to_ocean_share: { label: "Plastic reaching the ocean", meaning: "this country's share of ocean plastic — it re-enters food via fish", bucket: 1 },
@@ -93,6 +96,9 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   poverty_gap: { label: "Poverty gap ($2.15/day)", meaning: "how far the poorest fall below the poverty line — depth, not just count", bucket: 2 },
   unemployment: { label: "Unemployment rate", meaning: "share of the labor force without a job but actively seeking one", bucket: 2 },
   control_of_corruption: { label: "Control of corruption (WGI)", meaning: "World Bank governance score: −2.5 = no control, +2.5 = strong control — captures resource rent capture", bucket: 2 },
+  tech_exports: { label: "High-technology exports", meaning: "share of manufactured exports that are high-tech — shows economic complexity", bucket: 2 },
+  gross_savings: { label: "Gross savings (% GNI)", meaning: "share of national income saved rather than consumed — determines investment capacity", bucket: 2 },
+  current_account: { label: "Current account balance", meaning: "% of GDP — positive = surplus (net lender), negative = deficit (net borrower)", bucket: 2 },
   resource_rents_total: { label: "Resource rents", meaning: "value of all natural resources as % of GDP", bucket: 2 },
   mineral_rents: { label: "Mineral rents", meaning: "mining value as % of GDP", bucket: 2 },
   oil_rents: { label: "Oil rents", meaning: "oil value as % of GDP", bucket: 2 },
@@ -124,6 +130,7 @@ function fmt(m: CountryMetric): string {
   if (m.unit === "kcal/day") return `${Math.round(m.value).toLocaleString()} kcal/day`;
   if (m.unit === "kWh") return `${Math.round(m.value).toLocaleString()} kWh`;
   if (m.unit === "per 100") return `${m.value.toFixed(0)} per 100 people`;
+  if (m.unit === "L/capita") return `${m.value.toFixed(1)} L/yr`;
   if (m.unit === "score") return m.value.toFixed(2);
   if (m.unit === "t" || m.unit === "t/year") {
     return new Intl.NumberFormat(undefined, {
