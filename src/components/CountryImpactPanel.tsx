@@ -59,6 +59,12 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   mobile_subscriptions: { label: "Mobile phone subscriptions", meaning: "subscriptions per 100 people — can exceed 100 where people hold multiple SIMs", bucket: 0 },
   alcohol_consumption: { label: "Alcohol consumption per capita", meaning: "litres of pure alcohol per person per year", bucket: 0 },
   uhc_coverage: { label: "Universal health coverage (UHC)", meaning: "index 0–100 tracking access to essential health services — higher = better coverage", bucket: 0 },
+  homicide_rate: { label: "Homicide rate", meaning: "intentional homicides per 100,000 people — a proxy for personal safety and state capacity", bucket: 0 },
+  alcohol_deaths: { label: "Deaths from alcohol disorders", meaning: "age-standardized death rate from alcohol use disorders (per 100,000)", bucket: 0 },
+  fertility_rate: { label: "Fertility rate", meaning: "average number of births per woman — reflects education, health access, and women's autonomy", bucket: 0 },
+  pop_over_65: { label: "Population over 65 (%)", meaning: "share of people at or above retirement age — indicator of demographic aging", bucket: 0 },
+  pop_under_14: { label: "Population under 14 (%)", meaning: "share of children — shows youth bulge and pressure on schools and services", bucket: 0 },
+  population_density: { label: "Population density", meaning: "people per square kilometre — shapes infrastructure needs and resource pressure", bucket: 0 },
   // 1 — the environment people live in
   water_stress: { label: "Water stress", meaning: "freshwater withdrawn vs. what's available", bucket: 1 },
   agri_land: { label: "Agricultural land", meaning: "share of land used for farming", bucket: 1 },
@@ -68,6 +74,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   air_pollution_deaths: { label: "Deaths from air pollution", meaning: "age-standardized death rate from outdoor and household air pollution (per 100,000)", bucket: 1 },
   n2o_total: { label: "Nitrous oxide (N₂O)", meaning: "total national N₂O emissions (agriculture + industry)", bucket: 1 },
   electricity_per_capita: { label: "Electricity use per person", meaning: "kilowatt-hours of electricity consumed per person per year", bucket: 1 },
+  electricity_losses: { label: "Electricity grid losses", meaning: "share of power lost in transmission and distribution — reflects grid quality and investment", bucket: 1 },
   hydro_electricity: { label: "Hydropower share", meaning: "share of electricity generated from hydropower — connects energy to water availability", bucket: 1 },
   renewable_electricity_xhydro: { label: "Solar/wind electricity share", meaning: "share from renewables excluding hydro — shows the pace of the clean energy transition", bucket: 1 },
   coal_electricity: { label: "Coal-fired electricity share", meaning: "share of electricity generated from coal — major driver of local air pollution and CO₂", bucket: 1 },
@@ -91,6 +98,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   fish_catch: { label: "Fish & seafood catch", meaning: "wild-caught fish and seafood (tonnes/year)", bucket: 2 },
   aquaculture: { label: "Aquaculture production", meaning: "farmed fish and seafood (tonnes/year)", bucket: 2 },
   gdp_per_capita: { label: "GDP per capita", meaning: "output per person — what the economy generates for each resident", bucket: 2 },
+  gni_per_capita_ppp: { label: "GNI per capita (PPP)", meaning: "purchasing-power-adjusted income per person — better than nominal GDP for comparing living standards", bucket: 2 },
   health_expenditure: { label: "Health expenditure (% GDP)", meaning: "share of national output spent on healthcare (public + private)", bucket: 2 },
   trade_openness: { label: "Trade openness (% GDP)", meaning: "exports + imports as a share of GDP — how exposed the economy is to global trade", bucket: 2 },
   remittances: { label: "Remittances received (% GDP)", meaning: "money sent home by citizens working abroad, as a share of GDP", bucket: 2 },
@@ -139,6 +147,13 @@ function fmt(m: CountryMetric): string {
   if (m.unit === "kWh") return `${Math.round(m.value).toLocaleString()} kWh`;
   if (m.unit === "per 100") return `${m.value.toFixed(0)} per 100 people`;
   if (m.unit === "L/capita") return `${m.value.toFixed(1)} L/yr`;
+  if (m.unit === "births/woman") return `${m.value.toFixed(2)} births/woman`;
+  if (m.unit === "per km²") return `${m.value.toFixed(1)} /km²`;
+  if (m.unit === "PPP$")
+    return new Intl.NumberFormat(undefined, {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(m.value) + " (PPP)";
   if (m.unit === "score") return m.value.toFixed(2);
   if (m.unit === "t" || m.unit === "t/year") {
     return new Intl.NumberFormat(undefined, {

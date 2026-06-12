@@ -180,6 +180,14 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   coal_electricity: "Most coal-dependent electricity",
   gas_electricity: "Most gas-dependent electricity",
   oil_electricity: "Most oil-dependent electricity",
+  fertility_rate: "Highest fertility rate",
+  pop_over_65: "Most aging population",
+  pop_under_14: "Youngest population",
+  population_density: "Most densely populated",
+  gni_per_capita_ppp: "Lowest income (PPP)",
+  electricity_losses: "Highest grid losses",
+  homicide_rate: "Highest homicide rate",
+  alcohol_deaths: "Highest alcohol-disorder mortality",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -593,6 +601,38 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which countries still burn oil for electricity — and why?",
     "How does oil-for-power connect to import dependence and energy poverty?",
   ],
+  fertility_rate: [
+    "Where is fertility highest, and what drives large family sizes?",
+    "How does fertility connect to education, women's rights, and poverty?",
+  ],
+  pop_over_65: [
+    "Where is the population aging fastest?",
+    "How does an aging population affect labor force, pensions, and resource demand?",
+  ],
+  pop_under_14: [
+    "Where is the youngest population, and what does it mean for future labor and consumption?",
+    "How does a youth bulge connect to education demand, jobs, and migration?",
+  ],
+  population_density: [
+    "Where are people most densely concentrated?",
+    "How does density shape resource demand, infrastructure needs, and climate risk?",
+  ],
+  gni_per_capita_ppp: [
+    "Where is purchasing-power-adjusted income lowest?",
+    "How does PPP income compare to resource wealth in extractive economies?",
+  ],
+  electricity_losses: [
+    "Where do electricity grids lose the most power in transmission?",
+    "How do grid losses connect to energy poverty and investment gaps?",
+  ],
+  homicide_rate: [
+    "Where is homicide highest, and what's driving it?",
+    "How do violence levels map onto resource extraction, inequality, and governance?",
+  ],
+  alcohol_deaths: [
+    "Where does harmful alcohol use cause the most deaths per person?",
+    "How does alcohol mortality connect to poverty, inequality, and mental health burdens?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -651,7 +691,8 @@ const LAYER_CATEGORIES: {
       "coal_production","oil_production","gas_production","renewable_energy",
       "energy_per_capita","electricity_per_capita","hydro_electricity",
       "renewable_electricity_xhydro","coal_electricity","gas_electricity","oil_electricity",
-      "coal_rents","oil_rents","gas_rents","resource_rents_total","mineral_rents",
+      "electricity_losses","coal_rents","oil_rents","gas_rents",
+      "resource_rents_total","mineral_rents",
     ],
   },
   {
@@ -665,7 +706,7 @@ const LAYER_CATEGORIES: {
       "diabetes_prevalence","hospital_beds","road_deaths","safe_sanitation",
       "food_insecurity_severe","stunting","suicide_rate","tobacco_deaths",
       "alcohol_consumption","uhc_coverage","cardiovascular_deaths",
-      "exports_value","imports_value",
+      "homicide_rate","alcohol_deaths","exports_value","imports_value",
     ],
   },
   {
@@ -697,6 +738,7 @@ const LAYER_CATEGORIES: {
       "unemployment","adult_literacy","mobile_subscriptions","control_of_corruption",
       "tech_exports","gross_savings","current_account",
       "out_of_pocket_health","tax_revenue","food_production_index",
+      "fertility_rate","pop_over_65","pop_under_14","population_density","gni_per_capita_ppp",
     ],
   },
 ];

@@ -103,6 +103,7 @@ const OWID_MEIJER = "Our World in Data — Meijer et al. (2021), Science Advance
 const OWID_FAO_FISH = "Our World in Data — FAO FishStat";
 const OWID_GBD = "Our World in Data — NCD Risk Factor Collaboration (NCD-RisC)";
 const OWID_UNDP = "Our World in Data — UNDP (Human Development Report)";
+const OWID_UNODC = "Our World in Data — UNODC (Homicide Statistics)";
 
 // metric, OWID grapher slug, label, unit, source_name — OWID/grapher CSV series.
 // Each series is a single value column (entity,code,year,value), parsed from the
@@ -150,6 +151,12 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Cardiovascular death rates (IHME GBD via OWID) ---
   // Verified 2025-06-12: ~185 countries, deaths per 100,000.
   ["cardiovascular_deaths", "death-rates-from-cardiovascular-disease", "Death rates from cardiovascular disease", "per 100k", OWID_IHME],
+  // --- Homicide rate (UNODC via OWID) ---
+  // Verified 2025-06-12: ~180 countries, per 100,000.
+  ["homicide_rate", "homicide-rate-unodc", "Homicide rate", "per 100k", OWID_UNODC],
+  // --- Alcohol use disorder deaths (IHME GBD via OWID) ---
+  // Verified 2025-06-12: ~185 countries, deaths per 100,000.
+  ["alcohol_deaths", "death-rates-from-alcohol-use-disorders", "Death rates from alcohol use disorders", "per 100k", OWID_IHME],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -276,6 +283,15 @@ const WB_INDICATORS = [
   { metric: "food_production_index", code: "AG.PRD.FOOD.XD", unit: "index" },
   { metric: "out_of_pocket_health", code: "SH.XPD.OOPC.CH.ZS", unit: "%" },
   { metric: "tax_revenue", code: "GC.TAX.TOTL.GD.ZS", unit: "%" },
+  // ---- Demographics (World Bank) ----
+  // Verified 2025-06-12: all ~195–200 countries.
+  { metric: "fertility_rate", code: "SP.DYN.TFRT.IN", unit: "births/woman" },
+  { metric: "pop_over_65", code: "SP.POP.65UP.TO.ZS", unit: "%" },
+  { metric: "pop_under_14", code: "SP.POP.0014.TO.ZS", unit: "%" },
+  { metric: "population_density", code: "EN.POP.DNST", unit: "per km²" },
+  // ---- Income & infrastructure (World Bank) ----
+  { metric: "gni_per_capita_ppp", code: "NY.GNP.PCAP.PP.CD", unit: "PPP$" },
+  { metric: "electricity_losses", code: "EG.ELC.LOSS.ZS", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -1108,6 +1124,80 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     OWID_IHME,
     "https://ourworldindata.org/grapher/total-alcohol-consumption-per-capita",
+  ],
+  // ---- Demographics (World Bank) ----
+  [
+    "fertility_rate",
+    "Fertility rate (births per woman)",
+    "births/woman",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SP.DYN.TFRT.IN",
+  ],
+  [
+    "pop_over_65",
+    "Population ages 65+ (% of total)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SP.POP.65UP.TO.ZS",
+  ],
+  [
+    "pop_under_14",
+    "Population ages 0–14 (% of total)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SP.POP.0014.TO.ZS",
+  ],
+  [
+    "population_density",
+    "Population density (people per km²)",
+    "per km²",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/EN.POP.DNST",
+  ],
+  [
+    "gni_per_capita_ppp",
+    "GNI per capita, PPP (current international $)",
+    "PPP$",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/NY.GNP.PCAP.PP.CD",
+  ],
+  [
+    "electricity_losses",
+    "Electric power transmission losses (% of output)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.ELC.LOSS.ZS",
+  ],
+  // ---- Homicide & alcohol mortality (UNODC/IHME via OWID) ----
+  [
+    "homicide_rate",
+    "Homicide rate (per 100,000 people)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_UNODC,
+    "https://ourworldindata.org/grapher/homicide-rate-unodc",
+  ],
+  [
+    "alcohol_deaths",
+    "Death rates from alcohol use disorders (per 100,000)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/death-rates-from-alcohol-use-disorders",
   ],
   // ---- Labor, connectivity, governance (World Bank) ----
   [
