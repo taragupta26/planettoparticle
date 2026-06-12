@@ -200,6 +200,12 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   ores_metals_exports: "Most mineral-export-dependent",
   fuel_exports: "Most fuel-export-dependent",
   cancer_deaths: "Highest cancer mortality",
+  agricultural_employment: "Most agriculture-dependent labor",
+  self_employment: "Highest self-employment rate",
+  immunization_dtp: "Lowest DTP immunization coverage",
+  co2_intensity_gdp: "Most carbon-intensive economy",
+  fdi_inflows: "Highest FDI inflows (% GDP)",
+  food_imports_share: "Most dependent on food imports",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -693,6 +699,30 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Where are cancer death rates highest, and what types dominate?",
     "How does cancer mortality connect to tobacco, air pollution, and healthcare access?",
   ],
+  agricultural_employment: [
+    "Where do most people still work in agriculture, and what does that mean for food security?",
+    "How does high agricultural employment connect to rural poverty and smallholder land rights?",
+  ],
+  self_employment: [
+    "Which countries have the highest rates of self-employment, and why?",
+    "How does self-employment concentration reflect informality, social protection gaps, and economic structure?",
+  ],
+  immunization_dtp: [
+    "Where is childhood immunization coverage lowest, and what drives the gaps?",
+    "How does DTP immunization correlate with child mortality, healthcare access, and conflict?",
+  ],
+  co2_intensity_gdp: [
+    "Which economies produce the most CO₂ per dollar of output?",
+    "How does carbon intensity of GDP relate to energy mix, industrial structure, and climate commitments?",
+  ],
+  fdi_inflows: [
+    "Which countries attract the most foreign direct investment relative to their economy?",
+    "How does FDI flow connect to resource extraction, governance, and development outcomes?",
+  ],
+  food_imports_share: [
+    "Which countries are most dependent on imported food and why does it matter?",
+    "How does food import dependency create vulnerability to supply chain shocks and price spikes?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -730,7 +760,8 @@ const LAYER_CATEGORIES: {
       "coffee_production","cocoa_production","palm_oil_production","sugarcane_production",
       "banana_production","potato_production","cassava_production","meat_production",
       "milk_production","fish_catch","aquaculture","cereal_yield","fertilizer_use",
-      "agri_land","caloric_supply","food_production_index",
+      "agri_land","caloric_supply","food_production_index","food_imports_share",
+      "agricultural_employment",
     ],
   },
   {
@@ -767,7 +798,7 @@ const LAYER_CATEGORIES: {
       "food_insecurity_severe","stunting","suicide_rate","tobacco_deaths",
       "alcohol_consumption","uhc_coverage","cardiovascular_deaths",
       "homicide_rate","alcohol_deaths","drug_deaths","cancer_deaths",
-      "exports_value","imports_value",
+      "immunization_dtp","exports_value","imports_value",
     ],
   },
   {
@@ -778,6 +809,7 @@ const LAYER_CATEGORIES: {
       "co2_per_capita","co2_total","methane_total","n2o_total",
       "pm25_exposure","air_pollution_deaths","plastic_waste_pc",
       "plastic_to_ocean_share","plastic_waste_total","plastic_to_ocean_total",
+      "co2_intensity_gdp",
     ],
   },
   {
@@ -803,6 +835,7 @@ const LAYER_CATEGORIES: {
       "employment_ratio","broadband","military_expenditure","business_days",
       "rule_of_law","political_stability","gov_effectiveness",
       "ores_metals_exports","fuel_exports",
+      "fdi_inflows","self_employment",
     ],
   },
 ];

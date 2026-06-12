@@ -63,6 +63,8 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   alcohol_deaths: { label: "Deaths from alcohol disorders", meaning: "age-standardized death rate from alcohol use disorders (per 100,000)", bucket: 0 },
   drug_deaths: { label: "Deaths from drug use disorders", meaning: "age-standardized death rate from drug use disorders (per 100,000) — opioids, stimulants, and other substances", bucket: 0 },
   cancer_deaths: { label: "Cancer death rates", meaning: "age-standardized cancer death rate per 100,000 — shaped by tobacco, diet, pollution, and healthcare access", bucket: 0 },
+  immunization_dtp: { label: "DTP immunization coverage", meaning: "% of 1-year-olds receiving diphtheria-tetanus-pertussis vaccine — a proxy for healthcare system reach", bucket: 0 },
+  agricultural_employment: { label: "Agricultural employment", meaning: "share of all workers in farming — high values often correlate with rural poverty and subsistence agriculture", bucket: 0 },
   employment_ratio: { label: "Employment-to-population ratio", meaning: "share of working-age adults (15+) who are employed — higher = more people contributing to the economy", bucket: 0 },
   broadband: { label: "Fixed broadband access", meaning: "fixed broadband subscriptions per 100 people — indicator of digital infrastructure depth beyond mobile-only connectivity", bucket: 0 },
   fertility_rate: { label: "Fertility rate", meaning: "average number of births per woman — reflects education, health access, and women's autonomy", bucket: 0 },
@@ -80,6 +82,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   electricity_per_capita: { label: "Electricity use per person", meaning: "kilowatt-hours of electricity consumed per person per year", bucket: 1 },
   electricity_losses: { label: "Electricity grid losses", meaning: "share of power lost in transmission and distribution — reflects grid quality and investment", bucket: 1 },
   energy_intensity: { label: "Energy intensity", meaning: "megajoules of primary energy per dollar of PPP GDP — higher = less efficient; improvement signals decoupling of growth from energy", bucket: 1 },
+  co2_intensity_gdp: { label: "CO₂ intensity of GDP", meaning: "kg of CO₂ emitted per dollar of PPP GDP — high values signal carbon-heavy industry or energy mix poorly aligned with climate goals", bucket: 1 },
   hydro_electricity: { label: "Hydropower share", meaning: "share of electricity generated from hydropower — connects energy to water availability", bucket: 1 },
   renewable_electricity_xhydro: { label: "Solar/wind electricity share", meaning: "share from renewables excluding hydro — shows the pace of the clean energy transition", bucket: 1 },
   coal_electricity: { label: "Coal-fired electricity share", meaning: "share of electricity generated from coal — major driver of local air pollution and CO₂", bucket: 1 },
@@ -133,6 +136,9 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   gov_effectiveness: { label: "Government effectiveness (WGI)", meaning: "World Bank score −2.5 to +2.5 — quality of public services and civil service, free from political pressure", bucket: 2 },
   ores_metals_exports: { label: "Ores & metals exports", meaning: "share of merchandise exports from ores and metals — high values signal mineral resource dependence", bucket: 2 },
   fuel_exports: { label: "Fuel exports", meaning: "share of merchandise exports from fossil fuels — high values signal energy resource dependence and exposure to transition risk", bucket: 2 },
+  fdi_inflows: { label: "Net FDI inflows", meaning: "foreign direct investment as % of GDP — reflects investor confidence, openness, and often resource-extraction interest", bucket: 2 },
+  self_employment: { label: "Self-employment rate", meaning: "share of workers who are self-employed — high rates often reflect informality and weak social protection systems", bucket: 2 },
+  food_imports_share: { label: "Food imports", meaning: "food as % of merchandise imports — high values indicate dependence on global supply chains for basic nutrition", bucket: 2 },
 };
 
 const BUCKETS = [
@@ -168,6 +174,7 @@ function fmt(m: CountryMetric): string {
     }).format(m.value) + " (PPP)";
   if (m.unit === "score") return m.value.toFixed(2);
   if (m.unit === "MJ/PPP$") return `${m.value.toFixed(1)} MJ/PPP$`;
+  if (m.unit === "kg/PPP$") return `${m.value.toFixed(3)} kg/PPP$`;
   if (m.unit === "days") return `${m.value.toFixed(0)} days`;
   if (m.unit === "t" || m.unit === "t/year") {
     return new Intl.NumberFormat(undefined, {

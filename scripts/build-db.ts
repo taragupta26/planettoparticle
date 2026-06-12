@@ -326,6 +326,23 @@ const WB_INDICATORS = [
   // Verified 2025-06-12: ~145-150 countries.
   { metric: "ores_metals_exports", code: "TX.VAL.MMTL.ZS.UN", unit: "%" },
   { metric: "fuel_exports", code: "TX.VAL.FUEL.ZS.UN", unit: "%" },
+  // ---- Labor structure (World Bank / ILO via WDI) ----
+  // Verified 2025-06-12: ~130 countries.
+  { metric: "agricultural_employment", code: "SL.AGR.EMPL.ZS", unit: "%" },
+  { metric: "self_employment", code: "SL.EMP.SELF.ZS", unit: "%" },
+  // ---- Health delivery (World Bank / UNICEF via WDI) ----
+  // DTP3 immunization coverage: % of 1-year-olds. Verified 2025-06-12: ~185c.
+  { metric: "immunization_dtp", code: "SH.IMM.IDPT", unit: "%" },
+  // ---- Carbon intensity of GDP (WB / IEA via WDI) ----
+  // kg CO2 per constant $PPP GDP. Higher = less carbon-efficient. ~180c.
+  { metric: "co2_intensity_gdp", code: "EN.ATM.CO2E.PP.GD", unit: "kg/PPP$" },
+  // ---- Investment climate (World Bank) ----
+  // Net FDI inflows as % of GDP. Verified 2025-06-12: ~175 countries.
+  { metric: "fdi_inflows", code: "BX.KLT.DINV.WD.GD.ZS", unit: "%" },
+  // ---- Import composition (World Bank / UN COMTRADE via WDI) ----
+  // Food as % of merchandise imports — food system exposure to global markets.
+  // Verified 2025-06-12: ~145 countries.
+  { metric: "food_imports_share", code: "TM.VAL.FOOD.ZS.UN", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -1463,6 +1480,61 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     false,
     WB.name,
     "https://data.worldbank.org/indicator/TX.VAL.FUEL.ZS.UN",
+  ],
+  // ---- Labor structure, health delivery, carbon, investment, trade (World Bank) ----
+  [
+    "agricultural_employment",
+    "Employment in agriculture (% of total employment)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SL.AGR.EMPL.ZS",
+  ],
+  [
+    "self_employment",
+    "Self-employment (% of total employment)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SL.EMP.SELF.ZS",
+  ],
+  [
+    "immunization_dtp",
+    "DTP immunization coverage (% of 1-year-olds)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.IMM.IDPT",
+  ],
+  [
+    "co2_intensity_gdp",
+    "CO₂ intensity of GDP (kg CO₂ per PPP$ of output)",
+    "kg/PPP$",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EN.ATM.CO2E.PP.GD",
+  ],
+  [
+    "fdi_inflows",
+    "Net FDI inflows (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/BX.KLT.DINV.WD.GD.ZS",
+  ],
+  [
+    "food_imports_share",
+    "Food imports (% of merchandise imports)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/TM.VAL.FOOD.ZS.UN",
   ],
 ];
 
