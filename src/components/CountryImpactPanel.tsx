@@ -48,13 +48,16 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   women_in_parliament: { label: "Women in parliament", meaning: "share of national parliament seats held by women", bucket: 0 },
   neonatal_mortality: { label: "Neonatal mortality", meaning: "deaths in first 28 days of life, per 1,000 live births", bucket: 0 },
   hiv_incidence: { label: "HIV incidence", meaning: "new HIV infections per 1,000 uninfected people per year", bucket: 0 },
+  diabetes_prevalence: { label: "Diabetes prevalence", meaning: "share of adults aged 20-79 living with diabetes", bucket: 0 },
   // 1 — the environment people live in
   water_stress: { label: "Water stress", meaning: "freshwater withdrawn vs. what's available", bucket: 1 },
   agri_land: { label: "Agricultural land", meaning: "share of land used for farming", bucket: 1 },
   arable_land: { label: "Arable land", meaning: "share of land suitable for crops", bucket: 1 },
   energy_per_capita: { label: "Energy use per person", meaning: "kilograms of oil equivalent per person", bucket: 1 },
   pm25_exposure: { label: "Air pollution (PM2.5)", meaning: "annual mean fine-particle exposure (WHO safe limit: 5 µg/m³)", bucket: 1 },
+  air_pollution_deaths: { label: "Deaths from air pollution", meaning: "age-standardized death rate from outdoor and household air pollution (per 100,000)", bucket: 1 },
   n2o_total: { label: "Nitrous oxide (N₂O)", meaning: "total national N₂O emissions (agriculture + industry)", bucket: 1 },
+  electricity_per_capita: { label: "Electricity use per person", meaning: "kilowatt-hours of electricity consumed per person per year", bucket: 1 },
   co2_per_capita: { label: "CO₂ per person", meaning: "emissions each resident is tied to", bucket: 1 },
   plastic_waste_pc: { label: "Plastic waste per person", meaning: "plastic thrown away per person daily", bucket: 1 },
   plastic_to_ocean_share: { label: "Plastic reaching the ocean", meaning: "this country's share of ocean plastic — it re-enters food via fish", bucket: 1 },
@@ -73,6 +76,9 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   trade_openness: { label: "Trade openness (% GDP)", meaning: "exports + imports as a share of GDP — how exposed the economy is to global trade", bucket: 2 },
   remittances: { label: "Remittances received (% GDP)", meaning: "money sent home by citizens working abroad, as a share of GDP", bucket: 2 },
   education_expenditure: { label: "Education expenditure (% GDP)", meaning: "government spending on education as a share of GDP", bucket: 2 },
+  manuf_value_added: { label: "Manufacturing value added", meaning: "manufacturing sector's contribution to GDP — factory economy vs. resource exporter", bucket: 2 },
+  agri_value_added: { label: "Agriculture value added", meaning: "farming sector's contribution to GDP — how much the economy depends on land", bucket: 2 },
+  inflation: { label: "Inflation rate", meaning: "annual price increase — high inflation erodes wages and food purchasing power", bucket: 2 },
   resource_rents_total: { label: "Resource rents", meaning: "value of all natural resources as % of GDP", bucket: 2 },
   mineral_rents: { label: "Mineral rents", meaning: "mining value as % of GDP", bucket: 2 },
   oil_rents: { label: "Oil rents", meaning: "oil value as % of GDP", bucket: 2 },
@@ -102,6 +108,7 @@ function fmt(m: CountryMetric): string {
   if (m.unit === "kg oil eq") return `${Math.round(m.value).toLocaleString()} kg`;
   if (m.unit === "index") return m.value < 2 ? m.value.toFixed(3) : m.value.toFixed(1);
   if (m.unit === "kcal/day") return `${Math.round(m.value).toLocaleString()} kcal/day`;
+  if (m.unit === "kWh") return `${Math.round(m.value).toLocaleString()} kWh`;
   if (m.unit === "t" || m.unit === "t/year") {
     return new Intl.NumberFormat(undefined, {
       notation: "compact",

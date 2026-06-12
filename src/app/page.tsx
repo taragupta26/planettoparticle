@@ -146,6 +146,12 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   trade_openness: "Most trade-dependent economies",
   remittances: "Most remittance-dependent",
   education_expenditure: "Lowest education spending",
+  manuf_value_added: "Most manufacturing-dependent",
+  agri_value_added: "Most agriculture-dependent",
+  electricity_per_capita: "Lowest electricity consumption per person",
+  diabetes_prevalence: "Highest diabetes prevalence",
+  inflation: "Highest inflation",
+  air_pollution_deaths: "Highest air-pollution mortality",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -423,6 +429,30 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which governments spend the least on education as a share of GDP?",
     "How does education investment compare to resource wealth and development outcomes?",
   ],
+  manuf_value_added: [
+    "Which countries have the smallest manufacturing sector?",
+    "How does manufacturing capacity connect to supply chain risk and resource extraction?",
+  ],
+  agri_value_added: [
+    "Where does agriculture make up the biggest share of the economy?",
+    "How does agrarian dependency relate to hunger, climate risk, and land use?",
+  ],
+  electricity_per_capita: [
+    "Where is per-capita electricity consumption lowest?",
+    "How does electricity access map onto energy poverty and industrial development?",
+  ],
+  diabetes_prevalence: [
+    "Where is diabetes most widespread, and what's driving the nutrition transition?",
+    "How does diabetes connect to trade, food systems, and ultra-processed food imports?",
+  ],
+  inflation: [
+    "Where is inflation highest, and what does it mean for food and energy prices?",
+    "How does inflation map onto commodity dependence and economic vulnerability?",
+  ],
+  air_pollution_deaths: [
+    "Where does air pollution cause the most deaths per person?",
+    "How do PM2.5 exposure levels translate into mortality across countries?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -479,7 +509,7 @@ const LAYER_CATEGORIES: {
     color: "#dc2626",
     ids: [
       "coal_production","oil_production","gas_production","renewable_energy",
-      "energy_per_capita","coal_rents","oil_rents","gas_rents",
+      "energy_per_capita","electricity_per_capita","coal_rents","oil_rents","gas_rents",
       "resource_rents_total","mineral_rents",
     ],
   },
@@ -491,7 +521,7 @@ const LAYER_CATEGORIES: {
       "poverty_headcount","undernourishment","electricity_access","clean_cooking",
       "basic_sanitation","gini","life_expectancy","child_mortality",
       "tuberculosis","physicians","neonatal_mortality","hiv_incidence",
-      "exports_value","imports_value",
+      "diabetes_prevalence","exports_value","imports_value",
     ],
   },
   {
@@ -500,7 +530,7 @@ const LAYER_CATEGORIES: {
     color: "#374151",
     ids: [
       "co2_per_capita","co2_total","methane_total","n2o_total",
-      "pm25_exposure","plastic_waste_pc",
+      "pm25_exposure","air_pollution_deaths","plastic_waste_pc",
       "plastic_to_ocean_share","plastic_waste_total","plastic_to_ocean_total",
     ],
   },
@@ -519,6 +549,7 @@ const LAYER_CATEGORIES: {
       "access_to_finance","maternal_mortality","obesity_adults","energy_per_capita",
       "hdi","urban_population","health_expenditure","female_labor","secondary_enrollment",
       "women_in_parliament","trade_openness","remittances","education_expenditure",
+      "manuf_value_added","agri_value_added","inflation",
     ],
   },
 ];

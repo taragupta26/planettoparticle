@@ -94,6 +94,7 @@ const OWID = {
 };
 // Accurate upstream attributions for the different OWID/grapher series.
 const OWID_FAO = "Our World in Data — FAOSTAT";
+const OWID_IHME = "Our World in Data — IHME, Global Burden of Disease";
 const OWID_USGS = "Our World in Data — USGS (Mineral Commodity Summaries)";
 const OWID_EI = "Our World in Data — Energy Institute Statistical Review";
 const OWID_UNCCD = "Our World in Data — UNCCD (SDG 15.3.1)";
@@ -137,6 +138,9 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Dietary energy supply (FAO food balance sheets via OWID) ---
   // Verified 2025-06-12: ~174 countries, kcal/person/day.
   ["caloric_supply", "daily-caloric-supply", "Daily caloric supply per person", "kcal/day", OWID_FAO],
+  // --- Air pollution mortality (IHME GBD via OWID) ---
+  // Verified 2025-06-12: ~185 countries, deaths per 100,000.
+  ["air_pollution_deaths", "death-rates-from-air-pollution", "Death rates from air pollution", "per 100k", OWID_IHME],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -223,6 +227,13 @@ const WB_INDICATORS = [
   { metric: "trade_openness", code: "NE.TRD.GNFS.ZS", unit: "%" },
   { metric: "remittances", code: "BX.TRF.PWKR.DT.GD.ZS", unit: "%" },
   { metric: "education_expenditure", code: "SE.XPD.TOTL.GD.ZS", unit: "%" },
+  // ---- Economic structure & food (World Bank) ----
+  // Verified 2025-06-12.
+  { metric: "manuf_value_added", code: "NV.IND.MANF.ZS", unit: "%" },
+  { metric: "agri_value_added", code: "NV.AGR.TOTL.ZS", unit: "%" },
+  { metric: "electricity_per_capita", code: "EG.USE.ELEC.KH.PC", unit: "kWh" },
+  { metric: "diabetes_prevalence", code: "SH.STA.DIAB.ZS", unit: "%" },
+  { metric: "inflation", code: "FP.CPI.TOTL.ZG", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -822,6 +833,62 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     false,
     WB.name,
     "https://data.worldbank.org/indicator/SE.XPD.TOTL.GD.ZS",
+  ],
+  // ---- Economic structure & food (World Bank) ----
+  [
+    "manuf_value_added",
+    "Manufacturing value added (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/NV.IND.MANF.ZS",
+  ],
+  [
+    "agri_value_added",
+    "Agriculture value added (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/NV.AGR.TOTL.ZS",
+  ],
+  [
+    "electricity_per_capita",
+    "Electric power consumption per capita (kWh)",
+    "kWh",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC",
+  ],
+  [
+    "diabetes_prevalence",
+    "Diabetes prevalence (% of population ages 20-79)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.STA.DIAB.ZS",
+  ],
+  [
+    "inflation",
+    "Inflation rate (annual %)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG",
+  ],
+  // ---- Air pollution mortality (IHME GBD via OWID) ----
+  [
+    "air_pollution_deaths",
+    "Death rates from air pollution (per 100,000)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/death-rates-from-air-pollution",
   ],
   // ---- Biodiversity (World Bank → IUCN / UNEP-WCMC) ----
   [
