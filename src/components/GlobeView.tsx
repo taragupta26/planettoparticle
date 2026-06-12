@@ -816,9 +816,11 @@ export default function GlobeMap({
           imageUrl: typeof img === "string" ? img : undefined,
         }];
       }));
-    Promise.all([globalLoad, tflLoad])
-      .then(([global, tfl]) => { camerasRef.current = [...global, ...tfl]; })
-      .catch(() => {});
+    // Use individual fallbacks so a TfL outage never blocks the curated cameras
+    Promise.all([
+      globalLoad.catch((): OverlayPoint[] => []),
+      tflLoad.catch((): OverlayPoint[] => []),
+    ]).then(([global, tfl]) => { camerasRef.current = [...global, ...tfl]; });
   }, [showCams]);
 
   // --- Live field boundaries: Fields of The World (FTW) — global, Sentinel-2

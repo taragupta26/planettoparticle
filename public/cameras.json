@@ -13,8 +13,8 @@
   {
     "id": "nasa-iss-live",
     "label": "NASA ISS — Live Earth View",
-    "lat": 0,
-    "lng": 0,
+    "lat": 51.5,
+    "lng": -0.1,
     "category": "space",
     "embedUrl": "https://www.youtube.com/embed/21X5lGlDOfg?autoplay=1&mute=1",
     "source": "NASA",
@@ -49,7 +49,6 @@
     "lat": 38.9304,
     "lng": -77.0508,
     "category": "wildlife",
-    "embedUrl": null,
     "source": "Smithsonian National Zoo",
     "sourceUrl": "https://nationalzoo.si.edu/webcams",
     "description": "Live cameras at the Smithsonian National Zoo including giant pandas, elephants, and lions."
@@ -60,7 +59,6 @@
     "lat": 40.758,
     "lng": -73.9855,
     "category": "city",
-    "embedUrl": null,
     "source": "EarthCam",
     "sourceUrl": "https://www.earthcam.com/usa/newyork/timessquare/",
     "description": "Live panoramic view of Times Square, the iconic crossroads of the world in Midtown Manhattan."
@@ -71,7 +69,6 @@
     "lat": 43.0962,
     "lng": -79.0377,
     "category": "nature",
-    "embedUrl": "https://www.skylinewebcams.com/en/webcam/canada/ontario/niagara-falls/niagara-falls.html",
     "source": "Skyline Webcams",
     "sourceUrl": "https://www.skylinewebcams.com/en/webcam/canada/ontario/niagara-falls/niagara-falls.html",
     "description": "Sweeping live view of the Horseshoe Falls and Niagara Gorge on the Canada–USA border."
@@ -82,7 +79,6 @@
     "lat": 48.8584,
     "lng": 2.2945,
     "category": "city",
-    "embedUrl": "https://www.skylinewebcams.com/en/webcam/france/ile-de-france/paris/eiffel-tower.html",
     "source": "Skyline Webcams",
     "sourceUrl": "https://www.skylinewebcams.com/en/webcam/france/ile-de-france/paris/eiffel-tower.html",
     "description": "Live wide-angle view of the Eiffel Tower and Champ de Mars from central Paris."
@@ -93,7 +89,6 @@
     "lat": 21.2785,
     "lng": -157.8288,
     "category": "beach",
-    "embedUrl": null,
     "source": "LiveBeaches.com",
     "sourceUrl": "https://www.livebeaches.com/countries/",
     "description": "Live beach cam overlooking the famous Waikiki shoreline in Honolulu, Hawaii."
@@ -104,7 +99,6 @@
     "lat": 37.9715,
     "lng": 23.7267,
     "category": "city",
-    "embedUrl": "https://www.skylinewebcams.com/en/webcam/ellada/attiki/athina/acropolis.html",
     "source": "Skyline Webcams",
     "sourceUrl": "https://www.skylinewebcams.com/en/webcam/ellada/attiki/athina/acropolis.html",
     "description": "Live HD view of the Acropolis of Athens, including the Parthenon, overlooking the city."
@@ -115,7 +109,6 @@
     "lat": -33.8914,
     "lng": 151.2768,
     "category": "beach",
-    "embedUrl": null,
     "source": "LiveBeaches.com",
     "sourceUrl": "https://www.livebeaches.com",
     "description": "Live surf cam at Sydney's iconic Bondi Beach, one of Australia's most famous coastal spots."
@@ -126,7 +119,6 @@
     "lat": 41.8902,
     "lng": 12.4922,
     "category": "city",
-    "embedUrl": "https://www.skylinewebcams.com/en/webcam/italia/lazio/roma/colosseo.html",
     "source": "Skyline Webcams",
     "sourceUrl": "https://www.skylinewebcams.com/en/webcam/italia/lazio/roma/colosseo.html",
     "description": "Live view of the Roman Colosseum, the ancient amphitheater in the heart of Rome."
@@ -137,7 +129,6 @@
     "lat": 35.6595,
     "lng": 139.7004,
     "category": "city",
-    "embedUrl": null,
     "source": "EarthCam",
     "sourceUrl": "https://www.earthcam.com/japan/tokyo/shibuya/",
     "description": "Live view of Shibuya Scramble Crossing, the world's busiest pedestrian intersection in Tokyo."
@@ -148,7 +139,6 @@
     "lat": 51.5007,
     "lng": -0.1246,
     "category": "city",
-    "embedUrl": null,
     "source": "Skyline Webcams",
     "sourceUrl": "https://www.skylinewebcams.com",
     "description": "Live panoramic view of the Elizabeth Tower (Big Ben) and the Palace of Westminster."
@@ -159,7 +149,6 @@
     "lat": -33.8568,
     "lng": 151.2153,
     "category": "city",
-    "embedUrl": null,
     "source": "EarthCam",
     "sourceUrl": "https://www.earthcam.com/australia/sydney/",
     "description": "Live camera overlooking the Sydney Opera House and Harbour Bridge on Sydney Harbour."
@@ -170,7 +159,6 @@
     "lat": 44.4605,
     "lng": -110.8281,
     "category": "geology",
-    "embedUrl": null,
     "source": "NPS Yellowstone",
     "sourceUrl": "https://www.nps.gov/yell/learn/photosmultimedia/webcams.htm",
     "description": "Live National Park Service webcam at Old Faithful Geyser, which erupts roughly every 90 minutes."
@@ -181,7 +169,6 @@
     "lat": 36.0544,
     "lng": -112.1401,
     "category": "geology",
-    "embedUrl": null,
     "source": "NPS Grand Canyon",
     "sourceUrl": "https://www.nps.gov/grca/learn/photosmultimedia/webcams.htm",
     "description": "Live NPS webcam overlooking the vast Colorado River canyon from the South Rim visitor area."
@@ -192,7 +179,6 @@
     "lat": 43.3009,
     "lng": -91.804,
     "category": "wildlife",
-    "embedUrl": null,
     "source": "Raptor Resource Project",
     "sourceUrl": "https://www.raptorresource.org",
     "description": "Nest cam at an active bald eagle nest in Decorah, Iowa, operated by the Raptor Resource Project."
@@ -203,7 +189,6 @@
     "lat": 45.4341,
     "lng": 12.3388,
     "category": "city",
-    "embedUrl": "https://www.skylinewebcams.com/en/webcam/italia/veneto/venezia/canal-grande.html",
     "source": "Skyline Webcams",
     "sourceUrl": "https://www.skylinewebcams.com/en/webcam/italia/veneto/venezia/canal-grande.html",
     "description": "Live HD view of Venice's Grand Canal with gondolas and historic palaces."
@@ -214,7 +199,6 @@
     "lat": 25.1972,
     "lng": 55.2744,
     "category": "city",
-    "embedUrl": null,
     "source": "Skyline Webcams",
     "sourceUrl": "https://www.skylinewebcams.com",
     "description": "Live view of Dubai's skyline including the Burj Khalifa, the world's tallest building."
@@ -225,7 +209,6 @@
     "lat": 25.7823,
     "lng": -80.1301,
     "category": "beach",
-    "embedUrl": null,
     "source": "LiveBeaches.com",
     "sourceUrl": "https://www.livebeaches.com/countries/",
     "description": "Live beach camera on Miami's famous South Beach strip in Florida."
@@ -236,7 +219,6 @@
     "lat": -22.9711,
     "lng": -43.1824,
     "category": "beach",
-    "embedUrl": null,
     "source": "LiveBeaches.com",
     "sourceUrl": "https://www.livebeaches.com/countries/",
     "description": "Live camera along Rio de Janeiro's iconic Copacabana Beach with views toward Sugarloaf Mountain."
@@ -247,7 +229,6 @@
     "lat": 19.8207,
     "lng": -155.4681,
     "category": "space",
-    "embedUrl": null,
     "source": "Univ. of Hawaii Institute for Astronomy",
     "sourceUrl": "https://www.ifa.hawaii.edu/wco/",
     "description": "Live summit webcam at Mauna Kea, one of the world's premier astronomical observing sites."
@@ -258,7 +239,6 @@
     "lat": 38.8977,
     "lng": -77.0366,
     "category": "city",
-    "embedUrl": null,
     "source": "whitehouse.gov1.info",
     "sourceUrl": "https://whitehouse.gov1.info/webcam/white-house-lawn.html",
     "description": "Live webcam overlooking the North Lawn of the White House in Washington DC."
@@ -269,7 +249,6 @@
     "lat": 38.9072,
     "lng": -77.0369,
     "category": "weather",
-    "embedUrl": null,
     "source": "Fox5 DC",
     "sourceUrl": "https://www.fox5dc.com/live-weather-cameras-across-dc-maryland-and-virginia",
     "description": "Live weather cameras across the DC-Maryland-Virginia metro area from Fox5DC."
@@ -280,7 +259,6 @@
     "lat": 44.428,
     "lng": -110.5885,
     "category": "wildlife",
-    "embedUrl": null,
     "source": "explore.org",
     "sourceUrl": "https://explore.org/livecams",
     "description": "Live wildlife cam at Yellowstone's Lamar Valley, prime habitat for wolves and bison."
@@ -291,7 +269,6 @@
     "lat": -3.119,
     "lng": -60.0217,
     "category": "nature",
-    "embedUrl": null,
     "source": "explore.org",
     "sourceUrl": "https://explore.org/livecams",
     "description": "Live camera in the Amazon basin showing tropical forest canopy near Manaus, Brazil."
@@ -302,7 +279,6 @@
     "lat": -27.0333,
     "lng": 32.4167,
     "category": "wildlife",
-    "embedUrl": null,
     "source": "Africam",
     "sourceUrl": "https://www.africam.com",
     "description": "Live waterhole and bush cam at Tembe Elephant Park near the Mozambique border."
@@ -313,7 +289,6 @@
     "lat": -33.9628,
     "lng": 18.4098,
     "category": "city",
-    "embedUrl": null,
     "source": "Webcam Taxi",
     "sourceUrl": "https://www.webcamtaxi.com/en/south-africa/western-cape/cape-town.html",
     "description": "Live view of Table Mountain and Cape Town's cityscape from the Atlantic seaboard."
@@ -324,7 +299,6 @@
     "lat": -1.3742,
     "lng": 36.7309,
     "category": "wildlife",
-    "embedUrl": null,
     "source": "Africam",
     "sourceUrl": "https://www.africam.com",
     "description": "Live camera at the African Fund for Endangered Wildlife Giraffe Centre in Nairobi, Kenya."
@@ -335,7 +309,6 @@
     "lat": -24.0,
     "lng": 31.5,
     "category": "wildlife",
-    "embedUrl": null,
     "source": "Africam",
     "sourceUrl": "https://www.africam.com",
     "description": "Live waterhole cam at Kruger National Park, South Africa's premier Big Five wildlife reserve."
@@ -346,7 +319,6 @@
     "lat": -13.1631,
     "lng": -72.545,
     "category": "city",
-    "embedUrl": null,
     "source": "Webcam Hopper",
     "sourceUrl": "https://www.webcamhopper.com/tag/peru/",
     "description": "Live webcam overlooking the Inca citadel of Machu Picchu in the Peruvian Andes."
@@ -357,7 +329,6 @@
     "lat": -34.6037,
     "lng": -58.3816,
     "category": "city",
-    "embedUrl": null,
     "source": "Webcam Taxi",
     "sourceUrl": "https://www.webcamtaxi.com/en/argentina/buenos-aires/obelisk.html",
     "description": "Live webcam of the Obelisco in Buenos Aires along the Avenida 9 de Julio."
@@ -368,7 +339,6 @@
     "lat": 31.2397,
     "lng": 121.4905,
     "category": "city",
-    "embedUrl": null,
     "source": "Webcam Hopper",
     "sourceUrl": "https://www.webcamhopper.com/tag/china/",
     "description": "Live panoramic view of the historic Bund waterfront and Pudong skyline in Shanghai."
@@ -379,7 +349,6 @@
     "lat": 1.2834,
     "lng": 103.8607,
     "category": "city",
-    "embedUrl": null,
     "source": "Webcam Taxi",
     "sourceUrl": "https://www.webcamtaxi.com/en/singapore/marina-bay.html",
     "description": "Live panoramic view of Singapore's Marina Bay including the iconic Marina Bay Sands resort."
@@ -390,7 +359,6 @@
     "lat": 35.3606,
     "lng": 138.7274,
     "category": "geology",
-    "embedUrl": null,
     "source": "World Cams",
     "sourceUrl": "https://www.worldcams.tv/japan",
     "description": "Live webcam with views of Mount Fuji, Japan's iconic stratovolcano and highest peak."
@@ -401,7 +369,6 @@
     "lat": 78.2232,
     "lng": 15.6267,
     "category": "nature",
-    "embedUrl": null,
     "source": "Webcam Taxi",
     "sourceUrl": "https://www.webcamtaxi.com/en/norway/svalbard/longyearbyen.html",
     "description": "Live camera at Longyearbyen, Svalbard — the world's northernmost settlement in the High Arctic."
@@ -412,7 +379,6 @@
     "lat": 64.3126,
     "lng": -20.3021,
     "category": "geology",
-    "embedUrl": null,
     "source": "Webcam Hopper",
     "sourceUrl": "https://www.webcamhopper.com/tag/iceland/",
     "description": "Live geothermal webcam at Geysir in the Golden Circle, where Strokkur erupts every 5–10 minutes."
@@ -423,7 +389,6 @@
     "lat": 41.4036,
     "lng": 2.1744,
     "category": "city",
-    "embedUrl": null,
     "source": "Skyline Webcams",
     "sourceUrl": "https://www.skylinewebcams.com",
     "description": "Live webcam of Gaudí's unfinished Sagrada Família basilica in Barcelona, Spain."
@@ -434,7 +399,6 @@
     "lat": 52.3727,
     "lng": 4.895,
     "category": "city",
-    "embedUrl": null,
     "source": "Webcam Taxi",
     "sourceUrl": "https://www.webcamtaxi.com/en/netherlands/amsterdam.html",
     "description": "Live view of Amsterdam's famous Keizersgracht canal with traditional Dutch canal houses."
@@ -445,7 +409,6 @@
     "lat": 17.9,
     "lng": -66.0,
     "category": "ocean",
-    "embedUrl": null,
     "source": "SECORE International",
     "sourceUrl": "https://www.secore.org",
     "description": "Underwater camera monitoring coral reef restoration sites in the Caribbean Sea."
@@ -456,7 +419,6 @@
     "lat": 22.2855,
     "lng": 114.1577,
     "category": "city",
-    "embedUrl": null,
     "source": "Webcam Taxi",
     "sourceUrl": "https://www.webcamtaxi.com/en/china/hong-kong/victoria-harbour.html",
     "description": "Live panoramic view of Victoria Harbour and Hong Kong's skyline from Kowloon."
@@ -467,7 +429,6 @@
     "lat": -3.0674,
     "lng": 37.3556,
     "category": "nature",
-    "embedUrl": null,
     "source": "Webcam Hopper",
     "sourceUrl": "https://www.webcamhopper.com/tag/africa/",
     "description": "Live camera at the entrance to Kilimanjaro National Park, Tanzania, with views toward the summit."
@@ -478,7 +439,6 @@
     "lat": 33.9887,
     "lng": -118.4723,
     "category": "beach",
-    "embedUrl": null,
     "source": "LiveBeaches.com",
     "sourceUrl": "https://www.livebeaches.com/countries/",
     "description": "Live surf and boardwalk camera at Venice Beach in Los Angeles, California."
@@ -489,7 +449,6 @@
     "lat": 4.1755,
     "lng": 73.5093,
     "category": "ocean",
-    "embedUrl": null,
     "source": "World Cams",
     "sourceUrl": "https://www.worldcams.tv",
     "description": "Live beach and lagoon camera in the Maldives, showing one of the world's lowest-lying island nations."
@@ -500,7 +459,6 @@
     "lat": 41.0522,
     "lng": 29.0128,
     "category": "river",
-    "embedUrl": null,
     "source": "Webcam Taxi",
     "sourceUrl": "https://www.webcamtaxi.com/en/turkey/istanbul/bosphorus-bridge.html",
     "description": "Live view of the Bosphorus strait, the busy waterway dividing Europe and Asia in Istanbul."
@@ -511,7 +469,6 @@
     "lat": 29.9511,
     "lng": -90.0715,
     "category": "river",
-    "embedUrl": null,
     "source": "Webcam Hopper",
     "sourceUrl": "https://www.webcamhopper.com/tag/louisiana/",
     "description": "Live camera overlooking the Mississippi River at New Orleans, one of North America's great rivers."
@@ -522,7 +479,6 @@
     "lat": -77.8419,
     "lng": 166.6863,
     "category": "nature",
-    "embedUrl": null,
     "source": "US Antarctic Program",
     "sourceUrl": "https://www.usap.gov/videoclipsandmaps/",
     "description": "Live webcam at the United States' McMurdo Station on Ross Island, Antarctica."
@@ -533,7 +489,6 @@
     "lat": 69.6489,
     "lng": 18.9551,
     "category": "nature",
-    "embedUrl": null,
     "source": "Webcam Taxi",
     "sourceUrl": "https://www.webcamtaxi.com/en/norway/troms/tromso.html",
     "description": "Live all-sky aurora camera in Tromsø, Norway, one of the best spots to see the Northern Lights."
@@ -544,7 +499,6 @@
     "lat": -3.1019,
     "lng": -60.025,
     "category": "river",
-    "embedUrl": null,
     "source": "World Cams",
     "sourceUrl": "https://www.worldcams.tv/brazil",
     "description": "Live camera at the confluence of the Amazon and Rio Negro rivers near Manaus, Brazil."
@@ -555,7 +509,6 @@
     "lat": -0.3284,
     "lng": -90.3554,
     "category": "ocean",
-    "embedUrl": null,
     "source": "explore.org",
     "sourceUrl": "https://explore.org/livecams",
     "description": "Live underwater camera at Darwin Bay on Genovesa Island in the Galápagos archipelago."
@@ -566,7 +519,6 @@
     "lat": 37.7484,
     "lng": 14.9934,
     "category": "volcano",
-    "embedUrl": null,
     "source": "INGV — Istituto Nazionale di Geofisica e Vulcanologia",
     "sourceUrl": "https://www.ct.ingv.it/en/webcams.html",
     "description": "Live volcanic webcam on Mount Etna, Europe's most active volcano on Sicily's eastern flank."
@@ -577,7 +529,6 @@
     "lat": 38.7937,
     "lng": 15.2139,
     "category": "volcano",
-    "embedUrl": null,
     "source": "INGV",
     "sourceUrl": "https://www.ct.ingv.it/en/webcams.html",
     "description": "Live summit webcam monitoring Stromboli, the 'Lighthouse of the Mediterranean,' which erupts almost continuously."
