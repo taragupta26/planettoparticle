@@ -65,6 +65,9 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   cancer_deaths: { label: "Cancer death rates", meaning: "age-standardized cancer death rate per 100,000 — shaped by tobacco, diet, pollution, and healthcare access", bucket: 0 },
   immunization_dtp: { label: "DTP immunization coverage", meaning: "% of 1-year-olds receiving diphtheria-tetanus-pertussis vaccine — a proxy for healthcare system reach", bucket: 0 },
   agricultural_employment: { label: "Agricultural employment", meaning: "share of all workers in farming — high values often correlate with rural poverty and subsistence agriculture", bucket: 0 },
+  malaria_deaths: { label: "Malaria death rates", meaning: "deaths from malaria per 100,000 — concentrated in tropical regions with weak health infrastructure and high vector pressure", bucket: 0 },
+  diarrhea_deaths: { label: "Diarrheal disease deaths", meaning: "deaths from diarrheal diseases per 100,000 — a direct indicator of water safety, sanitation coverage, and child health", bucket: 0 },
+  rural_electricity: { label: "Rural electrification", meaning: "% of rural population with access to electricity — reveals the urban–rural infrastructure divide", bucket: 0 },
   employment_ratio: { label: "Employment-to-population ratio", meaning: "share of working-age adults (15+) who are employed — higher = more people contributing to the economy", bucket: 0 },
   broadband: { label: "Fixed broadband access", meaning: "fixed broadband subscriptions per 100 people — indicator of digital infrastructure depth beyond mobile-only connectivity", bucket: 0 },
   fertility_rate: { label: "Fertility rate", meaning: "average number of births per woman — reflects education, health access, and women's autonomy", bucket: 0 },
@@ -139,6 +142,9 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   fdi_inflows: { label: "Net FDI inflows", meaning: "foreign direct investment as % of GDP — reflects investor confidence, openness, and often resource-extraction interest", bucket: 2 },
   self_employment: { label: "Self-employment rate", meaning: "share of workers who are self-employed — high rates often reflect informality and weak social protection systems", bucket: 2 },
   food_imports_share: { label: "Food imports", meaning: "food as % of merchandise imports — high values indicate dependence on global supply chains for basic nutrition", bucket: 2 },
+  tertiary_enrollment: { label: "Tertiary enrollment", meaning: "gross enrollment in higher education — signal of human capital investment and labor market sophistication", bucket: 2 },
+  domestic_credit: { label: "Private sector credit", meaning: "domestic credit to private sector as % of GDP — deeper = more financialised economy and investment capacity", bucket: 2 },
+  secure_servers: { label: "Secure internet servers", meaning: "secure servers per million people — indicates digital infrastructure maturity and readiness for e-commerce and digital governance", bucket: 2 },
 };
 
 const BUCKETS = [
@@ -175,6 +181,7 @@ function fmt(m: CountryMetric): string {
   if (m.unit === "score") return m.value.toFixed(2);
   if (m.unit === "MJ/PPP$") return `${m.value.toFixed(1)} MJ/PPP$`;
   if (m.unit === "kg/PPP$") return `${m.value.toFixed(3)} kg/PPP$`;
+  if (m.unit === "per million") return `${Math.round(m.value).toLocaleString()} /million`;
   if (m.unit === "days") return `${m.value.toFixed(0)} days`;
   if (m.unit === "t" || m.unit === "t/year") {
     return new Intl.NumberFormat(undefined, {

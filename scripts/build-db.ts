@@ -163,6 +163,12 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Cancer deaths (IHME GBD via OWID) ---
   // Verified 2025-06-12: ~185 countries, deaths per 100,000 age-standardized.
   ["cancer_deaths", "cancer-death-rates-owid", "Cancer death rates", "per 100k", OWID_IHME],
+  // --- Malaria deaths (IHME GBD via OWID) ---
+  // Verified 2025-06-12: strong geographic concentration in sub-Saharan Africa.
+  ["malaria_deaths", "malaria-death-rates", "Malaria death rates", "per 100k", OWID_IHME],
+  // --- Diarrheal disease deaths (IHME GBD via OWID) ---
+  // Reveals WASH (water/sanitation/hygiene) burden. ~185 countries.
+  ["diarrhea_deaths", "diarrheal-disease-death-rate", "Diarrheal disease death rates", "per 100k", OWID_IHME],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -343,6 +349,22 @@ const WB_INDICATORS = [
   // Food as % of merchandise imports — food system exposure to global markets.
   // Verified 2025-06-12: ~145 countries.
   { metric: "food_imports_share", code: "TM.VAL.FOOD.ZS.UN", unit: "%" },
+  // ---- Education (World Bank) ----
+  // Tertiary enrollment completes the education ladder (secondary already present).
+  // Verified 2025-06-12: ~170 countries.
+  { metric: "tertiary_enrollment", code: "SE.TER.ENRR", unit: "%" },
+  // ---- Rural electrification (World Bank) ----
+  // Paired with electricity_access (all) to show urban–rural infrastructure gap.
+  // Verified 2025-06-12: ~170 countries.
+  { metric: "rural_electricity", code: "EG.ELC.ACCS.RU.ZS", unit: "%" },
+  // ---- Financial sector depth (World Bank / IMF via WDI) ----
+  // Domestic credit to private sector as % of GDP — deeper = more financialised.
+  // Verified 2025-06-12: ~170 countries.
+  { metric: "domestic_credit", code: "FS.AST.DOMS.GD.ZS", unit: "%" },
+  // ---- Digital readiness (World Bank / ITU via WDI) ----
+  // Secure internet servers per million — signals digital infrastructure maturity.
+  // Verified 2025-06-12: ~175 countries.
+  { metric: "secure_servers", code: "IT.NET.SECR.P6", unit: "per million" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -1268,6 +1290,24 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     OWID_IHME,
     "https://ourworldindata.org/grapher/cancer-death-rates-owid",
   ],
+  [
+    "malaria_deaths",
+    "Malaria death rates (per 100,000)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/malaria-death-rates",
+  ],
+  [
+    "diarrhea_deaths",
+    "Diarrheal disease death rates (per 100,000)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/diarrheal-disease-death-rate",
+  ],
   // ---- Labor, connectivity, governance (World Bank) ----
   [
     "unemployment",
@@ -1480,6 +1520,43 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     false,
     WB.name,
     "https://data.worldbank.org/indicator/TX.VAL.FUEL.ZS.UN",
+  ],
+  // ---- Education, rural electrification, finance, digital readiness (World Bank) ----
+  [
+    "tertiary_enrollment",
+    "Tertiary school enrollment (% gross)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SE.TER.ENRR",
+  ],
+  [
+    "rural_electricity",
+    "Rural electrification rate (% of rural population)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.ELC.ACCS.RU.ZS",
+  ],
+  [
+    "domestic_credit",
+    "Domestic credit to private sector (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/FS.AST.DOMS.GD.ZS",
+  ],
+  [
+    "secure_servers",
+    "Secure internet servers (per million people)",
+    "per million",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/IT.NET.SECR.P6",
   ],
   // ---- Labor structure, health delivery, carbon, investment, trade (World Bank) ----
   [

@@ -206,6 +206,12 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   co2_intensity_gdp: "Most carbon-intensive economy",
   fdi_inflows: "Highest FDI inflows (% GDP)",
   food_imports_share: "Most dependent on food imports",
+  malaria_deaths: "Highest malaria mortality",
+  diarrhea_deaths: "Highest diarrheal disease mortality",
+  tertiary_enrollment: "Highest tertiary enrollment",
+  rural_electricity: "Lowest rural electrification",
+  domestic_credit: "Deepest private credit market",
+  secure_servers: "Most secure internet servers",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -723,6 +729,30 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which countries are most dependent on imported food and why does it matter?",
     "How does food import dependency create vulnerability to supply chain shocks and price spikes?",
   ],
+  malaria_deaths: [
+    "Where is malaria mortality still highest, and what's holding back control efforts?",
+    "How do malaria death rates overlap with poverty, climate, and access to healthcare?",
+  ],
+  diarrhea_deaths: [
+    "Where do diarrheal diseases still kill the most people, and why?",
+    "How does diarrheal mortality map onto water access, sanitation, and child health?",
+  ],
+  tertiary_enrollment: [
+    "Which countries have the highest rates of higher education access?",
+    "How does tertiary enrollment connect to economic complexity and innovation capacity?",
+  ],
+  rural_electricity: [
+    "Where do rural communities still lack electricity access?",
+    "How does the rural–urban electricity gap connect to agricultural productivity and migration?",
+  ],
+  domestic_credit: [
+    "Which economies have the deepest private credit markets?",
+    "How does domestic credit as a share of GDP relate to investment, inequality, and financial risk?",
+  ],
+  secure_servers: [
+    "Which countries have the most developed secure internet infrastructure?",
+    "How do secure server counts relate to e-commerce, governance, and digital sovereignty?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -798,7 +828,8 @@ const LAYER_CATEGORIES: {
       "food_insecurity_severe","stunting","suicide_rate","tobacco_deaths",
       "alcohol_consumption","uhc_coverage","cardiovascular_deaths",
       "homicide_rate","alcohol_deaths","drug_deaths","cancer_deaths",
-      "immunization_dtp","exports_value","imports_value",
+      "malaria_deaths","diarrhea_deaths","immunization_dtp","rural_electricity",
+      "exports_value","imports_value",
     ],
   },
   {
@@ -836,6 +867,7 @@ const LAYER_CATEGORIES: {
       "rule_of_law","political_stability","gov_effectiveness",
       "ores_metals_exports","fuel_exports",
       "fdi_inflows","self_employment",
+      "tertiary_enrollment","domestic_credit","secure_servers",
     ],
   },
 ];
