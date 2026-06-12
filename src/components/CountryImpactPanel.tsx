@@ -49,6 +49,10 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   neonatal_mortality: { label: "Neonatal mortality", meaning: "deaths in first 28 days of life, per 1,000 live births", bucket: 0 },
   hiv_incidence: { label: "HIV incidence", meaning: "new HIV infections per 1,000 uninfected people per year", bucket: 0 },
   diabetes_prevalence: { label: "Diabetes prevalence", meaning: "share of adults aged 20-79 living with diabetes", bucket: 0 },
+  hospital_beds: { label: "Hospital beds per 1,000", meaning: "inpatient beds available per 1,000 people", bucket: 0 },
+  road_deaths: { label: "Road traffic deaths", meaning: "deaths from road accidents per 100,000 people", bucket: 0 },
+  safe_sanitation: { label: "Safely managed sanitation", meaning: "share with a toilet that hygienically separates waste — higher standard than basic sanitation", bucket: 0 },
+  food_insecurity_severe: { label: "Severe food insecurity", meaning: "share who ran out of food, went a day without eating, or worse in the past year", bucket: 0 },
   // 1 — the environment people live in
   water_stress: { label: "Water stress", meaning: "freshwater withdrawn vs. what's available", bucket: 1 },
   agri_land: { label: "Agricultural land", meaning: "share of land used for farming", bucket: 1 },
@@ -67,6 +71,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   marine_protected: { label: "Protected seas", meaning: "share of waters safeguarded for nature", bucket: 1 },
   threatened_birds: { label: "Threatened bird species", meaning: "birds at risk of disappearing here", bucket: 1 },
   threatened_plants: { label: "Threatened plant species", meaning: "plants at risk of disappearing here", bucket: 1 },
+  threatened_mammals: { label: "Threatened mammal species", meaning: "mammals at risk of disappearing here", bucket: 1 },
   renewable_energy: { label: "Renewable energy", meaning: "share of energy from renewables", bucket: 1 },
   // 2 — what the land & resources generate (and who captures it)
   fish_catch: { label: "Fish & seafood catch", meaning: "wild-caught fish and seafood (tonnes/year)", bucket: 2 },
@@ -79,6 +84,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   manuf_value_added: { label: "Manufacturing value added", meaning: "manufacturing sector's contribution to GDP — factory economy vs. resource exporter", bucket: 2 },
   agri_value_added: { label: "Agriculture value added", meaning: "farming sector's contribution to GDP — how much the economy depends on land", bucket: 2 },
   inflation: { label: "Inflation rate", meaning: "annual price increase — high inflation erodes wages and food purchasing power", bucket: 2 },
+  poverty_gap: { label: "Poverty gap ($2.15/day)", meaning: "how far the poorest fall below the poverty line — depth, not just count", bucket: 2 },
   resource_rents_total: { label: "Resource rents", meaning: "value of all natural resources as % of GDP", bucket: 2 },
   mineral_rents: { label: "Mineral rents", meaning: "mining value as % of GDP", bucket: 2 },
   oil_rents: { label: "Oil rents", meaning: "oil value as % of GDP", bucket: 2 },

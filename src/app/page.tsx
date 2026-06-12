@@ -152,6 +152,12 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   diabetes_prevalence: "Highest diabetes prevalence",
   inflation: "Highest inflation",
   air_pollution_deaths: "Highest air-pollution mortality",
+  hospital_beds: "Fewest hospital beds",
+  road_deaths: "Highest road traffic deaths",
+  safe_sanitation: "Lowest safe sanitation access",
+  food_insecurity_severe: "Highest severe food insecurity",
+  poverty_gap: "Deepest poverty gap",
+  threatened_mammals: "Most threatened mammal species",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -453,6 +459,30 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Where does air pollution cause the most deaths per person?",
     "How do PM2.5 exposure levels translate into mortality across countries?",
   ],
+  hospital_beds: [
+    "Where are there the fewest hospital beds per person?",
+    "How does healthcare infrastructure compare to disease burden?",
+  ],
+  road_deaths: [
+    "Where are road traffic deaths highest per capita?",
+    "How do road safety and infrastructure connect to development?",
+  ],
+  safe_sanitation: [
+    "Where do the fewest people have access to safely managed sanitation?",
+    "How does the sanitation gap extend beyond basic access to safe waste management?",
+  ],
+  food_insecurity_severe: [
+    "Where is severe food insecurity most widespread?",
+    "How does acute food insecurity overlap with conflict, drought, and poverty?",
+  ],
+  poverty_gap: [
+    "Where are the poorest people furthest from the poverty line?",
+    "How does the depth of poverty compare to resource wealth?",
+  ],
+  threatened_mammals: [
+    "Which countries have the most mammal species at risk of extinction?",
+    "How does mammal threat overlap with deforestation and resource extraction?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -521,7 +551,8 @@ const LAYER_CATEGORIES: {
       "poverty_headcount","undernourishment","electricity_access","clean_cooking",
       "basic_sanitation","gini","life_expectancy","child_mortality",
       "tuberculosis","physicians","neonatal_mortality","hiv_incidence",
-      "diabetes_prevalence","exports_value","imports_value",
+      "diabetes_prevalence","hospital_beds","road_deaths",
+      "safe_sanitation","food_insecurity_severe","exports_value","imports_value",
     ],
   },
   {
@@ -538,7 +569,7 @@ const LAYER_CATEGORIES: {
     id: "biodiversity",
     label: "Biodiversity",
     color: "#059669",
-    ids: ["threatened_birds","threatened_plants"],
+    ids: ["threatened_birds","threatened_plants","threatened_mammals"],
   },
   {
     id: "economy_demog",
@@ -549,7 +580,7 @@ const LAYER_CATEGORIES: {
       "access_to_finance","maternal_mortality","obesity_adults","energy_per_capita",
       "hdi","urban_population","health_expenditure","female_labor","secondary_enrollment",
       "women_in_parliament","trade_openness","remittances","education_expenditure",
-      "manuf_value_added","agri_value_added","inflation",
+      "manuf_value_added","agri_value_added","inflation","poverty_gap",
     ],
   },
 ];

@@ -234,6 +234,14 @@ const WB_INDICATORS = [
   { metric: "electricity_per_capita", code: "EG.USE.ELEC.KH.PC", unit: "kWh" },
   { metric: "diabetes_prevalence", code: "SH.STA.DIAB.ZS", unit: "%" },
   { metric: "inflation", code: "FP.CPI.TOTL.ZG", unit: "%" },
+  // ---- Healthcare capacity, food security, poverty depth (World Bank) ----
+  // Verified 2025-06-12.
+  { metric: "hospital_beds", code: "SH.MED.BEDS.ZS", unit: "per 1000" },
+  { metric: "road_deaths", code: "SH.STA.TRAF.P5", unit: "per 100k" },
+  { metric: "safe_sanitation", code: "SH.STA.SMSS.ZS", unit: "%" },
+  { metric: "food_insecurity_severe", code: "SN.ITK.MSFI.ZS", unit: "%" },
+  { metric: "threatened_mammals", code: "EN.MAM.THRD.NO", unit: "species" },
+  { metric: "poverty_gap", code: "SI.POV.GAPS", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -890,7 +898,62 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     OWID_IHME,
     "https://ourworldindata.org/grapher/death-rates-from-air-pollution",
   ],
+  // ---- Healthcare capacity, food security, poverty depth (World Bank) ----
+  [
+    "hospital_beds",
+    "Hospital beds (per 1,000 people)",
+    "per 1000",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.MED.BEDS.ZS",
+  ],
+  [
+    "road_deaths",
+    "Road traffic deaths (per 100,000 people)",
+    "per 100k",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.STA.TRAF.P5",
+  ],
+  [
+    "safe_sanitation",
+    "Safely managed sanitation services (% of population)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.STA.SMSS.ZS",
+  ],
+  [
+    "food_insecurity_severe",
+    "Severe food insecurity (% of population)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SN.ITK.MSFI.ZS",
+  ],
+  [
+    "poverty_gap",
+    "Poverty gap at $2.15/day (% of poverty line)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SI.POV.GAPS",
+  ],
   // ---- Biodiversity (World Bank → IUCN / UNEP-WCMC) ----
+  [
+    "threatened_mammals",
+    "Threatened mammal species (IUCN)",
+    "species",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EN.MAM.THRD.NO",
+  ],
   [
     "terrestrial_protected",
     "Terrestrial protected areas (% of land)",
