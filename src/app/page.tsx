@@ -188,6 +188,12 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   electricity_losses: "Highest grid losses",
   homicide_rate: "Highest homicide rate",
   alcohol_deaths: "Highest alcohol-disorder mortality",
+  drug_deaths: "Highest drug-disorder mortality",
+  employment_ratio: "Highest employment ratio",
+  broadband: "Most fixed broadband access",
+  military_expenditure: "Highest military spending (% GDP)",
+  energy_intensity: "Least energy-efficient economy",
+  business_days: "Hardest to start a business",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -633,6 +639,30 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Where does harmful alcohol use cause the most deaths per person?",
     "How does alcohol mortality connect to poverty, inequality, and mental health burdens?",
   ],
+  drug_deaths: [
+    "Where are drug use disorder deaths highest, and why?",
+    "How do drug mortality rates relate to supply chains, governance, and economic stress?",
+  ],
+  employment_ratio: [
+    "Which countries have the highest share of working-age adults employed?",
+    "How does the employment ratio differ between resource-dependent and diversified economies?",
+  ],
+  broadband: [
+    "Where is fixed broadband access concentrated, and who is left behind?",
+    "How does broadband penetration correlate with education, exports, and development?",
+  ],
+  military_expenditure: [
+    "Which countries spend the most on their military relative to their GDP?",
+    "How does military spending relate to conflict, resource extraction, and governance?",
+  ],
+  energy_intensity: [
+    "Which economies are least energy-efficient and why does it matter?",
+    "How does energy intensity track alongside fossil fuel subsidies and industrialisation?",
+  ],
+  business_days: [
+    "Where is it hardest to legally start a business, and what are the consequences?",
+    "How does red tape at business registration connect to informality and investment gaps?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -692,7 +722,7 @@ const LAYER_CATEGORIES: {
       "energy_per_capita","electricity_per_capita","hydro_electricity",
       "renewable_electricity_xhydro","coal_electricity","gas_electricity","oil_electricity",
       "electricity_losses","coal_rents","oil_rents","gas_rents",
-      "resource_rents_total","mineral_rents",
+      "resource_rents_total","mineral_rents","energy_intensity",
     ],
   },
   {
@@ -706,7 +736,7 @@ const LAYER_CATEGORIES: {
       "diabetes_prevalence","hospital_beds","road_deaths","safe_sanitation",
       "food_insecurity_severe","stunting","suicide_rate","tobacco_deaths",
       "alcohol_consumption","uhc_coverage","cardiovascular_deaths",
-      "homicide_rate","alcohol_deaths","exports_value","imports_value",
+      "homicide_rate","alcohol_deaths","drug_deaths","exports_value","imports_value",
     ],
   },
   {
@@ -739,6 +769,7 @@ const LAYER_CATEGORIES: {
       "tech_exports","gross_savings","current_account",
       "out_of_pocket_health","tax_revenue","food_production_index",
       "fertility_rate","pop_over_65","pop_under_14","population_density","gni_per_capita_ppp",
+      "employment_ratio","broadband","military_expenditure","business_days",
     ],
   },
 ];

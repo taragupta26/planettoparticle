@@ -61,6 +61,9 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   uhc_coverage: { label: "Universal health coverage (UHC)", meaning: "index 0–100 tracking access to essential health services — higher = better coverage", bucket: 0 },
   homicide_rate: { label: "Homicide rate", meaning: "intentional homicides per 100,000 people — a proxy for personal safety and state capacity", bucket: 0 },
   alcohol_deaths: { label: "Deaths from alcohol disorders", meaning: "age-standardized death rate from alcohol use disorders (per 100,000)", bucket: 0 },
+  drug_deaths: { label: "Deaths from drug use disorders", meaning: "age-standardized death rate from drug use disorders (per 100,000) — opioids, stimulants, and other substances", bucket: 0 },
+  employment_ratio: { label: "Employment-to-population ratio", meaning: "share of working-age adults (15+) who are employed — higher = more people contributing to the economy", bucket: 0 },
+  broadband: { label: "Fixed broadband access", meaning: "fixed broadband subscriptions per 100 people — indicator of digital infrastructure depth beyond mobile-only connectivity", bucket: 0 },
   fertility_rate: { label: "Fertility rate", meaning: "average number of births per woman — reflects education, health access, and women's autonomy", bucket: 0 },
   pop_over_65: { label: "Population over 65 (%)", meaning: "share of people at or above retirement age — indicator of demographic aging", bucket: 0 },
   pop_under_14: { label: "Population under 14 (%)", meaning: "share of children — shows youth bulge and pressure on schools and services", bucket: 0 },
@@ -75,6 +78,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   n2o_total: { label: "Nitrous oxide (N₂O)", meaning: "total national N₂O emissions (agriculture + industry)", bucket: 1 },
   electricity_per_capita: { label: "Electricity use per person", meaning: "kilowatt-hours of electricity consumed per person per year", bucket: 1 },
   electricity_losses: { label: "Electricity grid losses", meaning: "share of power lost in transmission and distribution — reflects grid quality and investment", bucket: 1 },
+  energy_intensity: { label: "Energy intensity", meaning: "megajoules of primary energy per dollar of PPP GDP — higher = less efficient; improvement signals decoupling of growth from energy", bucket: 1 },
   hydro_electricity: { label: "Hydropower share", meaning: "share of electricity generated from hydropower — connects energy to water availability", bucket: 1 },
   renewable_electricity_xhydro: { label: "Solar/wind electricity share", meaning: "share from renewables excluding hydro — shows the pace of the clean energy transition", bucket: 1 },
   coal_electricity: { label: "Coal-fired electricity share", meaning: "share of electricity generated from coal — major driver of local air pollution and CO₂", bucket: 1 },
@@ -121,6 +125,8 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   gas_rents: { label: "Gas rents", meaning: "gas value as % of GDP", bucket: 2 },
   forest_rents: { label: "Forest rents", meaning: "forestry value as % of GDP", bucket: 2 },
   exports_value: { label: "Exports", meaning: "goods & services sold abroad", bucket: 2 },
+  military_expenditure: { label: "Military expenditure", meaning: "defence spending as % of GDP — shapes fiscal trade-offs between security and social services", bucket: 2 },
+  business_days: { label: "Time to register a business", meaning: "days needed to complete all formalities to legally start a company — proxy for bureaucratic friction", bucket: 2 },
 };
 
 const BUCKETS = [
@@ -155,6 +161,8 @@ function fmt(m: CountryMetric): string {
       maximumFractionDigits: 1,
     }).format(m.value) + " (PPP)";
   if (m.unit === "score") return m.value.toFixed(2);
+  if (m.unit === "MJ/PPP$") return `${m.value.toFixed(1)} MJ/PPP$`;
+  if (m.unit === "days") return `${m.value.toFixed(0)} days`;
   if (m.unit === "t" || m.unit === "t/year") {
     return new Intl.NumberFormat(undefined, {
       notation: "compact",

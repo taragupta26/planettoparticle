@@ -157,6 +157,9 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Alcohol use disorder deaths (IHME GBD via OWID) ---
   // Verified 2025-06-12: ~185 countries, deaths per 100,000.
   ["alcohol_deaths", "death-rates-from-alcohol-use-disorders", "Death rates from alcohol use disorders", "per 100k", OWID_IHME],
+  // --- Drug use disorder deaths (IHME GBD via OWID) ---
+  // Verified 2025-06-12: ~185 countries, deaths per 100,000.
+  ["drug_deaths", "death-rates-from-drug-use-disorders", "Death rates from drug use disorders", "per 100k", OWID_IHME],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -292,6 +295,23 @@ const WB_INDICATORS = [
   // ---- Income & infrastructure (World Bank) ----
   { metric: "gni_per_capita_ppp", code: "NY.GNP.PCAP.PP.CD", unit: "PPP$" },
   { metric: "electricity_losses", code: "EG.ELC.LOSS.ZS", unit: "%" },
+  // ---- Labor market & employment (World Bank) ----
+  // Verified 2025-06-12: ~175 countries, % of working-age population.
+  { metric: "employment_ratio", code: "SL.EMP.TOTL.SP.ZS", unit: "%" },
+  // ---- Digital infrastructure (World Bank) ----
+  // Verified 2025-06-12: ~185 countries, fixed broadband subscriptions per 100 people.
+  { metric: "broadband", code: "IT.NET.BBND.P2", unit: "per 100" },
+  // ---- Military expenditure (World Bank / SIPRI via WDI) ----
+  // Verified 2025-06-12: ~145 countries, % of GDP.
+  { metric: "military_expenditure", code: "MS.MIL.XPND.GD.ZS", unit: "%" },
+  // ---- Energy efficiency (WB / IEA) ----
+  // Primary energy per unit of PPP GDP. Higher = less efficient.
+  // Verified 2025-06-12: ~170 countries.
+  { metric: "energy_intensity", code: "EG.EGY.PRIM.PP.KD", unit: "MJ/PPP$" },
+  // ---- Business environment (World Bank Doing Business, discontinued 2021) ----
+  // Time required to register a business (days). Last observation ~2019-2020.
+  // Verified 2025-06-12: ~175 countries.
+  { metric: "business_days", code: "IC.REG.DURS", unit: "days" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -1199,6 +1219,15 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     OWID_IHME,
     "https://ourworldindata.org/grapher/death-rates-from-alcohol-use-disorders",
   ],
+  [
+    "drug_deaths",
+    "Death rates from drug use disorders (per 100,000)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/death-rates-from-drug-use-disorders",
+  ],
   // ---- Labor, connectivity, governance (World Bank) ----
   [
     "unemployment",
@@ -1318,6 +1347,52 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     WB.name,
     "https://data.worldbank.org/indicator/EN.FSH.THRD.NO",
+  ],
+  // ---- Labor, business, military, energy efficiency (World Bank) ----
+  [
+    "employment_ratio",
+    "Employment-to-population ratio (% ages 15+)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SL.EMP.TOTL.SP.ZS",
+  ],
+  [
+    "broadband",
+    "Fixed broadband subscriptions (per 100 people)",
+    "per 100",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/IT.NET.BBND.P2",
+  ],
+  [
+    "military_expenditure",
+    "Military expenditure (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/MS.MIL.XPND.GD.ZS",
+  ],
+  [
+    "energy_intensity",
+    "Energy intensity of primary energy (MJ per PPP$ GDP)",
+    "MJ/PPP$",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.EGY.PRIM.PP.KD",
+  ],
+  [
+    "business_days",
+    "Time to register a business (days)",
+    "days",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/IC.REG.DURS",
   ],
 ];
 
