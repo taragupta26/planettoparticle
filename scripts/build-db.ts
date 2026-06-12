@@ -215,6 +215,14 @@ const WB_INDICATORS = [
   { metric: "physicians", code: "SH.MED.PHYS.ZS", unit: "per 1000" },
   { metric: "female_labor", code: "SL.TLF.CACT.FE.ZS", unit: "%" },
   { metric: "secondary_enrollment", code: "SE.SEC.ENRR", unit: "%" },
+  // ---- Gender, trade, finance (World Bank) ----
+  // Verified 2025-06-12: all return 150–200 real countries.
+  { metric: "women_in_parliament", code: "SG.GEN.PARL.ZS", unit: "%" },
+  { metric: "neonatal_mortality", code: "SH.DYN.NMRT", unit: "per 1000" },
+  { metric: "hiv_incidence", code: "SH.HIV.INCD.ZS", unit: "per 1000" },
+  { metric: "trade_openness", code: "NE.TRD.GNFS.ZS", unit: "%" },
+  { metric: "remittances", code: "BX.TRF.PWKR.DT.GD.ZS", unit: "%" },
+  { metric: "education_expenditure", code: "SE.XPD.TOTL.GD.ZS", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -759,6 +767,61 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     false,
     WB.name,
     "https://data.worldbank.org/indicator/SE.SEC.ENRR",
+  ],
+  // ---- Gender, trade, finance (World Bank) ----
+  [
+    "women_in_parliament",
+    "Women in national parliaments (% of seats)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SG.GEN.PARL.ZS",
+  ],
+  [
+    "neonatal_mortality",
+    "Neonatal mortality rate (per 1,000 live births)",
+    "per 1000",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.DYN.NMRT",
+  ],
+  [
+    "hiv_incidence",
+    "HIV incidence (per 1,000 uninfected people)",
+    "per 1000",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.HIV.INCD.ZS",
+  ],
+  [
+    "trade_openness",
+    "Trade (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/NE.TRD.GNFS.ZS",
+  ],
+  [
+    "remittances",
+    "Personal remittances received (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/BX.TRF.PWKR.DT.GD.ZS",
+  ],
+  [
+    "education_expenditure",
+    "Government expenditure on education (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SE.XPD.TOTL.GD.ZS",
   ],
   // ---- Biodiversity (World Bank → IUCN / UNEP-WCMC) ----
   [

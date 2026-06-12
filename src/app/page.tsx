@@ -140,6 +140,12 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   physicians: "Fewest physicians",
   female_labor: "Lowest female labor participation",
   secondary_enrollment: "Lowest secondary enrollment",
+  women_in_parliament: "Lowest representation of women",
+  neonatal_mortality: "Highest neonatal mortality",
+  hiv_incidence: "Highest HIV incidence",
+  trade_openness: "Most trade-dependent economies",
+  remittances: "Most remittance-dependent",
+  education_expenditure: "Lowest education spending",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -393,6 +399,30 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Where is secondary school enrollment lowest?",
     "How does education access connect to poverty and child labor?",
   ],
+  women_in_parliament: [
+    "Where do women hold the fewest seats in national parliament?",
+    "How does political representation for women connect to development outcomes?",
+  ],
+  neonatal_mortality: [
+    "Where is newborn mortality highest, and what drives the gap?",
+    "How does neonatal mortality map onto healthcare access and resource wealth?",
+  ],
+  hiv_incidence: [
+    "Where is new HIV infection most prevalent?",
+    "How does HIV incidence overlap with poverty, healthcare access, and inequality?",
+  ],
+  trade_openness: [
+    "Which economies are most exposed to global trade flows?",
+    "How does trade openness connect to commodity dependence and vulnerability?",
+  ],
+  remittances: [
+    "Which countries depend most on remittances from abroad?",
+    "How do remittances compare to foreign aid and resource rents as income sources?",
+  ],
+  education_expenditure: [
+    "Which governments spend the least on education as a share of GDP?",
+    "How does education investment compare to resource wealth and development outcomes?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -460,7 +490,8 @@ const LAYER_CATEGORIES: {
     ids: [
       "poverty_headcount","undernourishment","electricity_access","clean_cooking",
       "basic_sanitation","gini","life_expectancy","child_mortality",
-      "tuberculosis","physicians","exports_value","imports_value",
+      "tuberculosis","physicians","neonatal_mortality","hiv_incidence",
+      "exports_value","imports_value",
     ],
   },
   {
@@ -487,6 +518,7 @@ const LAYER_CATEGORIES: {
       "gdp_per_capita","internet_access","school_enrollment",
       "access_to_finance","maternal_mortality","obesity_adults","energy_per_capita",
       "hdi","urban_population","health_expenditure","female_labor","secondary_enrollment",
+      "women_in_parliament","trade_openness","remittances","education_expenditure",
     ],
   },
 ];
