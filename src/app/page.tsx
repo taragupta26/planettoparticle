@@ -1678,8 +1678,7 @@ export default function Home() {
               [
                 ["globe", "3D Globe"],
                 ["mercator", "Flat"],
-                ["satellite", "Satellite"],
-                ["space", "🌍 Space"],
+                ["space", "Satellite"],
               ] as const
             ).map(([m, label]) => (
               <button

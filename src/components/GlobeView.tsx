@@ -499,7 +499,11 @@ export default function GlobeMap({
   const noaaTileCache = useRef<Map<string, HTMLImageElement>>(new Map()); // GIBS GOES-East tiles
   const showNoaaLayerRef = useRef(showNoaaLayer);
   const noaaProductRef = useRef(noaaProduct);
-  const blueMarbleRef = useRef<HTMLImageElement | null>(null); // NASA Blue Marble for space mode
+  // Satellite globe texture: Esri World Imagery zoom-1 tiles composited into a
+  // 1024×512 pseudo-equirectangular offscreen canvas (2:1 Mercator stretch).
+  // Four tiles: zt=1 → 2×2 grid. No crossOrigin needed (drawn, not read).
+  const satGlobeTilesRef = useRef<Map<string, HTMLImageElement>>(new Map());
+  const satGlobeCanvasRef = useRef<HTMLCanvasElement | null>(null); // composited texture
   const [zoomTick, setZoomTick] = useState(0); // re-render zoom readout
   const rotYRef = useRef(-18); // longitude spin
   const rotXRef = useRef(16); // equator tilt
@@ -596,6 +600,26 @@ export default function GlobeMap({
     // Clear tile cache when product changes so fresh tiles are fetched
     noaaTileCache.current.clear();
   }, [noaaProduct]);
+
+  // Pre-load Esri World Imagery zoom-1 tiles for the satellite globe texture.
+  // Triggered once when the component mounts (satellite button may be pressed
+  // any time). Uses the shared tileCache so tiles aren't double-fetched.
+  useEffect(() => {
+    const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile";
+    const tiles = satGlobeTilesRef.current;
+    for (let ty = 0; ty < 2; ty++) {
+      for (let tx = 0; tx < 2; tx++) {
+        const key = `sat-globe/1/${tx}/${ty}`;
+        if (tiles.has(key)) continue;
+        const img = new Image();
+        img.src = `${ESRI}/1/${ty}/${tx}`;
+        img.onload = () => {
+          satGlobeCanvasRef.current = null; // invalidate cached composite on each tile load
+        };
+        tiles.set(key, img);
+      }
+    }
+  }, []);
 
   // Load bilateral trade flows for the selected reporter whenever the overlay is
   // on and the country / direction / year changes. Real WITS data; gap-aware.
@@ -1831,7 +1855,7 @@ export default function GlobeMap({
     function drawNoaaLayer() {
       if (!showNoaaLayerRef.current) return;
       const m = modeRef.current;
-      if (m !== "mercator" && m !== "satellite") return;
+      if (m !== "mercator") return; // only overlay on flat Mercator map
 
       const { w, h, cx, cy } = sizeRef.current;
       const W = w * zoomRef.current;
@@ -1961,15 +1985,34 @@ export default function GlobeMap({
         ctx!.arc(cx, cy, R * 1.2, 0, Math.PI * 2);
         ctx!.fill();
 
-        // NASA Blue Marble texture — load once and draw clipped to globe circle
-        if (!blueMarbleRef.current) {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          img.src = "https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74117/world.200408.3x2700x1350.jpg";
-          img.onload = () => { blueMarbleRef.current = img; };
-          blueMarbleRef.current = img; // store immediately so we only create once
+        // Esri World Imagery tiles composited into a 1024×512 pseudo-equirectangular
+        // canvas, drawn clipped to the globe circle like an equirectangular texture.
+        // Rebuild the composite whenever new tiles arrive (satGlobeCanvasRef = null).
+        const tiles = satGlobeTilesRef.current;
+        const allFour = [
+          tiles.get("sat-globe/1/0/0"),
+          tiles.get("sat-globe/1/1/0"),
+          tiles.get("sat-globe/1/0/1"),
+          tiles.get("sat-globe/1/1/1"),
+        ];
+        const anyLoaded = allFour.some(t => t?.complete && t.naturalWidth > 0);
+        if (anyLoaded && !satGlobeCanvasRef.current) {
+          // Build composite: 4 tiles (each 256×256) → 1024×512 canvas (2:1 ratio)
+          // Tile (tx, ty) drawn at screen slot (tx*512, ty*256) size 512×256
+          const sc = document.createElement("canvas");
+          sc.width = 1024; sc.height = 512;
+          const sctx = sc.getContext("2d")!;
+          for (let ty = 0; ty < 2; ty++) {
+            for (let tx = 0; tx < 2; tx++) {
+              const img = tiles.get(`sat-globe/1/${tx}/${ty}`);
+              if (img?.complete && img.naturalWidth > 0)
+                sctx.drawImage(img, tx * 512, ty * 256, 512, 256);
+            }
+          }
+          satGlobeCanvasRef.current = sc;
         }
-        if (blueMarbleRef.current?.complete && blueMarbleRef.current.naturalWidth > 0) {
+        const satCanvas = satGlobeCanvasRef.current;
+        if (satCanvas) {
           ctx!.save();
           ctx!.beginPath();
           ctx!.arc(cx, cy, R, 0, Math.PI * 2);
@@ -1978,12 +2021,12 @@ export default function GlobeMap({
           const imgW = R * 2 * Math.PI;
           const imgH = R * Math.PI;
           const offsetX = cx - R - (rotFraction / 360) * imgW;
-          ctx!.drawImage(blueMarbleRef.current, offsetX, cy - imgH / 2, imgW, imgH);
-          ctx!.drawImage(blueMarbleRef.current, offsetX + imgW, cy - imgH / 2, imgW, imgH);
-          ctx!.drawImage(blueMarbleRef.current, offsetX - imgW, cy - imgH / 2, imgW, imgH);
+          ctx!.drawImage(satCanvas, offsetX,        cy - imgH / 2, imgW, imgH);
+          ctx!.drawImage(satCanvas, offsetX + imgW, cy - imgH / 2, imgW, imgH);
+          ctx!.drawImage(satCanvas, offsetX - imgW, cy - imgH / 2, imgW, imgH);
           ctx!.restore();
         } else {
-          // Fallback ocean fill while texture loads
+          // Fallback ocean fill while tiles load
           ctx!.save();
           ctx!.beginPath();
           ctx!.arc(cx, cy, R, 0, Math.PI * 2);
@@ -2051,8 +2094,7 @@ export default function GlobeMap({
         ctx!.arc(cx, cy, R, 0, Math.PI * 2);
         ctx!.stroke();
       } else {
-        if (modeRef.current === "satellite") drawSatellite();
-        drawNoaaLayer(); // GIBS GOES-East tiles (transparent overlay, Mercator+Satellite modes)
+        drawNoaaLayer(); // GIBS GOES-East tiles (transparent overlay, Mercator mode only)
         drawCountries();
       }
 
