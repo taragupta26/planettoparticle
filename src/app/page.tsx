@@ -1074,6 +1074,8 @@ function LeftOverlaysSection({
   showClimate, setShowClimate,
   showTrade, setShowTrade,
   countyMetric, setCountyMetric,
+  showWeatherPanel, setShowWeatherPanel,
+  showNoaaPanel, setShowNoaaPanel,
 }: {
   showMines: boolean; setShowMines: React.Dispatch<React.SetStateAction<boolean>>;
   showBoundariesMap: boolean; setShowBoundariesMap: React.Dispatch<React.SetStateAction<boolean>>;
@@ -1088,6 +1090,8 @@ function LeftOverlaysSection({
   showClimate: boolean; setShowClimate: React.Dispatch<React.SetStateAction<boolean>>;
   showTrade: boolean; setShowTrade: React.Dispatch<React.SetStateAction<boolean>>;
   countyMetric: string; setCountyMetric: React.Dispatch<React.SetStateAction<string>>;
+  showWeatherPanel: boolean; setShowWeatherPanel: React.Dispatch<React.SetStateAction<boolean>>;
+  showNoaaPanel: boolean; setShowNoaaPanel: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -1100,10 +1104,12 @@ function LeftOverlaysSection({
     ["Disasters", showDisasters, setShowDisasters, "#dc2626", "Live NASA EONET events + USGS earthquakes"],
     ["Vessels", showVessels, setShowVessels, "#0284c7", "Live global AIS vessel positions (AISStream.io)"],
     ["Field boundaries", showFarms, setShowFarms, "#16a34a", "Global Sentinel-2 field boundaries (Fields of The World, CC-BY-4.0)"],
-    ["Webcams", showCams, setShowCams, "#7c3aed", "Live public traffic cameras (TfL JamCams, London)"],
+    ["📷 Webcams", showCams, setShowCams, "#7c3aed", "Live cameras worldwide — geology, wildlife, cities, ocean, beaches"],
     ["US county data", showCountyData, setShowCountyData, "#16a34a", "US county choropleth from County Health Rankings 2024 (Univ. of Wisconsin / RWJF)"],
     ["US climate risk", showClimate, setShowClimate, "#b91c1c", "US county climate-habitability projections (Rhodium Group via ProPublica/NYT)"],
     ["Trade flows", showTrade, setShowTrade, "#d97706", "Bilateral export/import flows (World Bank WITS) — click a country"],
+    ["🌬 Weather & Wind", showWeatherPanel, setShowWeatherPanel, "#6366f1", "Live wind, weather, and water vapor (Windy.com / ECMWF)"],
+    ["🛰 NOAA Satellite", showNoaaPanel, setShowNoaaPanel, "#0369a1", "GOES-East real-time satellite — visible, water vapor, night IR"],
   ];
 
   const activeCount = overlays.filter(([, on]) => on).length;
@@ -1374,7 +1380,7 @@ export default function Home() {
   const [answer, setAnswer] = useState<GroundedAnswer | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"globe" | "mercator" | "satellite">("globe");
+  const [mode, setMode] = useState<"globe" | "mercator" | "satellite" | "space">("globe");
   const [highlight, setHighlight] = useState<string[]>([]);
   const [showGraph, setShowGraph] = useState(false);
   const [showMines, setShowMines] = useState(false);
@@ -1389,6 +1395,10 @@ export default function Home() {
   const [showCams, setShowCams] = useState(false);
   const [showClimate, setShowClimate] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
+  const [activeCam, setActiveCam] = useState<{title: string; embedUrl: string; sourceUrl: string; source: string; description?: string} | null>(null);
+  const [showWeatherPanel, setShowWeatherPanel] = useState(false);
+  const [showNoaaPanel, setShowNoaaPanel] = useState(false);
+  const [noaaProduct, setNoaaProduct] = useState<"GEOCOLOR" | "Water Vapor" | "Night IR">("GEOCOLOR");
   const [showDrawdown, setShowDrawdown] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(false);
   const [showBoundariesMap, setShowBoundariesMap] = useState(false);
@@ -1583,6 +1593,10 @@ export default function Home() {
             setCountryPanelOpen(true); // auto-reopen panel on new country click
             if (iso && isoToEvidence[iso]) setHighlight(isoToEvidence[iso]);
           }}
+          onCamClick={(cam) => {
+            if (cam.embedUrl) setActiveCam({title: cam.title, embedUrl: cam.embedUrl, sourceUrl: cam.sourceUrl, source: cam.source, description: cam.description});
+            else window.open(cam.sourceUrl, "_blank");
+          }}
         />
         <MapLegend activeMetas={activeMetas} composite={composite} />
 
@@ -1663,6 +1677,7 @@ export default function Home() {
                 ["globe", "3D Globe"],
                 ["mercator", "Flat"],
                 ["satellite", "Satellite"],
+                ["space", "🌍 Space"],
               ] as const
             ).map(([m, label]) => (
               <button
@@ -1924,6 +1939,8 @@ export default function Home() {
             showClimate={showClimate} setShowClimate={setShowClimate}
             showTrade={showTrade} setShowTrade={setShowTrade}
             countyMetric={countyMetric} setCountyMetric={setCountyMetric}
+            showWeatherPanel={showWeatherPanel} setShowWeatherPanel={setShowWeatherPanel}
+            showNoaaPanel={showNoaaPanel} setShowNoaaPanel={setShowNoaaPanel}
           />
 
           {/* ════════════════════════════════════════
@@ -2154,6 +2171,94 @@ export default function Home() {
           2023) · Natural Earth. No mocked data.
         </div>
       </aside>
+
+      {/* ── Camera viewer panel ── */}
+      {activeCam && (
+        <div className="absolute bottom-4 right-4 z-40 flex w-[420px] flex-col rounded-xl border border-earth-200 bg-white/95 shadow-2xl backdrop-blur-sm">
+          <div className="flex items-center justify-between border-b border-earth-100 px-3 py-2">
+            <div>
+              <div className="text-[13px] font-semibold text-earth-800">{activeCam.title}</div>
+              <div className="text-[10px] text-earth-500">{activeCam.source}</div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <a href={activeCam.sourceUrl} target="_blank" rel="noreferrer"
+                 className="rounded px-1.5 py-0.5 text-[10px] text-earth-500 hover:bg-earth-50 hover:text-earth-700">
+                ↗ source
+              </a>
+              <button onClick={() => setActiveCam(null)}
+                      className="rounded px-1.5 py-0.5 text-[11px] text-earth-400 hover:bg-earth-50">✕</button>
+            </div>
+          </div>
+          <iframe
+            src={activeCam.embedUrl}
+            className="h-[236px] w-full rounded-b-xl"
+            allow="autoplay; fullscreen"
+            allowFullScreen
+            title={activeCam.title}
+          />
+          {activeCam.description && (
+            <div className="border-t border-earth-100 px-3 py-1.5 text-[10px] text-earth-500">{activeCam.description}</div>
+          )}
+        </div>
+      )}
+
+      {/* ── NOAA GOES-East satellite panel ── */}
+      {showNoaaPanel && (
+        <div className="absolute left-[260px] top-4 z-40 w-[360px] rounded-xl border border-blue-200 bg-slate-900/95 shadow-2xl backdrop-blur-sm">
+          <div className="flex items-center justify-between border-b border-slate-700 px-3 py-2">
+            <div className="text-[13px] font-semibold text-white">NOAA GOES-East Live</div>
+            <div className="flex items-center gap-1">
+              {(["GEOCOLOR", "Water Vapor", "Night IR"] as const).map(p => (
+                <button key={p} onClick={() => setNoaaProduct(p)}
+                        className={`rounded px-1.5 py-0.5 text-[9px] ${noaaProduct === p ? "bg-blue-500 text-white" : "text-slate-400 hover:text-white"}`}>
+                  {p}
+                </button>
+              ))}
+              <button onClick={() => setShowNoaaPanel(false)} className="ml-1 text-slate-400 hover:text-white text-[11px]">✕</button>
+            </div>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={noaaProduct}
+            src={noaaProduct === "GEOCOLOR"
+              ? "https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/latest.jpg"
+              : noaaProduct === "Water Vapor"
+              ? "https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/09/latest.jpg"
+              : "https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/13/latest.jpg"
+            }
+            alt={`NOAA GOES-East ${noaaProduct}`}
+            className="w-full"
+            style={{display: "block"}}
+          />
+          <div className="px-3 py-1.5 text-[9px] text-slate-400">
+            NOAA NESDIS · GOES-East ABI · Updates every 10 minutes ·{" "}
+            <a href="https://www.nesdis.noaa.gov/imagery/satellite-maps/earth-real-time" target="_blank" rel="noreferrer" className="underline hover:text-white">Full viewer ↗</a>
+          </div>
+        </div>
+      )}
+
+      {/* ── Windy.com live weather panel ── */}
+      {showWeatherPanel && (
+        <div className="absolute left-[260px] top-4 z-40 w-[520px] overflow-hidden rounded-xl border border-indigo-200 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-indigo-100 bg-white/95 px-3 py-1.5 backdrop-blur-sm">
+            <div className="text-[12px] font-semibold text-earth-800">Live Weather · Wind · Water Vapor</div>
+            <div className="flex gap-2">
+              <a href="https://www.nesdis.noaa.gov/imagery/satellite-maps/earth-real-time" target="_blank" rel="noreferrer"
+                 className="text-[10px] text-earth-500 hover:text-earth-700">NOAA Real-Time ↗</a>
+              <button onClick={() => setShowWeatherPanel(false)} className="text-[11px] text-earth-400 hover:text-earth-700">✕</button>
+            </div>
+          </div>
+          <iframe
+            src="https://embed.windy.com/embed2.html?lat=20&lon=0&detailLat=20&detailLon=0&width=650&height=450&zoom=3&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"
+            className="h-[340px] w-full"
+            title="Live wind and weather (Windy.com / ECMWF)"
+            allow="fullscreen"
+          />
+          <div className="border-t border-indigo-100 bg-white/95 px-3 py-1 text-[9px] text-earth-400">
+            Windy.com · ECMWF forecast model · Wind, temperature, precipitation, waves, air quality
+          </div>
+        </div>
+      )}
     </main>
   );
 }

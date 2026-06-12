@@ -163,6 +163,9 @@ interface OverlayPoint {
   source: string;
   sourceUrl: string;
   imageUrl?: string; // live snapshot (public webcams) — shown in the tooltip
+  embedUrl?: string;    // YouTube/iframe embed — opens camera viewer panel
+  category?: string;    // "volcano"|"ocean"|"wildlife"|"city"|"beach"|etc.
+  description?: string; // one-sentence description
 }
 // NASA EONET event category → stable marker color.
 const DISASTER_COLORS: Record<string, string> = {
@@ -184,6 +187,25 @@ function disasterColor(cat: string): string {
 }
 
 const RAD = Math.PI / 180;
+
+const CAM_CATEGORY_COLOR: Record<string, string> = {
+  volcano: "#f97316", ocean: "#0ea5e9", wildlife: "#22c55e", city: "#8b5cf6",
+  beach: "#f59e0b", nature: "#16a34a", weather: "#6366f1", geology: "#d97706",
+  river: "#38bdf8", space: "#1e40af",
+};
+
+// Generate once — stable star positions for space mode
+const STARS_600 = Array.from({length: 600}, (_, i) => {
+  const seed = (i * 2654435761) >>> 0;
+  const seed2 = (seed * 1664525 + 1013904223) >>> 0;
+  const seed3 = (seed2 * 22695477 + 1) >>> 0;
+  return {
+    x: (seed & 0xffff) / 0xffff,
+    y: (seed2 & 0xffff) / 0xffff,
+    r: 0.3 + ((seed3 & 0xff) / 0xff) * 1.1,
+    a: 0.4 + ((seed3 >> 8 & 0xff) / 0xff) * 0.6,
+  };
+});
 
 /* point-in-polygon (ray casting) on a single ring of [lng,lat] pairs */
 function pointInRing(lng: number, lat: number, ring: number[][]): boolean {
@@ -307,6 +329,7 @@ function rampGYR(t: number): string {
 export default function GlobeMap({
   mode,
   onSelectIso,
+  onCamClick,
   highlightIso,
   layers = ["cobalt_production"],
   showMines = false,
@@ -325,8 +348,9 @@ export default function GlobeMap({
   planEntities,
   planFocus,
 }: {
-  mode: "globe" | "mercator" | "satellite";
+  mode: "globe" | "mercator" | "satellite" | "space";
   onSelectIso?: (iso: string | undefined) => void;
+  onCamClick?: (cam: OverlayPoint) => void; // called when a camera pin with embedUrl is clicked
   highlightIso?: string[]; // ISO3s referenced by the current answer
   layers?: string[]; // active data filters (one OR many, combined)
   showMines?: boolean; // overlay real mine/deposit points (USGS PP1802)
@@ -468,6 +492,7 @@ export default function GlobeMap({
   const zoomRef = useRef(1); // shared map zoom (globe radius + mercator scale)
   const baseRRef = useRef(0); // unzoomed globe radius, set by fit()
   const tileCache = useRef<Map<string, HTMLImageElement>>(new Map());
+  const blueMarbleRef = useRef<HTMLImageElement | null>(null); // NASA Blue Marble for space mode
   const [zoomTick, setZoomTick] = useState(0); // re-render zoom readout
   const rotYRef = useRef(-18); // longitude spin
   const rotXRef = useRef(16); // equator tilt
@@ -739,42 +764,45 @@ export default function GlobeMap({
     };
   }, [showVessels]);
 
-  // --- Live public traffic webcams: Transport for London "JamCams" — official,
-  // free, no key. Each is a public road camera with a live JPEG snapshot and
-  // real coordinates. Coverage is London only (a data gap elsewhere until more
-  // open municipal feeds are verified — we never invent camera locations).
-  // We aggregate only official public-infrastructure cameras, not private feeds.
+  // --- Live public webcams: curated global cameras (cameras.json) + Transport for
+  // London JamCams. Global cameras link to YouTube embeds / live streams;
+  // TfL JamCams are official London traffic cameras with live JPEG snapshots.
   useEffect(() => {
     if (!showCams || camerasRef.current.length) return;
-    fetch("https://api.tfl.gov.uk/Place/Type/JamCam")
+    // Load curated global cameras from /cameras.json
+    const globalLoad = fetch("/cameras.json")
       .then((r) => r.json())
-      .then((arr: any[]) => {
-        const pts: OverlayPoint[] = [];
-        for (const pl of arr ?? []) {
-          const lat = pl.lat;
-          const lon = pl.lon;
-          if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
-          const props: any[] = pl.additionalProperties ?? [];
-          const img = props.find((p) => p.key === "imageUrl")?.value;
-          const avail = props.find((p) => p.key === "available")?.value;
-          pts.push({
-            kind: "camera",
-            lat,
-            lon,
-            color: "#7c3aed",
-            r: 2.2,
-            title: pl.commonName ?? "Traffic camera",
-            lines: [
-              ["Status", avail === "true" ? "available" : "offline"],
-              ["Operator", "Transport for London"],
-            ],
-            source: "TfL JamCams (public)",
-            sourceUrl: "https://api.tfl.gov.uk/Place/Type/JamCam",
-            imageUrl: typeof img === "string" ? img : undefined,
-          });
-        }
-        camerasRef.current = pts;
-      })
+      .then((arr: any[]) => arr.map((c: any): OverlayPoint => ({
+        kind: "camera",
+        lat: c.lat, lon: c.lng,
+        color: CAM_CATEGORY_COLOR[c.category] ?? "#7c3aed",
+        r: 3.5,
+        title: c.label,
+        lines: [["Category", c.category], ["Source", c.source]],
+        source: c.source, sourceUrl: c.sourceUrl,
+        embedUrl: c.embedUrl ?? undefined,
+        category: c.category,
+        description: c.description,
+      })));
+    // Load TfL JamCams (London traffic, existing behavior)
+    const tflLoad = fetch("https://api.tfl.gov.uk/Place/Type/JamCam")
+      .then((r) => r.json())
+      .then((arr: any[]) => (arr ?? []).flatMap((pl: any): OverlayPoint[] => {
+        const lat = pl.lat; const lon = pl.lon;
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return [];
+        const props: any[] = pl.additionalProperties ?? [];
+        const img = props.find((p: any) => p.key === "imageUrl")?.value;
+        return [{
+          kind: "camera", lat, lon,
+          color: "#94a3b8", r: 2,
+          title: pl.commonName ?? "Traffic camera",
+          lines: [["Status", "live"], ["Operator", "Transport for London"]],
+          source: "TfL JamCams", sourceUrl: "https://api.tfl.gov.uk/Place/Type/JamCam",
+          imageUrl: typeof img === "string" ? img : undefined,
+        }];
+      }));
+    Promise.all([globalLoad, tflLoad])
+      .then(([global, tfl]) => { camerasRef.current = [...global, ...tfl]; })
       .catch(() => {});
   }, [showCams]);
 
@@ -1008,7 +1036,7 @@ export default function GlobeMap({
   // returns screen point + z (depth, >0 front) + whether on visible hemisphere
   function project(lat: number, lng: number) {
     const { cx, cy, R } = sizeRef.current;
-    if (modeRef.current !== "globe") {
+    if (modeRef.current !== "globe" && modeRef.current !== "space") {
       const { w } = sizeRef.current;
       const scale = (w / (2 * Math.PI)) * zoomRef.current; // world width = w·zoom
       let lon = lng + panXRef.current;
@@ -1033,7 +1061,7 @@ export default function GlobeMap({
   // invert a screen point back to lat/lng (front hemisphere only for globe)
   function unproject(mx: number, my: number): { lat: number; lng: number } | null {
     const { cx, cy, R } = sizeRef.current;
-    if (modeRef.current !== "globe") {
+    if (modeRef.current !== "globe" && modeRef.current !== "space") {
       const { w } = sizeRef.current;
       const scale = (w / (2 * Math.PI)) * zoomRef.current;
       const lonDeg = (mx - cx) / scale / RAD;
@@ -1138,7 +1166,7 @@ export default function GlobeMap({
     // widths as needed) — no seam break, no streak.
     function ringPath(ring: number[][]) {
       const { cx, cy, R, w } = sizeRef.current;
-      const merc = modeRef.current !== "globe";
+      const merc = modeRef.current !== "globe" && modeRef.current !== "space";
       const worldW = w * zoomRef.current; // pixel width of a full 360° span
       ctx!.beginPath();
       let started = false;
@@ -1169,7 +1197,7 @@ export default function GlobeMap({
     }
 
     function frontFacing(feature: any): boolean {
-      if (modeRef.current !== "globe") return true;
+      if (modeRef.current !== "globe" && modeRef.current !== "space") return true;
       // sample first coordinate of outer ring
       const g = feature.geometry;
       const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
@@ -1196,7 +1224,7 @@ export default function GlobeMap({
       const { cx, cy, R } = sizeRef.current;
 
       // clip to the globe disk so back-hemisphere fills never spill out
-      if (modeRef.current === "globe") {
+      if (modeRef.current === "globe" || modeRef.current === "space") {
         ctx!.save();
         ctx!.beginPath();
         ctx!.arc(cx, cy, R, 0, Math.PI * 2);
@@ -1222,13 +1250,15 @@ export default function GlobeMap({
             ringPath(rings[ri]);
             if (ri === 0) {
               const sat = modeRef.current === "satellite";
+              const space = modeRef.current === "space";
               if (rgb) {
-                const a = (sat ? (hovered ? 0.82 : 0.62) : hovered ? 0.92 : 0.82) * dim;
+                // In space mode, reduce opacity so Blue Marble texture shows through
+                const baseA = sat ? (hovered ? 0.82 : 0.62) : hovered ? 0.92 : 0.82;
+                const a = (space ? baseA * 0.5 : baseA) * dim;
                 ctx!.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`;
                 ctx!.fill();
-              } else if (sat) {
-                // over imagery, leave data-gap countries transparent (show
-                // the satellite basemap) — only a faint tint on hover.
+              } else if (sat || space) {
+                // over imagery/texture, leave data-gap countries transparent
                 if (hovered) {
                   ctx!.fillStyle = `rgba(226,232,240,${0.3 * dim})`;
                   ctx!.fill();
@@ -1266,7 +1296,7 @@ export default function GlobeMap({
         }
       }
 
-      if (modeRef.current === "globe") ctx!.restore();
+      if (modeRef.current === "globe" || modeRef.current === "space") ctx!.restore();
     }
 
     // draw "% of world" labels on producer countries (decluttered by threshold).
@@ -1293,7 +1323,7 @@ export default function GlobeMap({
         const c = (feat as any).__centroid;
         if (!c) continue;
         const p = project(c.lat, c.lng);
-        if (modeRef.current === "globe" && !p.vis) continue;
+        if ((modeRef.current === "globe" || modeRef.current === "space") && !p.vis) continue;
         const label = pct >= 1 ? `${Math.round(pct)}%` : `${pct.toFixed(1)}%`;
         ctx!.lineWidth = 3;
         ctx!.strokeStyle = "rgba(255,255,255,0.92)";
@@ -1310,7 +1340,7 @@ export default function GlobeMap({
       if (!showMinesRef.current) return;
       const pts = minesRef.current;
       if (!pts.length) return;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       const sat = modeRef.current === "satellite";
       ctx!.save();
       ctx!.lineWidth = 0.7;
@@ -1337,7 +1367,7 @@ export default function GlobeMap({
       if (!showCitiesRef.current) return;
       const pts = citiesRef.current;
       if (!pts.length) return;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       const z = zoomRef.current;
       const minPop = 6_000_000 / Math.pow(z, 1.5);
       const { w, h } = sizeRef.current;
@@ -1370,7 +1400,7 @@ export default function GlobeMap({
       if (!showPortsRef.current) return;
       const pts = portsRef.current;
       if (!pts.length) return;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       const z = zoomRef.current;
       const minScale = 45 / z;
       const { w, h } = sizeRef.current;
@@ -1402,7 +1432,7 @@ export default function GlobeMap({
       if (zoomRef.current < 2.2) return;
       const feats = statesRef.current;
       if (!feats.length) return;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       const { w, h } = sizeRef.current;
       ctx!.save();
       ctx!.lineWidth = 0.5;
@@ -1455,7 +1485,7 @@ export default function GlobeMap({
       const st = countyStatsRef.current[m.id];
       if (!st || st.max <= st.min) return;
       const span = st.max - st.min;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       ctx!.save();
       ctx!.lineWidth = 0.2;
       ctx!.strokeStyle = "rgba(40,40,40,0.25)";
@@ -1501,7 +1531,7 @@ export default function GlobeMap({
       if (!showTradeRef.current) return;
       const data = tradeRef.current;
       if (!data || !data.available || !data.flows || !data.reporter) return;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       const rep = data.reporter;
       const flows = data.flows.slice(0, 60);
       if (!flows.length) return;
@@ -1589,7 +1619,7 @@ export default function GlobeMap({
         v.cols.includes(col)
       )?.legend;
       if (!legend) return;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       ctx!.save();
       ctx!.lineWidth = 0.25;
       ctx!.strokeStyle = "rgba(40,40,40,0.35)";
@@ -1636,7 +1666,7 @@ export default function GlobeMap({
       if (!showFarmsRef.current) return;
       const feats = farmsRef.current.features;
       if (!feats.length) return;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       ctx!.save();
       ctx!.lineWidth = 0.7;
       ctx!.strokeStyle = "rgba(21,94,46,0.9)";
@@ -1676,7 +1706,7 @@ export default function GlobeMap({
     function drawPlanEntities() {
       const pts = planRef.current;
       if (!pts.length) return;
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       const showLabels = zoomRef.current >= 2.2;
       ctx!.save();
       for (const e of pts) {
@@ -1716,7 +1746,7 @@ export default function GlobeMap({
     // Live point overlays (natural disasters, AIS vessels). Back-hemisphere
     // points are culled on the globe via vis.
     function drawOverlayPoints() {
-      const globe = modeRef.current === "globe";
+      const globe = modeRef.current === "globe" || modeRef.current === "space";
       const sat = modeRef.current === "satellite";
       const groups: OverlayPoint[][] = [];
       if (showDisastersRef.current) groups.push(disastersRef.current);
@@ -1778,11 +1808,123 @@ export default function GlobeMap({
       }
     }
 
+    function drawDayNight() {
+      const now = new Date();
+      const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+      const declinationDeg = -23.45 * Math.cos((2 * Math.PI * (dayOfYear + 10)) / 365);
+      const hourAngle = ((now.getUTCHours() + now.getUTCMinutes() / 60) / 24 - 0.5) * 360;
+      const subSolarLat = declinationDeg;
+      const subSolarLon = -hourAngle;
+
+      const { cx, cy, R } = sizeRef.current;
+      const sp = project(subSolarLat, subSolarLon);
+      const asp = project(-subSolarLat, subSolarLon + 180);
+
+      ctx!.save();
+      ctx!.beginPath();
+      ctx!.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx!.clip();
+
+      if (!sp.vis && asp.vis) {
+        // Night hemisphere faces us: darken most of the globe
+        ctx!.fillStyle = "rgba(0,10,30,0.45)";
+        ctx!.fillRect(cx - R, cy - R, R * 2, R * 2);
+      } else if (sp.vis && !asp.vis) {
+        // Day hemisphere faces us: no overlay needed
+      } else {
+        // Terminator crosses the visible face — draw gradient
+        const dx = sp.x - cx;
+        const dy = sp.y - cy;
+        const dist = Math.hypot(dx, dy) || 1;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const grad = ctx!.createLinearGradient(
+          cx - nx * R, cy - ny * R,
+          cx + nx * R, cy + ny * R
+        );
+        grad.addColorStop(0, "rgba(0,10,30,0.50)");
+        grad.addColorStop(0.45, "rgba(0,10,30,0.35)");
+        grad.addColorStop(0.55, "rgba(0,10,30,0.05)");
+        grad.addColorStop(1, "rgba(0,10,30,0)");
+        ctx!.fillStyle = grad;
+        ctx!.fillRect(cx - R, cy - R, R * 2, R * 2);
+      }
+      ctx!.restore();
+    }
+
     function draw() {
       const { w, h, cx, cy, R } = sizeRef.current;
       ctx!.clearRect(0, 0, w, h);
 
-      if (modeRef.current === "globe") {
+      if (modeRef.current === "space") {
+        // Dark space background + starfield
+        ctx!.fillStyle = "#04090f";
+        ctx!.fillRect(0, 0, w, h);
+        ctx!.save();
+        for (const s of STARS_600) {
+          ctx!.globalAlpha = s.a;
+          ctx!.fillStyle = s.r > 1.1 ? "#c8d8ff" : "#ffffff";
+          ctx!.beginPath();
+          ctx!.arc(s.x * w, s.y * h, s.r, 0, Math.PI * 2);
+          ctx!.fill();
+        }
+        ctx!.globalAlpha = 1;
+        ctx!.restore();
+
+        // Outer glow ring
+        const spaceGlow = ctx!.createRadialGradient(cx, cy, R * 0.95, cx, cy, R * 1.2);
+        spaceGlow.addColorStop(0, "rgba(100,160,255,0.18)");
+        spaceGlow.addColorStop(1, "rgba(30,50,120,0)");
+        ctx!.fillStyle = spaceGlow;
+        ctx!.beginPath();
+        ctx!.arc(cx, cy, R * 1.2, 0, Math.PI * 2);
+        ctx!.fill();
+
+        // NASA Blue Marble texture — load once and draw clipped to globe circle
+        if (!blueMarbleRef.current) {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.src = "https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74117/world.200408.3x2700x1350.jpg";
+          img.onload = () => { blueMarbleRef.current = img; };
+          blueMarbleRef.current = img; // store immediately so we only create once
+        }
+        if (blueMarbleRef.current?.complete && blueMarbleRef.current.naturalWidth > 0) {
+          ctx!.save();
+          ctx!.beginPath();
+          ctx!.arc(cx, cy, R, 0, Math.PI * 2);
+          ctx!.clip();
+          const rotFraction = ((rotYRef.current % 360) + 360) % 360;
+          const imgW = R * 2 * Math.PI;
+          const imgH = R * Math.PI;
+          const offsetX = cx - R - (rotFraction / 360) * imgW;
+          ctx!.drawImage(blueMarbleRef.current, offsetX, cy - imgH / 2, imgW, imgH);
+          ctx!.drawImage(blueMarbleRef.current, offsetX + imgW, cy - imgH / 2, imgW, imgH);
+          ctx!.drawImage(blueMarbleRef.current, offsetX - imgW, cy - imgH / 2, imgW, imgH);
+          ctx!.restore();
+        } else {
+          // Fallback ocean fill while texture loads
+          ctx!.save();
+          ctx!.beginPath();
+          ctx!.arc(cx, cy, R, 0, Math.PI * 2);
+          const oceanGrad = ctx!.createRadialGradient(cx - R*0.3, cy - R*0.3, 0, cx, cy, R);
+          oceanGrad.addColorStop(0, "#1a4a8a");
+          oceanGrad.addColorStop(1, "#0a1f3d");
+          ctx!.fillStyle = oceanGrad;
+          ctx!.fill();
+          ctx!.restore();
+        }
+
+        drawGraticule();
+        drawCountries();
+        drawDayNight();
+
+        // Rim
+        ctx!.lineWidth = 1.5;
+        ctx!.strokeStyle = "rgba(80,130,220,0.5)";
+        ctx!.beginPath();
+        ctx!.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx!.stroke();
+      } else if (modeRef.current === "globe") {
         // glow halo
         const halo = ctx!.createRadialGradient(
           cx,
@@ -1819,6 +1961,7 @@ export default function GlobeMap({
 
         drawGraticule();
         drawCountries();
+        drawDayNight();
 
         // rim
         ctx!.lineWidth = 1;
@@ -1843,9 +1986,9 @@ export default function GlobeMap({
       drawOverlayPoints();
       drawPlanEntities();
 
-      // auto-rotate unless interacting
+      // auto-rotate unless interacting (both globe and space modes spin)
       if (
-        modeRef.current === "globe" &&
+        (modeRef.current === "globe" || modeRef.current === "space") &&
         !frozenRef.current &&
         !draggingRef.current &&
         !hoverIsoRef.current
@@ -1868,7 +2011,7 @@ export default function GlobeMap({
     if (!showMinesRef.current) return null;
     const pts = minesRef.current;
     if (!pts.length) return null;
-    const globe = modeRef.current === "globe";
+    const globe = modeRef.current === "globe" || modeRef.current === "space";
     let best: MinePoint | null = null;
     let bestD = 8 * 8; // px² threshold
     for (const mp of pts) {
@@ -1891,7 +2034,7 @@ export default function GlobeMap({
     if (!showCitiesRef.current) return null;
     const pts = citiesRef.current;
     if (!pts.length) return null;
-    const globe = modeRef.current === "globe";
+    const globe = modeRef.current === "globe" || modeRef.current === "space";
     const z = zoomRef.current;
     const minPop = 6_000_000 / Math.pow(z, 1.5);
     let best: CityPoint | null = null;
@@ -1917,7 +2060,7 @@ export default function GlobeMap({
     if (!showPortsRef.current) return null;
     const pts = portsRef.current;
     if (!pts.length) return null;
-    const globe = modeRef.current === "globe";
+    const globe = modeRef.current === "globe" || modeRef.current === "space";
     const minScale = 45 / zoomRef.current;
     let best: PortPoint | null = null;
     let bestD = 8 * 8;
@@ -1960,9 +2103,9 @@ export default function GlobeMap({
     return null;
   }
 
-  // nearest live overlay point (disaster/vessel) within a few px of the cursor
+  // nearest live overlay point (disaster/vessel/camera) within a few px of the cursor
   function hitOverlayPoint(mx: number, my: number): OverlayPoint | null {
-    const globe = modeRef.current === "globe";
+    const globe = modeRef.current === "globe" || modeRef.current === "space";
     const groups: OverlayPoint[][] = [];
     if (showDisastersRef.current) groups.push(disastersRef.current);
     if (showVesselsRef.current) groups.push(vesselsRef.current);
@@ -2001,7 +2144,7 @@ export default function GlobeMap({
     if (!showTradeRef.current) return null;
     const data = tradeRef.current;
     if (!data || !data.available || !data.flows) return null;
-    const globe = modeRef.current === "globe";
+    const globe = modeRef.current === "globe" || modeRef.current === "space";
     let best: TradeFlow | null = null;
     let bestD = 144; // 12px pick radius²
     for (const f of data.flows.slice(0, 60)) {
@@ -2022,7 +2165,7 @@ export default function GlobeMap({
   function hitPlanEntity(mx: number, my: number): PlanEntity | null {
     const pts = planRef.current;
     if (!pts.length) return null;
-    const globe = modeRef.current === "globe";
+    const globe = modeRef.current === "globe" || modeRef.current === "space";
     let best: PlanEntity | null = null;
     let bestD = 100; // 10px pick radius²
     for (const e of pts) {
@@ -2076,7 +2219,7 @@ export default function GlobeMap({
       const dy = my - lastPtrRef.current.y;
       if (Math.abs(dx) + Math.abs(dy) > 2) dragMovedRef.current = true;
       lastPtrRef.current = { x: mx, y: my };
-      if (modeRef.current === "globe") {
+      if (modeRef.current === "globe" || modeRef.current === "space") {
         rotYRef.current += dx * 0.3;
         rotXRef.current = Math.max(-78, Math.min(78, rotXRef.current - dy * 0.3));
       } else {
@@ -2227,6 +2370,16 @@ export default function GlobeMap({
     const rect = e.currentTarget.getBoundingClientRect();
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
+    // Click a camera overlay → open viewer panel (if embedUrl) or source link
+    const cam = hitOverlayPoint(cx, cy);
+    if (cam && cam.kind === "camera") {
+      if (cam.embedUrl) {
+        onCamClick?.(cam);
+      } else {
+        window.open(cam.sourceUrl, "_blank", "noopener,noreferrer");
+      }
+      return;
+    }
     // Click a mine marker → open high-resolution satellite imagery of the
     // actual operation (pit, tailings) at its real coordinates. ESRI World
     // Imagery is free to view; the coordinates come straight from USGS PP1802.
@@ -2608,12 +2761,18 @@ export default function GlobeMap({
               className="my-1 h-[120px] w-full rounded border border-earth-200 object-cover"
             />
           )}
+          {ptTip.p.description && (
+            <div className="mt-0.5 text-[10px] italic opacity-70">{ptTip.p.description}</div>
+          )}
           {ptTip.p.lines.map(([k, v]) => (
             <div key={k} className="text-[11px]">
               <span className="opacity-70">{k}: </span>
               <b>{v}</b>
             </div>
           ))}
+          {ptTip.p.embedUrl && (
+            <div className="mt-0.5 text-[9px] font-medium text-purple-600">▶ click to watch live</div>
+          )}
           <div className="mt-0.5 text-[9px] opacity-60">
             {ptTip.p.source} · live · {ptTip.p.lat.toFixed(2)},{" "}
             {ptTip.p.lon.toFixed(2)}
