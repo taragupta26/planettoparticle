@@ -1075,7 +1075,7 @@ function LeftOverlaysSection({
   showTrade, setShowTrade,
   countyMetric, setCountyMetric,
   showWeatherPanel, setShowWeatherPanel,
-  showNoaaPanel, setShowNoaaPanel,
+  showNoaaLayer, setShowNoaaLayer,
 }: {
   showMines: boolean; setShowMines: React.Dispatch<React.SetStateAction<boolean>>;
   showBoundariesMap: boolean; setShowBoundariesMap: React.Dispatch<React.SetStateAction<boolean>>;
@@ -1091,7 +1091,7 @@ function LeftOverlaysSection({
   showTrade: boolean; setShowTrade: React.Dispatch<React.SetStateAction<boolean>>;
   countyMetric: string; setCountyMetric: React.Dispatch<React.SetStateAction<string>>;
   showWeatherPanel: boolean; setShowWeatherPanel: React.Dispatch<React.SetStateAction<boolean>>;
-  showNoaaPanel: boolean; setShowNoaaPanel: React.Dispatch<React.SetStateAction<boolean>>;
+  showNoaaLayer: boolean; setShowNoaaLayer: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -1109,7 +1109,7 @@ function LeftOverlaysSection({
     ["US climate risk", showClimate, setShowClimate, "#b91c1c", "US county climate-habitability projections (Rhodium Group via ProPublica/NYT)"],
     ["Trade flows", showTrade, setShowTrade, "#d97706", "Bilateral export/import flows (World Bank WITS) — click a country"],
     ["🌬 Weather & Wind", showWeatherPanel, setShowWeatherPanel, "#6366f1", "Live wind, weather, and water vapor (Windy.com / ECMWF)"],
-    ["🛰 NOAA Satellite", showNoaaPanel, setShowNoaaPanel, "#0369a1", "GOES-East real-time satellite — visible, water vapor, night IR"],
+    ["🛰 NOAA Satellite", showNoaaLayer, setShowNoaaLayer, "#0369a1", "GOES-East real-time satellite drawn on map — visible, water vapor, night IR"],
   ];
 
   const activeCount = overlays.filter(([, on]) => on).length;
@@ -1397,7 +1397,7 @@ export default function Home() {
   const [showTrade, setShowTrade] = useState(false);
   const [activeCam, setActiveCam] = useState<{title: string; embedUrl: string; sourceUrl: string; source: string; description?: string} | null>(null);
   const [showWeatherPanel, setShowWeatherPanel] = useState(false);
-  const [showNoaaPanel, setShowNoaaPanel] = useState(false);
+  const [showNoaaLayer, setShowNoaaLayer] = useState(false);
   const [noaaProduct, setNoaaProduct] = useState<"GEOCOLOR" | "Water Vapor" | "Night IR">("GEOCOLOR");
   const [showDrawdown, setShowDrawdown] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(false);
@@ -1597,6 +1597,8 @@ export default function Home() {
             if (cam.embedUrl) setActiveCam({title: cam.title, embedUrl: cam.embedUrl, sourceUrl: cam.sourceUrl, source: cam.source, description: cam.description});
             else window.open(cam.sourceUrl, "_blank");
           }}
+          showNoaaLayer={showNoaaLayer}
+          noaaProduct={noaaProduct}
         />
         <MapLegend activeMetas={activeMetas} composite={composite} />
 
@@ -1940,7 +1942,7 @@ export default function Home() {
             showTrade={showTrade} setShowTrade={setShowTrade}
             countyMetric={countyMetric} setCountyMetric={setCountyMetric}
             showWeatherPanel={showWeatherPanel} setShowWeatherPanel={setShowWeatherPanel}
-            showNoaaPanel={showNoaaPanel} setShowNoaaPanel={setShowNoaaPanel}
+            showNoaaLayer={showNoaaLayer} setShowNoaaLayer={setShowNoaaLayer}
           />
 
           {/* ════════════════════════════════════════
@@ -2172,9 +2174,9 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* ── Camera viewer panel ── */}
+      {/* ── Camera viewer panel — positioned over the map canvas (left of right panel) ── */}
       {activeCam && (
-        <div className="absolute bottom-4 right-4 z-40 flex w-[420px] flex-col rounded-xl border border-earth-200 bg-white/95 shadow-2xl backdrop-blur-sm">
+        <div className="absolute bottom-20 left-[270px] z-40 flex w-[420px] flex-col rounded-xl border border-earth-200 bg-white/95 shadow-2xl backdrop-blur-sm">
           <div className="flex items-center justify-between border-b border-earth-100 px-3 py-2">
             <div>
               <div className="text-[13px] font-semibold text-earth-800">{activeCam.title}</div>
@@ -2202,38 +2204,26 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── NOAA GOES-East satellite panel ── */}
-      {showNoaaPanel && (
-        <div className="absolute left-[260px] top-4 z-40 w-[360px] rounded-xl border border-blue-200 bg-slate-900/95 shadow-2xl backdrop-blur-sm">
-          <div className="flex items-center justify-between border-b border-slate-700 px-3 py-2">
-            <div className="text-[13px] font-semibold text-white">NOAA GOES-East Live</div>
-            <div className="flex items-center gap-1">
-              {(["GEOCOLOR", "Water Vapor", "Night IR"] as const).map(p => (
-                <button key={p} onClick={() => setNoaaProduct(p)}
-                        className={`rounded px-1.5 py-0.5 text-[9px] ${noaaProduct === p ? "bg-blue-500 text-white" : "text-slate-400 hover:text-white"}`}>
-                  {p}
-                </button>
-              ))}
-              <button onClick={() => setShowNoaaPanel(false)} className="ml-1 text-slate-400 hover:text-white text-[11px]">✕</button>
-            </div>
-          </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            key={noaaProduct}
-            src={noaaProduct === "GEOCOLOR"
-              ? "https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/GEOCOLOR/latest.jpg"
-              : noaaProduct === "Water Vapor"
-              ? "https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/09/latest.jpg"
-              : "https://cdn.star.nesdis.noaa.gov/GOES16/ABI/FD/13/latest.jpg"
-            }
-            alt={`NOAA GOES-East ${noaaProduct}`}
-            className="w-full"
-            style={{display: "block"}}
-          />
-          <div className="px-3 py-1.5 text-[9px] text-slate-400">
-            NOAA NESDIS · GOES-East ABI · Updates every 10 minutes ·{" "}
-            <a href="https://www.nesdis.noaa.gov/imagery/satellite-maps/earth-real-time" target="_blank" rel="noreferrer" className="underline hover:text-white">Full viewer ↗</a>
-          </div>
+      {/* ── NOAA GOES-East product selector HUD — thin pill over the map canvas ── */}
+      {showNoaaLayer && (
+        <div className="absolute left-[270px] top-4 z-30 flex items-center gap-1 rounded-full border border-blue-300/60 bg-slate-900/85 px-2.5 py-1.5 shadow-lg backdrop-blur-sm">
+          <span className="mr-0.5 text-[9px] font-semibold text-blue-300">🛰 NOAA</span>
+          {(["GEOCOLOR", "Water Vapor", "Night IR"] as const).map(p => (
+            <button key={p} onClick={() => setNoaaProduct(p)}
+                    className={`rounded-full px-2 py-0.5 text-[9px] font-medium transition ${
+                      noaaProduct === p
+                        ? "bg-blue-500 text-white"
+                        : "text-slate-300 hover:bg-slate-700 hover:text-white"
+                    }`}>
+              {p}
+            </button>
+          ))}
+          <span className="mx-1 text-slate-600">·</span>
+          <a href="https://www.nesdis.noaa.gov/imagery/satellite-maps/earth-real-time"
+             target="_blank" rel="noreferrer"
+             className="text-[8px] text-slate-400 hover:text-slate-200">
+            NESDIS ↗
+          </a>
         </div>
       )}
 

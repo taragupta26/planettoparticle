@@ -347,6 +347,8 @@ export default function GlobeMap({
   tradeIso,
   planEntities,
   planFocus,
+  showNoaaLayer = false,
+  noaaProduct = "GEOCOLOR",
 }: {
   mode: "globe" | "mercator" | "satellite" | "space";
   onSelectIso?: (iso: string | undefined) => void;
@@ -368,6 +370,8 @@ export default function GlobeMap({
   tradeIso?: string; // reporter country for trade flows (= selected country)
   planEntities?: PlanEntity[]; // collaborative-plan points (OSM/Wikidata)
   planFocus?: { lat: number; lon: number; zoom: number } | null; // fly-to target
+  showNoaaLayer?: boolean; // draw NOAA GOES-East imagery as a canvas tile overlay
+  noaaProduct?: string; // "GEOCOLOR" | "Water Vapor" | "Night IR"
 }) {
   const layerKey = layers.join(",");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -492,6 +496,9 @@ export default function GlobeMap({
   const zoomRef = useRef(1); // shared map zoom (globe radius + mercator scale)
   const baseRRef = useRef(0); // unzoomed globe radius, set by fit()
   const tileCache = useRef<Map<string, HTMLImageElement>>(new Map());
+  const noaaTileCache = useRef<Map<string, HTMLImageElement>>(new Map()); // GIBS GOES-East tiles
+  const showNoaaLayerRef = useRef(showNoaaLayer);
+  const noaaProductRef = useRef(noaaProduct);
   const blueMarbleRef = useRef<HTMLImageElement | null>(null); // NASA Blue Marble for space mode
   const [zoomTick, setZoomTick] = useState(0); // re-render zoom readout
   const rotYRef = useRef(-18); // longitude spin
@@ -581,6 +588,14 @@ export default function GlobeMap({
   useEffect(() => {
     tradeFlowRef.current = tradeFlow;
   }, [tradeFlow]);
+  useEffect(() => {
+    showNoaaLayerRef.current = showNoaaLayer;
+  }, [showNoaaLayer]);
+  useEffect(() => {
+    noaaProductRef.current = noaaProduct;
+    // Clear tile cache when product changes so fresh tiles are fetched
+    noaaTileCache.current.clear();
+  }, [noaaProduct]);
 
   // Load bilateral trade flows for the selected reporter whenever the overlay is
   // on and the country / direction / year changes. Real WITS data; gap-aware.
@@ -1808,6 +1823,70 @@ export default function GlobeMap({
       }
     }
 
+    // Draw NOAA GOES-East satellite imagery as a semi-transparent canvas overlay
+    // using NASA GIBS WMTS tiles (EPSG:3857 / GoogleMapsCompatible).
+    // Works in both Mercator and Satellite modes; skipped in Globe/Space.
+    function drawNoaaLayer() {
+      if (!showNoaaLayerRef.current) return;
+      const m = modeRef.current;
+      if (m !== "mercator" && m !== "satellite") return;
+
+      const { w, h, cx, cy } = sizeRef.current;
+      const W = w * zoomRef.current;
+      // GIBS max zoom is 6 for GOES products
+      const zt = Math.max(1, Math.min(6, Math.round(Math.log2(W / 256))));
+      const worldSize = 256 * Math.pow(2, zt);
+      const n = Math.pow(2, zt);
+      const k = W / worldSize;
+      const tilePx = 256 * k;
+
+      let centerLon = -panXRef.current;
+      centerLon = ((((centerLon + 180) % 360) + 360) % 360) - 180;
+      const cwx = ((centerLon + 180) / 360) * worldSize;
+      const cwy = 0.5 * worldSize; // equator in world tile space
+
+      const txLeft = Math.floor((cwx - cx / k) / 256);
+      const txRight = Math.ceil((cwx + (w - cx) / k) / 256);
+      const tyTop = Math.max(0, Math.floor((cwy - cy / k) / 256));
+      const tyBot = Math.min(n - 1, Math.ceil((cwy + (h - cy) / k) / 256));
+
+      // Today's UTC date — GIBS serves GOES imagery for current day
+      const now = new Date();
+      const yy = now.getUTCFullYear();
+      const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(now.getUTCDate()).padStart(2, "0");
+      const dateStr = `${yy}-${mm}-${dd}`;
+
+      const prod = noaaProductRef.current;
+      let layerName: string;
+      if (prod === "Water Vapor") layerName = "GOES-East_ABI_Band9_CloudMoisture";
+      else if (prod === "Night IR") layerName = "GOES-East_ABI_Band13_Clean_Longwave_Window";
+      else layerName = "GOES-East_ABI_GeoColor"; // default
+
+      ctx!.save();
+      ctx!.globalAlpha = 0.68;
+      for (let ty = tyTop; ty <= tyBot; ty++) {
+        for (let tx = txLeft; tx <= txRight; tx++) {
+          const sx = cx + (tx * 256 - cwx) * k;
+          const sy = cy + (ty * 256 - cwy) * k;
+          const wrap = ((tx % n) + n) % n;
+          const key = `${layerName}/${dateStr}/${zt}/${wrap}/${ty}`;
+          let img = noaaTileCache.current.get(key);
+          if (!img) {
+            img = new Image();
+            img.crossOrigin = "anonymous";
+            // NASA GIBS WMTS: Z/Y/X ordering (row/col)
+            img.src = `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layerName}/default/${dateStr}/GoogleMapsCompatible/${zt}/${ty}/${wrap}.jpg`;
+            noaaTileCache.current.set(key, img);
+          }
+          if (img.complete && img.naturalWidth > 0)
+            ctx!.drawImage(img, sx, sy, tilePx + 1, tilePx + 1);
+        }
+      }
+      ctx!.globalAlpha = 1;
+      ctx!.restore();
+    }
+
     function drawDayNight() {
       const now = new Date();
       const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
@@ -1971,6 +2050,7 @@ export default function GlobeMap({
         ctx!.stroke();
       } else {
         if (modeRef.current === "satellite") drawSatellite();
+        drawNoaaLayer(); // GIBS GOES-East tiles (transparent overlay, Mercator+Satellite modes)
         drawCountries();
       }
 
