@@ -101,6 +101,7 @@ const OWID_JAMBECK = "Our World in Data — Jambeck et al. (2015), Science";
 const OWID_MEIJER = "Our World in Data — Meijer et al. (2021), Science Advances";
 const OWID_FAO_FISH = "Our World in Data — FAO FishStat";
 const OWID_GBD = "Our World in Data — NCD Risk Factor Collaboration (NCD-RisC)";
+const OWID_UNDP = "Our World in Data — UNDP (Human Development Report)";
 
 // metric, OWID grapher slug, label, unit, source_name — OWID/grapher CSV series.
 // Each series is a single value column (entity,code,year,value), parsed from the
@@ -130,6 +131,12 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Health (NCD-RisC via OWID) ---
   // Verified 2025-06-12: share-of-adults-defined-as-obese 194 countries.
   ["obesity_adults", "share-of-adults-defined-as-obese", "Adult obesity prevalence", "%", OWID_GBD],
+  // --- Human Development Index (UNDP via OWID) ---
+  // Verified 2025-06-12: ~191 countries, index 0–1.
+  ["hdi", "human-development-index", "Human Development Index", "index", OWID_UNDP],
+  // --- Dietary energy supply (FAO food balance sheets via OWID) ---
+  // Verified 2025-06-12: ~174 countries, kcal/person/day.
+  ["caloric_supply", "daily-caloric-supply", "Daily caloric supply per person", "kcal/day", OWID_FAO],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -200,6 +207,14 @@ const WB_INDICATORS = [
   { metric: "access_to_finance", code: "FX.OWN.TOTL.ZS", unit: "%" },
   { metric: "arable_land", code: "AG.LND.CROP.ZS", unit: "%" },
   { metric: "energy_per_capita", code: "EG.USE.PCAP.KG.OE", unit: "kg oil eq" },
+  // ---- Demographics, healthcare, education (World Bank) ----
+  // Verified 2025-06-12: all return 170–200 real countries.
+  { metric: "urban_population", code: "SP.URB.TOTL.IN.ZS", unit: "%" },
+  { metric: "health_expenditure", code: "SH.XPD.CHEX.GD.ZS", unit: "%" },
+  { metric: "tuberculosis", code: "SH.TBS.INCD", unit: "per 100k" },
+  { metric: "physicians", code: "SH.MED.PHYS.ZS", unit: "per 1000" },
+  { metric: "female_labor", code: "SL.TLF.CACT.FE.ZS", unit: "%" },
+  { metric: "secondary_enrollment", code: "SE.SEC.ENRR", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -669,6 +684,81 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     OWID_GBD,
     "https://ourworldindata.org/grapher/share-of-adults-defined-as-obese",
+  ],
+  // ---- Human Development Index (UNDP via OWID) ----
+  [
+    "hdi",
+    "Human Development Index (HDI)",
+    "index",
+    "magnitude",
+    false,
+    OWID_UNDP,
+    "https://ourworldindata.org/grapher/human-development-index",
+  ],
+  // ---- Dietary energy supply (FAO via OWID) ----
+  [
+    "caloric_supply",
+    "Dietary energy supply (kcal/person/day)",
+    "kcal/day",
+    "magnitude",
+    false,
+    OWID_FAO,
+    "https://ourworldindata.org/grapher/daily-caloric-supply",
+  ],
+  // ---- Demographics, healthcare, education (World Bank) ----
+  [
+    "urban_population",
+    "Urban population (% of total)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SP.URB.TOTL.IN.ZS",
+  ],
+  [
+    "health_expenditure",
+    "Current health expenditure (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.XPD.CHEX.GD.ZS",
+  ],
+  [
+    "tuberculosis",
+    "Tuberculosis incidence (per 100,000)",
+    "per 100k",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.TBS.INCD",
+  ],
+  [
+    "physicians",
+    "Physicians (per 1,000 people)",
+    "per 1000",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.MED.PHYS.ZS",
+  ],
+  [
+    "female_labor",
+    "Female labor force participation (% age 15+)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SL.TLF.CACT.FE.ZS",
+  ],
+  [
+    "secondary_enrollment",
+    "Secondary school enrollment (gross %)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SE.SEC.ENRR",
   ],
   // ---- Biodiversity (World Bank → IUCN / UNEP-WCMC) ----
   [

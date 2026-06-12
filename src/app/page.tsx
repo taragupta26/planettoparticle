@@ -132,6 +132,14 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   arable_land: "Most arable land",
   energy_per_capita: "Highest energy use per person",
   obesity_adults: "Highest adult obesity",
+  hdi: "Lowest human development",
+  caloric_supply: "Lowest caloric supply",
+  urban_population: "Most urbanized",
+  health_expenditure: "Lowest health spending",
+  tuberculosis: "Highest TB burden",
+  physicians: "Fewest physicians",
+  female_labor: "Lowest female labor participation",
+  secondary_enrollment: "Lowest secondary enrollment",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -353,6 +361,38 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which countries use the most energy per person?",
     "How does per-capita energy use relate to emissions and development?",
   ],
+  hdi: [
+    "Which countries score lowest on the Human Development Index?",
+    "How does human development compare to resource wealth in extractive economies?",
+  ],
+  caloric_supply: [
+    "Where do people have the least food available per day?",
+    "How does caloric supply overlap with hunger, drought, and commodity trade?",
+  ],
+  urban_population: [
+    "Which countries are the least urbanized, and what does that mean for rural communities?",
+    "How does urbanization connect to industrialization and resource extraction?",
+  ],
+  health_expenditure: [
+    "Which countries spend the least on health as a share of GDP?",
+    "How does health spending overlap with resource wealth and poverty outcomes?",
+  ],
+  tuberculosis: [
+    "Where is tuberculosis burden highest, and who is most exposed?",
+    "How does TB incidence overlap with poverty, crowding, and healthcare access?",
+  ],
+  physicians: [
+    "Where are there the fewest doctors per person?",
+    "How does healthcare capacity compare to disease burden across countries?",
+  ],
+  female_labor: [
+    "Where is female labor force participation lowest?",
+    "How does women's economic participation map onto resource wealth and inequality?",
+  ],
+  secondary_enrollment: [
+    "Where is secondary school enrollment lowest?",
+    "How does education access connect to poverty and child labor?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -390,7 +430,7 @@ const LAYER_CATEGORIES: {
       "coffee_production","cocoa_production","palm_oil_production","sugarcane_production",
       "banana_production","potato_production","cassava_production","meat_production",
       "milk_production","fish_catch","aquaculture","cereal_yield","fertilizer_use",
-      "agri_land",
+      "agri_land","caloric_supply",
     ],
   },
   {
@@ -420,7 +460,7 @@ const LAYER_CATEGORIES: {
     ids: [
       "poverty_headcount","undernourishment","electricity_access","clean_cooking",
       "basic_sanitation","gini","life_expectancy","child_mortality",
-      "exports_value","imports_value",
+      "tuberculosis","physicians","exports_value","imports_value",
     ],
   },
   {
@@ -446,6 +486,7 @@ const LAYER_CATEGORIES: {
     ids: [
       "gdp_per_capita","internet_access","school_enrollment",
       "access_to_finance","maternal_mortality","obesity_adults","energy_per_capita",
+      "hdi","urban_population","health_expenditure","female_labor","secondary_enrollment",
     ],
   },
 ];

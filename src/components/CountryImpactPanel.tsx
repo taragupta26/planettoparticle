@@ -38,6 +38,13 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   internet_access: { label: "Internet access", meaning: "share of people using the internet", bucket: 0 },
   access_to_finance: { label: "Access to finance", meaning: "share of adults with a bank/mobile account", bucket: 0 },
   gini: { label: "Income inequality", meaning: "0 = equal, 100 = most unequal", bucket: 0 },
+  hdi: { label: "Human Development Index", meaning: "composite of income, education, and life expectancy (0 = lowest, 1 = highest)", bucket: 0 },
+  urban_population: { label: "Urban population", meaning: "share of people living in urban areas", bucket: 0 },
+  tuberculosis: { label: "Tuberculosis incidence", meaning: "new and relapse TB cases per 100,000 people", bucket: 0 },
+  physicians: { label: "Physicians per 1,000 people", meaning: "number of doctors available per 1,000 people", bucket: 0 },
+  female_labor: { label: "Female labor participation", meaning: "share of women aged 15+ in the labor force", bucket: 0 },
+  secondary_enrollment: { label: "Secondary school enrollment", meaning: "gross enrollment ratio — can exceed 100% if older students enroll", bucket: 0 },
+  caloric_supply: { label: "Dietary energy supply", meaning: "average daily food availability per person (kcal/day)", bucket: 0 },
   // 1 — the environment people live in
   water_stress: { label: "Water stress", meaning: "freshwater withdrawn vs. what's available", bucket: 1 },
   agri_land: { label: "Agricultural land", meaning: "share of land used for farming", bucket: 1 },
@@ -59,6 +66,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   fish_catch: { label: "Fish & seafood catch", meaning: "wild-caught fish and seafood (tonnes/year)", bucket: 2 },
   aquaculture: { label: "Aquaculture production", meaning: "farmed fish and seafood (tonnes/year)", bucket: 2 },
   gdp_per_capita: { label: "GDP per capita", meaning: "output per person — what the economy generates for each resident", bucket: 2 },
+  health_expenditure: { label: "Health expenditure (% GDP)", meaning: "share of national output spent on healthcare (public + private)", bucket: 2 },
   resource_rents_total: { label: "Resource rents", meaning: "value of all natural resources as % of GDP", bucket: 2 },
   mineral_rents: { label: "Mineral rents", meaning: "mining value as % of GDP", bucket: 2 },
   oil_rents: { label: "Oil rents", meaning: "oil value as % of GDP", bucket: 2 },
@@ -86,7 +94,8 @@ function fmt(m: CountryMetric): string {
   if (m.unit === "per 100k") return `${Math.round(m.value).toLocaleString()} per 100k`;
   if (m.unit === "µg/m³") return `${m.value.toFixed(1)} µg/m³`;
   if (m.unit === "kg oil eq") return `${Math.round(m.value).toLocaleString()} kg`;
-  if (m.unit === "index") return m.value.toFixed(1);
+  if (m.unit === "index") return m.value < 2 ? m.value.toFixed(3) : m.value.toFixed(1);
+  if (m.unit === "kcal/day") return `${Math.round(m.value).toLocaleString()} kcal/day`;
   if (m.unit === "t" || m.unit === "t/year") {
     return new Intl.NumberFormat(undefined, {
       notation: "compact",
