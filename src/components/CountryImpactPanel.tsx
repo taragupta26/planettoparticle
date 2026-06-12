@@ -58,6 +58,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   adult_literacy: { label: "Adult literacy rate", meaning: "share of adults aged 15+ who can read and write", bucket: 0 },
   mobile_subscriptions: { label: "Mobile phone subscriptions", meaning: "subscriptions per 100 people — can exceed 100 where people hold multiple SIMs", bucket: 0 },
   alcohol_consumption: { label: "Alcohol consumption per capita", meaning: "litres of pure alcohol per person per year", bucket: 0 },
+  uhc_coverage: { label: "Universal health coverage (UHC)", meaning: "index 0–100 tracking access to essential health services — higher = better coverage", bucket: 0 },
   // 1 — the environment people live in
   water_stress: { label: "Water stress", meaning: "freshwater withdrawn vs. what's available", bucket: 1 },
   agri_land: { label: "Agricultural land", meaning: "share of land used for farming", bucket: 1 },
@@ -81,6 +82,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   threatened_mammals: { label: "Threatened mammal species", meaning: "mammals at risk of disappearing here", bucket: 1 },
   threatened_fish: { label: "Threatened fish species", meaning: "fish at risk of extinction in this country's waters and rivers", bucket: 1 },
   tobacco_deaths: { label: "Deaths from smoking", meaning: "age-standardized death rate from tobacco use (per 100,000)", bucket: 1 },
+  cardiovascular_deaths: { label: "Cardiovascular deaths", meaning: "age-standardized death rate from heart disease and stroke (per 100,000) — the world's leading cause of death", bucket: 1 },
   renewable_energy: { label: "Renewable energy", meaning: "share of energy from renewables", bucket: 1 },
   // 2 — what the land & resources generate (and who captures it)
   fish_catch: { label: "Fish & seafood catch", meaning: "wild-caught fish and seafood (tonnes/year)", bucket: 2 },
@@ -99,6 +101,9 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   tech_exports: { label: "High-technology exports", meaning: "share of manufactured exports that are high-tech — shows economic complexity", bucket: 2 },
   gross_savings: { label: "Gross savings (% GNI)", meaning: "share of national income saved rather than consumed — determines investment capacity", bucket: 2 },
   current_account: { label: "Current account balance", meaning: "% of GDP — positive = surplus (net lender), negative = deficit (net borrower)", bucket: 2 },
+  out_of_pocket_health: { label: "Out-of-pocket health spending", meaning: "share of all health spending paid directly by patients — high = financially catastrophic illness risk", bucket: 2 },
+  tax_revenue: { label: "Tax revenue (% GDP)", meaning: "share of GDP collected as taxes — fiscal capacity to fund public services", bucket: 2 },
+  food_production_index: { label: "Food production index", meaning: "food output relative to 2014–16 baseline (100 = same as baseline) — tracks whether a country is producing more or less food", bucket: 2 },
   resource_rents_total: { label: "Resource rents", meaning: "value of all natural resources as % of GDP", bucket: 2 },
   mineral_rents: { label: "Mineral rents", meaning: "mining value as % of GDP", bucket: 2 },
   oil_rents: { label: "Oil rents", meaning: "oil value as % of GDP", bucket: 2 },

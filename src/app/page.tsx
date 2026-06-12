@@ -172,6 +172,11 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   tech_exports: "Highest tech export share",
   gross_savings: "Lowest gross savings rate",
   current_account: "Largest current account deficit",
+  uhc_coverage: "Weakest health system coverage",
+  food_production_index: "Lowest food production growth",
+  out_of_pocket_health: "Highest out-of-pocket health burden",
+  tax_revenue: "Lowest tax revenue",
+  cardiovascular_deaths: "Highest cardiovascular mortality",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -553,6 +558,26 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which countries run the largest current account deficits?",
     "How does trade balance connect to commodity export dependence?",
   ],
+  uhc_coverage: [
+    "Where is universal health coverage lowest?",
+    "How does health system access compare to disease burden in resource-rich countries?",
+  ],
+  food_production_index: [
+    "Which countries have seen the biggest changes in food production?",
+    "How does food production growth connect to land use, water stress, and trade?",
+  ],
+  out_of_pocket_health: [
+    "Where do people pay the most out-of-pocket for healthcare?",
+    "How does out-of-pocket burden connect to poverty and health outcomes?",
+  ],
+  tax_revenue: [
+    "Which governments collect the least tax revenue relative to their economy?",
+    "How does fiscal capacity connect to public services, poverty, and resource rents?",
+  ],
+  cardiovascular_deaths: [
+    "Where are cardiovascular deaths highest per capita?",
+    "How do diet, pollution, and healthcare access drive heart disease mortality?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -590,7 +615,7 @@ const LAYER_CATEGORIES: {
       "coffee_production","cocoa_production","palm_oil_production","sugarcane_production",
       "banana_production","potato_production","cassava_production","meat_production",
       "milk_production","fish_catch","aquaculture","cereal_yield","fertilizer_use",
-      "agri_land","caloric_supply",
+      "agri_land","caloric_supply","food_production_index",
     ],
   },
   {
@@ -624,7 +649,8 @@ const LAYER_CATEGORIES: {
       "tuberculosis","physicians","neonatal_mortality","hiv_incidence",
       "diabetes_prevalence","hospital_beds","road_deaths","safe_sanitation",
       "food_insecurity_severe","stunting","suicide_rate","tobacco_deaths",
-      "alcohol_consumption","exports_value","imports_value",
+      "alcohol_consumption","uhc_coverage","cardiovascular_deaths",
+      "exports_value","imports_value",
     ],
   },
   {
@@ -655,6 +681,7 @@ const LAYER_CATEGORIES: {
       "manuf_value_added","agri_value_added","inflation","poverty_gap",
       "unemployment","adult_literacy","mobile_subscriptions","control_of_corruption",
       "tech_exports","gross_savings","current_account",
+      "out_of_pocket_health","tax_revenue","food_production_index",
     ],
   },
 ];

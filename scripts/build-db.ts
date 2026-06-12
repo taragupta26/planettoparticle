@@ -147,6 +147,9 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Alcohol consumption (WHO via OWID) ---
   // Verified 2025-06-12: ~180 countries, litres of pure alcohol per capita/year.
   ["alcohol_consumption", "total-alcohol-consumption-per-capita", "Alcohol consumption per capita", "L/capita", OWID_IHME],
+  // --- Cardiovascular death rates (IHME GBD via OWID) ---
+  // Verified 2025-06-12: ~185 countries, deaths per 100,000.
+  ["cardiovascular_deaths", "death-rates-from-cardiovascular-disease", "Death rates from cardiovascular disease", "per 100k", OWID_IHME],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -264,6 +267,12 @@ const WB_INDICATORS = [
   { metric: "tech_exports", code: "TX.VAL.TECH.MF.ZS", unit: "%" },
   { metric: "gross_savings", code: "NY.GNS.ICTR.ZS", unit: "%" },
   { metric: "current_account", code: "BN.CAB.XOKA.GD.ZS", unit: "%" },
+  // ---- Healthcare system, food production, fiscal (World Bank) ----
+  // Verified 2025-06-12.
+  { metric: "uhc_coverage", code: "SH.UHC.SRVS.CV.XD", unit: "index" },
+  { metric: "food_production_index", code: "AG.PRD.FOOD.XD", unit: "index" },
+  { metric: "out_of_pocket_health", code: "SH.XPD.OOPC.CH.ZS", unit: "%" },
+  { metric: "tax_revenue", code: "GC.TAX.TOTL.GD.ZS", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -965,6 +974,53 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     WB.name,
     "https://data.worldbank.org/indicator/SI.POV.GAPS",
+  ],
+  // ---- Healthcare system, food production, fiscal (World Bank) ----
+  [
+    "uhc_coverage",
+    "Universal health coverage service index (0–100)",
+    "index",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.UHC.SRVS.CV.XD",
+  ],
+  [
+    "food_production_index",
+    "Food production index (2014–16 = 100)",
+    "index",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/AG.PRD.FOOD.XD",
+  ],
+  [
+    "out_of_pocket_health",
+    "Out-of-pocket health expenditure (% of total health spending)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.XPD.OOPC.CH.ZS",
+  ],
+  [
+    "tax_revenue",
+    "Tax revenue (% of GDP)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/GC.TAX.TOTL.GD.ZS",
+  ],
+  // ---- Cardiovascular mortality (IHME GBD via OWID) ----
+  [
+    "cardiovascular_deaths",
+    "Death rates from cardiovascular disease (per 100,000)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/death-rates-from-cardiovascular-disease",
   ],
   // ---- Energy mix details (World Bank) ----
   [
