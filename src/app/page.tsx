@@ -177,6 +177,9 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   out_of_pocket_health: "Highest out-of-pocket health burden",
   tax_revenue: "Lowest tax revenue",
   cardiovascular_deaths: "Highest cardiovascular mortality",
+  coal_electricity: "Most coal-dependent electricity",
+  gas_electricity: "Most gas-dependent electricity",
+  oil_electricity: "Most oil-dependent electricity",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -578,6 +581,18 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Where are cardiovascular deaths highest per capita?",
     "How do diet, pollution, and healthcare access drive heart disease mortality?",
   ],
+  coal_electricity: [
+    "Which countries still generate the most electricity from coal?",
+    "Where is coal-power lock-in blocking the clean energy transition?",
+  ],
+  gas_electricity: [
+    "Which countries rely most on natural gas for electricity?",
+    "How does gas-power dependence connect to LNG trade and energy security?",
+  ],
+  oil_electricity: [
+    "Which countries still burn oil for electricity — and why?",
+    "How does oil-for-power connect to import dependence and energy poverty?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -635,8 +650,8 @@ const LAYER_CATEGORIES: {
     ids: [
       "coal_production","oil_production","gas_production","renewable_energy",
       "energy_per_capita","electricity_per_capita","hydro_electricity",
-      "renewable_electricity_xhydro","coal_rents","oil_rents","gas_rents",
-      "resource_rents_total","mineral_rents",
+      "renewable_electricity_xhydro","coal_electricity","gas_electricity","oil_electricity",
+      "coal_rents","oil_rents","gas_rents","resource_rents_total","mineral_rents",
     ],
   },
   {

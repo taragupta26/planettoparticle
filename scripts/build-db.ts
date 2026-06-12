@@ -263,6 +263,9 @@ const WB_INDICATORS = [
   // ---- Energy mix details (World Bank) ----
   { metric: "hydro_electricity", code: "EG.ELC.HYRO.ZS", unit: "%" },
   { metric: "renewable_electricity_xhydro", code: "EG.ELC.RNWX.ZS", unit: "%" },
+  { metric: "coal_electricity", code: "EG.ELC.COAL.ZS", unit: "%" },
+  { metric: "gas_electricity", code: "EG.ELC.GAS.ZS", unit: "%" },
+  { metric: "oil_electricity", code: "EG.ELC.PETR.ZS", unit: "%" },
   // ---- Economic structure (World Bank) ----
   { metric: "tech_exports", code: "TX.VAL.TECH.MF.ZS", unit: "%" },
   { metric: "gross_savings", code: "NY.GNS.ICTR.ZS", unit: "%" },
@@ -1040,6 +1043,33 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     false,
     WB.name,
     "https://data.worldbank.org/indicator/EG.ELC.RNWX.ZS",
+  ],
+  [
+    "coal_electricity",
+    "Electricity production from coal (% of total)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.ELC.COAL.ZS",
+  ],
+  [
+    "gas_electricity",
+    "Electricity production from natural gas (% of total)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.ELC.GAS.ZS",
+  ],
+  [
+    "oil_electricity",
+    "Electricity production from oil (% of total)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.ELC.PETR.ZS",
   ],
   // ---- Economic structure (World Bank) ----
   [
