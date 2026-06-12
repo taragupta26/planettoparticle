@@ -141,6 +141,9 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Air pollution mortality (IHME GBD via OWID) ---
   // Verified 2025-06-12: ~185 countries, deaths per 100,000.
   ["air_pollution_deaths", "death-rates-from-air-pollution", "Death rates from air pollution", "per 100k", OWID_IHME],
+  // --- Tobacco mortality (IHME GBD via OWID) ---
+  // Verified 2025-06-12: ~185 countries, deaths per 100,000.
+  ["tobacco_deaths", "death-rates-from-smoking", "Death rates from smoking", "per 100k", OWID_IHME],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -242,6 +245,15 @@ const WB_INDICATORS = [
   { metric: "food_insecurity_severe", code: "SN.ITK.MSFI.ZS", unit: "%" },
   { metric: "threatened_mammals", code: "EN.MAM.THRD.NO", unit: "species" },
   { metric: "poverty_gap", code: "SI.POV.GAPS", unit: "%" },
+  // ---- Labor, connectivity, governance (World Bank) ----
+  // Verified 2025-06-12.
+  { metric: "unemployment", code: "SL.UEM.TOTL.ZS", unit: "%" },
+  { metric: "adult_literacy", code: "SE.ADT.LITR.ZS", unit: "%" },
+  { metric: "mobile_subscriptions", code: "IT.CEL.SETS.P2", unit: "per 100" },
+  { metric: "stunting", code: "SH.STA.STNT.ME.ZS", unit: "%" },
+  { metric: "suicide_rate", code: "SH.STA.SUIC.P5", unit: "per 100k" },
+  { metric: "control_of_corruption", code: "CC.EST", unit: "score" },
+  { metric: "threatened_fish", code: "EN.FSH.THRD.NO", unit: "species" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -944,6 +956,71 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     WB.name,
     "https://data.worldbank.org/indicator/SI.POV.GAPS",
   ],
+  // ---- Labor, connectivity, governance (World Bank) ----
+  [
+    "unemployment",
+    "Unemployment rate (% of total labor force)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS",
+  ],
+  [
+    "adult_literacy",
+    "Adult literacy rate (% ages 15+)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SE.ADT.LITR.ZS",
+  ],
+  [
+    "mobile_subscriptions",
+    "Mobile phone subscriptions (per 100 people)",
+    "per 100",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/IT.CEL.SETS.P2",
+  ],
+  [
+    "stunting",
+    "Stunting in children under 5 (% underheight for age)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.STA.STNT.ME.ZS",
+  ],
+  [
+    "suicide_rate",
+    "Suicide mortality rate (per 100,000 people)",
+    "per 100k",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.STA.SUIC.P5",
+  ],
+  [
+    "control_of_corruption",
+    "Control of corruption (World Governance Indicator)",
+    "score",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/CC.EST",
+  ],
+  // ---- Tobacco mortality (IHME GBD via OWID) ----
+  [
+    "tobacco_deaths",
+    "Death rates from smoking (per 100,000)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/death-rates-from-smoking",
+  ],
   // ---- Biodiversity (World Bank → IUCN / UNEP-WCMC) ----
   [
     "threatened_mammals",
@@ -989,6 +1066,15 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     WB.name,
     "https://data.worldbank.org/indicator/EN.HPT.THRD.NO",
+  ],
+  [
+    "threatened_fish",
+    "Threatened fish species (IUCN)",
+    "species",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/EN.FSH.THRD.NO",
   ],
 ];
 

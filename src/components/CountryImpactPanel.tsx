@@ -53,6 +53,10 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   road_deaths: { label: "Road traffic deaths", meaning: "deaths from road accidents per 100,000 people", bucket: 0 },
   safe_sanitation: { label: "Safely managed sanitation", meaning: "share with a toilet that hygienically separates waste — higher standard than basic sanitation", bucket: 0 },
   food_insecurity_severe: { label: "Severe food insecurity", meaning: "share who ran out of food, went a day without eating, or worse in the past year", bucket: 0 },
+  stunting: { label: "Child stunting (under 5)", meaning: "share of children whose height is too low for their age — sign of chronic undernutrition", bucket: 0 },
+  suicide_rate: { label: "Suicide mortality rate", meaning: "deaths by suicide per 100,000 people — reflects mental health and social conditions", bucket: 0 },
+  adult_literacy: { label: "Adult literacy rate", meaning: "share of adults aged 15+ who can read and write", bucket: 0 },
+  mobile_subscriptions: { label: "Mobile phone subscriptions", meaning: "subscriptions per 100 people — can exceed 100 where people hold multiple SIMs", bucket: 0 },
   // 1 — the environment people live in
   water_stress: { label: "Water stress", meaning: "freshwater withdrawn vs. what's available", bucket: 1 },
   agri_land: { label: "Agricultural land", meaning: "share of land used for farming", bucket: 1 },
@@ -72,6 +76,8 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   threatened_birds: { label: "Threatened bird species", meaning: "birds at risk of disappearing here", bucket: 1 },
   threatened_plants: { label: "Threatened plant species", meaning: "plants at risk of disappearing here", bucket: 1 },
   threatened_mammals: { label: "Threatened mammal species", meaning: "mammals at risk of disappearing here", bucket: 1 },
+  threatened_fish: { label: "Threatened fish species", meaning: "fish at risk of extinction in this country's waters and rivers", bucket: 1 },
+  tobacco_deaths: { label: "Deaths from smoking", meaning: "age-standardized death rate from tobacco use (per 100,000)", bucket: 1 },
   renewable_energy: { label: "Renewable energy", meaning: "share of energy from renewables", bucket: 1 },
   // 2 — what the land & resources generate (and who captures it)
   fish_catch: { label: "Fish & seafood catch", meaning: "wild-caught fish and seafood (tonnes/year)", bucket: 2 },
@@ -85,6 +91,8 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   agri_value_added: { label: "Agriculture value added", meaning: "farming sector's contribution to GDP — how much the economy depends on land", bucket: 2 },
   inflation: { label: "Inflation rate", meaning: "annual price increase — high inflation erodes wages and food purchasing power", bucket: 2 },
   poverty_gap: { label: "Poverty gap ($2.15/day)", meaning: "how far the poorest fall below the poverty line — depth, not just count", bucket: 2 },
+  unemployment: { label: "Unemployment rate", meaning: "share of the labor force without a job but actively seeking one", bucket: 2 },
+  control_of_corruption: { label: "Control of corruption (WGI)", meaning: "World Bank governance score: −2.5 = no control, +2.5 = strong control — captures resource rent capture", bucket: 2 },
   resource_rents_total: { label: "Resource rents", meaning: "value of all natural resources as % of GDP", bucket: 2 },
   mineral_rents: { label: "Mineral rents", meaning: "mining value as % of GDP", bucket: 2 },
   oil_rents: { label: "Oil rents", meaning: "oil value as % of GDP", bucket: 2 },
@@ -115,6 +123,8 @@ function fmt(m: CountryMetric): string {
   if (m.unit === "index") return m.value < 2 ? m.value.toFixed(3) : m.value.toFixed(1);
   if (m.unit === "kcal/day") return `${Math.round(m.value).toLocaleString()} kcal/day`;
   if (m.unit === "kWh") return `${Math.round(m.value).toLocaleString()} kWh`;
+  if (m.unit === "per 100") return `${m.value.toFixed(0)} per 100 people`;
+  if (m.unit === "score") return m.value.toFixed(2);
   if (m.unit === "t" || m.unit === "t/year") {
     return new Intl.NumberFormat(undefined, {
       notation: "compact",

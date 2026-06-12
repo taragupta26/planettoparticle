@@ -158,6 +158,14 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   food_insecurity_severe: "Highest severe food insecurity",
   poverty_gap: "Deepest poverty gap",
   threatened_mammals: "Most threatened mammal species",
+  threatened_fish: "Most threatened fish species",
+  unemployment: "Highest unemployment",
+  adult_literacy: "Lowest adult literacy",
+  mobile_subscriptions: "Lowest mobile connectivity",
+  stunting: "Highest child stunting",
+  suicide_rate: "Highest suicide mortality",
+  control_of_corruption: "Weakest anti-corruption control",
+  tobacco_deaths: "Highest tobacco mortality",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -483,6 +491,38 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which countries have the most mammal species at risk of extinction?",
     "How does mammal threat overlap with deforestation and resource extraction?",
   ],
+  threatened_fish: [
+    "Which countries have the most fish species at risk of extinction?",
+    "How does fish species loss connect to overfishing, pollution, and habitat destruction?",
+  ],
+  unemployment: [
+    "Where is unemployment highest, and who does it fall on?",
+    "How does joblessness connect to resource dependence and economic structure?",
+  ],
+  adult_literacy: [
+    "Where is adult literacy lowest, and what keeps people from learning to read?",
+    "How does literacy connect to economic access, health outcomes, and land rights?",
+  ],
+  mobile_subscriptions: [
+    "Where is mobile connectivity lowest — and what does the digital gap mean for access?",
+    "How does mobile infrastructure connect to economic inclusion and trade?",
+  ],
+  stunting: [
+    "Where is child stunting most prevalent, and what's driving chronic undernutrition?",
+    "How does stunting map onto hunger, water stress, and poverty?",
+  ],
+  suicide_rate: [
+    "Where is suicide mortality highest, and what does it reflect about mental health burdens?",
+    "How does suicide rate connect to poverty, inequality, and social isolation?",
+  ],
+  control_of_corruption: [
+    "Where is governance weakest on corruption control?",
+    "How does corruption connect to resource wealth and the 'resource curse'?",
+  ],
+  tobacco_deaths: [
+    "Where does tobacco cause the most deaths per person?",
+    "How do tobacco supply chains and marketing connect to mortality burden?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -551,8 +591,9 @@ const LAYER_CATEGORIES: {
       "poverty_headcount","undernourishment","electricity_access","clean_cooking",
       "basic_sanitation","gini","life_expectancy","child_mortality",
       "tuberculosis","physicians","neonatal_mortality","hiv_incidence",
-      "diabetes_prevalence","hospital_beds","road_deaths",
-      "safe_sanitation","food_insecurity_severe","exports_value","imports_value",
+      "diabetes_prevalence","hospital_beds","road_deaths","safe_sanitation",
+      "food_insecurity_severe","stunting","suicide_rate","tobacco_deaths",
+      "exports_value","imports_value",
     ],
   },
   {
@@ -569,7 +610,7 @@ const LAYER_CATEGORIES: {
     id: "biodiversity",
     label: "Biodiversity",
     color: "#059669",
-    ids: ["threatened_birds","threatened_plants","threatened_mammals"],
+    ids: ["threatened_birds","threatened_plants","threatened_mammals","threatened_fish"],
   },
   {
     id: "economy_demog",
@@ -581,6 +622,7 @@ const LAYER_CATEGORIES: {
       "hdi","urban_population","health_expenditure","female_labor","secondary_enrollment",
       "women_in_parliament","trade_openness","remittances","education_expenditure",
       "manuf_value_added","agri_value_added","inflation","poverty_gap",
+      "unemployment","adult_literacy","mobile_subscriptions","control_of_corruption",
     ],
   },
 ];
