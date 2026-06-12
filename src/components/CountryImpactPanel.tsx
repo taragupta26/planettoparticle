@@ -62,6 +62,7 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   homicide_rate: { label: "Homicide rate", meaning: "intentional homicides per 100,000 people — a proxy for personal safety and state capacity", bucket: 0 },
   alcohol_deaths: { label: "Deaths from alcohol disorders", meaning: "age-standardized death rate from alcohol use disorders (per 100,000)", bucket: 0 },
   drug_deaths: { label: "Deaths from drug use disorders", meaning: "age-standardized death rate from drug use disorders (per 100,000) — opioids, stimulants, and other substances", bucket: 0 },
+  cancer_deaths: { label: "Cancer death rates", meaning: "age-standardized cancer death rate per 100,000 — shaped by tobacco, diet, pollution, and healthcare access", bucket: 0 },
   employment_ratio: { label: "Employment-to-population ratio", meaning: "share of working-age adults (15+) who are employed — higher = more people contributing to the economy", bucket: 0 },
   broadband: { label: "Fixed broadband access", meaning: "fixed broadband subscriptions per 100 people — indicator of digital infrastructure depth beyond mobile-only connectivity", bucket: 0 },
   fertility_rate: { label: "Fertility rate", meaning: "average number of births per woman — reflects education, health access, and women's autonomy", bucket: 0 },
@@ -127,6 +128,11 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   exports_value: { label: "Exports", meaning: "goods & services sold abroad", bucket: 2 },
   military_expenditure: { label: "Military expenditure", meaning: "defence spending as % of GDP — shapes fiscal trade-offs between security and social services", bucket: 2 },
   business_days: { label: "Time to register a business", meaning: "days needed to complete all formalities to legally start a company — proxy for bureaucratic friction", bucket: 2 },
+  rule_of_law: { label: "Rule of law (WGI)", meaning: "World Bank score −2.5 to +2.5 — captures trust in and enforcement of contracts, courts, and police", bucket: 2 },
+  political_stability: { label: "Political stability (WGI)", meaning: "World Bank score −2.5 to +2.5 — probability of government destabilization or political violence", bucket: 2 },
+  gov_effectiveness: { label: "Government effectiveness (WGI)", meaning: "World Bank score −2.5 to +2.5 — quality of public services and civil service, free from political pressure", bucket: 2 },
+  ores_metals_exports: { label: "Ores & metals exports", meaning: "share of merchandise exports from ores and metals — high values signal mineral resource dependence", bucket: 2 },
+  fuel_exports: { label: "Fuel exports", meaning: "share of merchandise exports from fossil fuels — high values signal energy resource dependence and exposure to transition risk", bucket: 2 },
 };
 
 const BUCKETS = [

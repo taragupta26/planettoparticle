@@ -194,6 +194,12 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   military_expenditure: "Highest military spending (% GDP)",
   energy_intensity: "Least energy-efficient economy",
   business_days: "Hardest to start a business",
+  rule_of_law: "Weakest rule of law",
+  political_stability: "Least politically stable",
+  gov_effectiveness: "Least effective government",
+  ores_metals_exports: "Most mineral-export-dependent",
+  fuel_exports: "Most fuel-export-dependent",
+  cancer_deaths: "Highest cancer mortality",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -663,6 +669,30 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Where is it hardest to legally start a business, and what are the consequences?",
     "How does red tape at business registration connect to informality and investment gaps?",
   ],
+  rule_of_law: [
+    "Where is the rule of law weakest, and how does that shape resource extraction?",
+    "How does rule-of-law quality interact with corruption, investment, and conflict risk?",
+  ],
+  political_stability: [
+    "Which countries face the highest risk of political violence or instability?",
+    "How does political instability affect supply chain reliability and foreign investment?",
+  ],
+  gov_effectiveness: [
+    "Where is government capacity to deliver services lowest?",
+    "How does government effectiveness correlate with health outcomes and infrastructure quality?",
+  ],
+  ores_metals_exports: [
+    "Which countries depend most on mineral and metal exports?",
+    "How does high ore and metals export concentration link to the resource curse?",
+  ],
+  fuel_exports: [
+    "Which economies are most dependent on fossil fuel exports?",
+    "How does fuel export dependence shape vulnerability to the energy transition?",
+  ],
+  cancer_deaths: [
+    "Where are cancer death rates highest, and what types dominate?",
+    "How does cancer mortality connect to tobacco, air pollution, and healthcare access?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -736,7 +766,8 @@ const LAYER_CATEGORIES: {
       "diabetes_prevalence","hospital_beds","road_deaths","safe_sanitation",
       "food_insecurity_severe","stunting","suicide_rate","tobacco_deaths",
       "alcohol_consumption","uhc_coverage","cardiovascular_deaths",
-      "homicide_rate","alcohol_deaths","drug_deaths","exports_value","imports_value",
+      "homicide_rate","alcohol_deaths","drug_deaths","cancer_deaths",
+      "exports_value","imports_value",
     ],
   },
   {
@@ -770,6 +801,8 @@ const LAYER_CATEGORIES: {
       "out_of_pocket_health","tax_revenue","food_production_index",
       "fertility_rate","pop_over_65","pop_under_14","population_density","gni_per_capita_ppp",
       "employment_ratio","broadband","military_expenditure","business_days",
+      "rule_of_law","political_stability","gov_effectiveness",
+      "ores_metals_exports","fuel_exports",
     ],
   },
 ];

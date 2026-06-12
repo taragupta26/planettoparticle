@@ -160,6 +160,9 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // --- Drug use disorder deaths (IHME GBD via OWID) ---
   // Verified 2025-06-12: ~185 countries, deaths per 100,000.
   ["drug_deaths", "death-rates-from-drug-use-disorders", "Death rates from drug use disorders", "per 100k", OWID_IHME],
+  // --- Cancer deaths (IHME GBD via OWID) ---
+  // Verified 2025-06-12: ~185 countries, deaths per 100,000 age-standardized.
+  ["cancer_deaths", "cancer-death-rates-owid", "Cancer death rates", "per 100k", OWID_IHME],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -312,6 +315,17 @@ const WB_INDICATORS = [
   // Time required to register a business (days). Last observation ~2019-2020.
   // Verified 2025-06-12: ~175 countries.
   { metric: "business_days", code: "IC.REG.DURS", unit: "days" },
+  // ---- Additional World Governance Indicators (WGI) ----
+  // All WGI scores range -2.5 to 2.5. Higher = stronger institutions.
+  // Verified 2025-06-12: ~190 countries.
+  { metric: "rule_of_law", code: "RL.EST", unit: "score" },
+  { metric: "political_stability", code: "PV.EST", unit: "score" },
+  { metric: "gov_effectiveness", code: "GE.EST", unit: "score" },
+  // ---- Export composition (World Bank / UN COMTRADE via WDI) ----
+  // % of merchandise exports. Reveals resource-dependence structure.
+  // Verified 2025-06-12: ~145-150 countries.
+  { metric: "ores_metals_exports", code: "TX.VAL.MMTL.ZS.UN", unit: "%" },
+  { metric: "fuel_exports", code: "TX.VAL.FUEL.ZS.UN", unit: "%" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -1228,6 +1242,15 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     OWID_IHME,
     "https://ourworldindata.org/grapher/death-rates-from-drug-use-disorders",
   ],
+  [
+    "cancer_deaths",
+    "Cancer death rates (per 100,000, age-standardized)",
+    "per 100k",
+    "magnitude",
+    true,
+    OWID_IHME,
+    "https://ourworldindata.org/grapher/cancer-death-rates-owid",
+  ],
   // ---- Labor, connectivity, governance (World Bank) ----
   [
     "unemployment",
@@ -1393,6 +1416,53 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     WB.name,
     "https://data.worldbank.org/indicator/IC.REG.DURS",
+  ],
+  // ---- Additional World Governance Indicators (WGI) ----
+  [
+    "rule_of_law",
+    "Rule of law (World Governance Indicator)",
+    "score",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/RL.EST",
+  ],
+  [
+    "political_stability",
+    "Political stability and absence of violence (WGI)",
+    "score",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/PV.EST",
+  ],
+  [
+    "gov_effectiveness",
+    "Government effectiveness (World Governance Indicator)",
+    "score",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/GE.EST",
+  ],
+  // ---- Export composition (World Bank / UN COMTRADE via WDI) ----
+  [
+    "ores_metals_exports",
+    "Ores & metals exports (% of merchandise exports)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/TX.VAL.MMTL.ZS.UN",
+  ],
+  [
+    "fuel_exports",
+    "Fuel exports (% of merchandise exports)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/TX.VAL.FUEL.ZS.UN",
   ],
 ];
 
