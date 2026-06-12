@@ -100,6 +100,7 @@ const OWID_UNCCD = "Our World in Data — UNCCD (SDG 15.3.1)";
 const OWID_JAMBECK = "Our World in Data — Jambeck et al. (2015), Science";
 const OWID_MEIJER = "Our World in Data — Meijer et al. (2021), Science Advances";
 const OWID_FAO_FISH = "Our World in Data — FAO FishStat";
+const OWID_GBD = "Our World in Data — NCD Risk Factor Collaboration (NCD-RisC)";
 
 // metric, OWID grapher slug, label, unit, source_name — OWID/grapher CSV series.
 // Each series is a single value column (entity,code,year,value), parsed from the
@@ -126,6 +127,9 @@ const OWID_SERIES: [string, string, string, string, string][] = [
   // aquaculture-farmed-fish-production ~212 countries.
   ["fish_catch", "fish-seafood-production", "Wild fish & seafood catch", "t", OWID_FAO_FISH],
   ["aquaculture", "aquaculture-farmed-fish-production", "Aquaculture production", "t", OWID_FAO_FISH],
+  // --- Health (NCD-RisC via OWID) ---
+  // Verified 2025-06-12: share-of-adults-defined-as-obese 194 countries.
+  ["obesity_adults", "share-of-adults-defined-as-obese", "Adult obesity prevalence", "%", OWID_GBD],
   // --- Minerals (USGS, tonnes; OWID's "_kt" column is actually tonnes —
   //     verified against real world totals, e.g. ~244,637 t lithium in 2024) ---
   ["lithium_production", "lithium-production", "Lithium mine production", "t", OWID_USGS],
@@ -187,6 +191,15 @@ const WB_INDICATORS = [
   { metric: "agri_land", code: "AG.LND.AGRI.ZS", unit: "%" },
   { metric: "life_expectancy", code: "SP.DYN.LE00.IN", unit: "years" },
   { metric: "child_mortality", code: "SH.DYN.MORT", unit: "per 1000" },
+  // ---- Economy & demographics (World Bank) ----
+  // Verified 2025-06-12: 177–195 real countries each.
+  { metric: "gdp_per_capita", code: "NY.GDP.PCAP.CD", unit: "US$" },
+  { metric: "maternal_mortality", code: "SH.STA.MMRT", unit: "per 100k" },
+  { metric: "internet_access", code: "IT.NET.USER.ZS", unit: "%" },
+  { metric: "school_enrollment", code: "SE.PRM.ENRR", unit: "%" },
+  { metric: "access_to_finance", code: "FX.OWN.TOTL.ZS", unit: "%" },
+  { metric: "arable_land", code: "AG.LND.CROP.ZS", unit: "%" },
+  { metric: "energy_per_capita", code: "EG.USE.PCAP.KG.OE", unit: "kg oil eq" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -582,6 +595,80 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     true,
     WB.name,
     "https://data.worldbank.org/indicator/SH.DYN.MORT",
+  ],
+  // ---- Economy & demographics (World Bank) ----
+  [
+    "gdp_per_capita",
+    "GDP per capita (current US$)",
+    "US$",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/NY.GDP.PCAP.CD",
+  ],
+  [
+    "maternal_mortality",
+    "Maternal mortality ratio",
+    "per 100k",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SH.STA.MMRT",
+  ],
+  [
+    "internet_access",
+    "Internet users (% of population)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/IT.NET.USER.ZS",
+  ],
+  [
+    "school_enrollment",
+    "Primary school enrollment (gross %)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SE.PRM.ENRR",
+  ],
+  [
+    "access_to_finance",
+    "Account at financial institution (% age 15+)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/FX.OWN.TOTL.ZS",
+  ],
+  [
+    "arable_land",
+    "Arable land (% of land area)",
+    "%",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/AG.LND.CROP.ZS",
+  ],
+  [
+    "energy_per_capita",
+    "Energy use per capita",
+    "kg oil eq",
+    "magnitude",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/EG.USE.PCAP.KG.OE",
+  ],
+  // ---- Obesity (NCD-RisC via OWID) ----
+  [
+    "obesity_adults",
+    "Adult obesity prevalence",
+    "%",
+    "percent",
+    true,
+    OWID_GBD,
+    "https://ourworldindata.org/grapher/share-of-adults-defined-as-obese",
   ],
   // ---- Biodiversity (World Bank → IUCN / UNEP-WCMC) ----
   [

@@ -124,6 +124,14 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   agri_land: "Most agricultural land",
   life_expectancy: "Lowest life expectancy",
   child_mortality: "Highest child mortality",
+  gdp_per_capita: "Highest GDP per capita",
+  maternal_mortality: "Highest maternal mortality",
+  internet_access: "Lowest internet access",
+  school_enrollment: "Lowest primary enrollment",
+  access_to_finance: "Lowest financial access",
+  arable_land: "Most arable land",
+  energy_per_capita: "Highest energy use per person",
+  obesity_adults: "Highest adult obesity",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -317,6 +325,34 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which countries have the most agricultural land?",
     "How does agricultural land use connect to deforestation and water stress?",
   ],
+  gdp_per_capita: [
+    "Which resource-rich countries have the lowest GDP per capita?",
+    "Where is the gap between resource wealth and people's prosperity biggest?",
+  ],
+  maternal_mortality: [
+    "Where is maternal mortality highest, and what drives the gap?",
+    "How does maternal mortality overlap with resource extraction and poverty?",
+  ],
+  internet_access: [
+    "Which countries have the least internet access?",
+    "How does the digital divide map onto resource wealth and poverty?",
+  ],
+  school_enrollment: [
+    "Where is primary school enrollment lowest?",
+    "How does education access compare to resource extraction wealth?",
+  ],
+  access_to_finance: [
+    "Where do people lack access to basic financial services?",
+    "How does financial exclusion map onto resource wealth and poverty?",
+  ],
+  obesity_adults: [
+    "Where is adult obesity highest, and what's driving it?",
+    "How does the nutrition transition connect to trade and food systems?",
+  ],
+  energy_per_capita: [
+    "Which countries use the most energy per person?",
+    "How does per-capita energy use relate to emissions and development?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -363,7 +399,8 @@ const LAYER_CATEGORIES: {
     color: "#0284c7",
     ids: [
       "water_access_basic","renew_water_pc","water_stress","forest_area",
-      "forest_rents","land_degradation","terrestrial_protected","marine_protected",
+      "forest_rents","land_degradation","arable_land",
+      "terrestrial_protected","marine_protected",
     ],
   },
   {
@@ -372,7 +409,8 @@ const LAYER_CATEGORIES: {
     color: "#dc2626",
     ids: [
       "coal_production","oil_production","gas_production","renewable_energy",
-      "coal_rents","oil_rents","gas_rents","resource_rents_total","mineral_rents",
+      "energy_per_capita","coal_rents","oil_rents","gas_rents",
+      "resource_rents_total","mineral_rents",
     ],
   },
   {
@@ -400,6 +438,15 @@ const LAYER_CATEGORIES: {
     label: "Biodiversity",
     color: "#059669",
     ids: ["threatened_birds","threatened_plants"],
+  },
+  {
+    id: "economy_demog",
+    label: "Economy & Development",
+    color: "#7c2d12",
+    ids: [
+      "gdp_per_capita","internet_access","school_enrollment",
+      "access_to_finance","maternal_mortality","obesity_adults","energy_per_capita",
+    ],
   },
 ];
 
