@@ -68,6 +68,8 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   malaria_deaths: { label: "Malaria death rates", meaning: "deaths from malaria per 100,000 — concentrated in tropical regions with weak health infrastructure and high vector pressure", bucket: 0 },
   diarrhea_deaths: { label: "Diarrheal disease deaths", meaning: "deaths from diarrheal diseases per 100,000 — a direct indicator of water safety, sanitation coverage, and child health", bucket: 0 },
   rural_electricity: { label: "Rural electrification", meaning: "% of rural population with access to electricity — reveals the urban–rural infrastructure divide", bucket: 0 },
+  infant_mortality: { label: "Infant mortality rate", meaning: "deaths in the first year of life per 1,000 live births — finer indicator than under-5 mortality, sensitive to birth care quality", bucket: 0 },
+  life_expectancy_female: { label: "Female life expectancy", meaning: "years a girl born today can expect to live — comparison with overall figure reveals gender health inequalities", bucket: 0 },
   employment_ratio: { label: "Employment-to-population ratio", meaning: "share of working-age adults (15+) who are employed — higher = more people contributing to the economy", bucket: 0 },
   broadband: { label: "Fixed broadband access", meaning: "fixed broadband subscriptions per 100 people — indicator of digital infrastructure depth beyond mobile-only connectivity", bucket: 0 },
   fertility_rate: { label: "Fertility rate", meaning: "average number of births per woman — reflects education, health access, and women's autonomy", bucket: 0 },
@@ -145,6 +147,8 @@ const MEANING: Record<string, { label: string; meaning: string; bucket: 0 | 1 | 
   tertiary_enrollment: { label: "Tertiary enrollment", meaning: "gross enrollment in higher education — signal of human capital investment and labor market sophistication", bucket: 2 },
   domestic_credit: { label: "Private sector credit", meaning: "domestic credit to private sector as % of GDP — deeper = more financialised economy and investment capacity", bucket: 2 },
   secure_servers: { label: "Secure internet servers", meaning: "secure servers per million people — indicates digital infrastructure maturity and readiness for e-commerce and digital governance", bucket: 2 },
+  external_debt: { label: "External debt stocks", meaning: "foreign debt as % of GNI — high values constrain fiscal policy and signal dependency on international creditors, including for resource-sector finance", bucket: 2 },
+  public_debt: { label: "Central government debt", meaning: "government debt as % of GDP — shapes the state's capacity to invest in climate transition, healthcare, and infrastructure", bucket: 2 },
 };
 
 const BUCKETS = [

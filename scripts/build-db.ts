@@ -365,6 +365,16 @@ const WB_INDICATORS = [
   // Secure internet servers per million — signals digital infrastructure maturity.
   // Verified 2025-06-12: ~175 countries.
   { metric: "secure_servers", code: "IT.NET.SECR.P6", unit: "per million" },
+  // ---- Debt (World Bank / IMF via WDI) ----
+  // Verified 2025-06-12: external debt ~160c, public debt ~120c.
+  { metric: "external_debt", code: "DT.DOD.DECT.GD.ZS", unit: "%" },
+  { metric: "public_debt", code: "GC.DOD.TOTL.GD.ZS", unit: "%" },
+  // ---- Detailed mortality & gender health (World Bank) ----
+  // Infant mortality (under 1 year) is finer than child_mortality (under 5).
+  // Female life expectancy shows gender health gap vs life_expectancy (all).
+  // Verified 2025-06-12: ~185 countries each.
+  { metric: "infant_mortality", code: "SP.DYN.IMRT.IN", unit: "per 1000" },
+  { metric: "life_expectancy_female", code: "SP.DYN.LE00.FE.IN", unit: "years" },
 ];
 
 // id, label, unit, display, higher_is_worse, source_name, source_url
@@ -1557,6 +1567,43 @@ const LAYERS: [string, string, string, string, boolean, string, string][] = [
     false,
     WB.name,
     "https://data.worldbank.org/indicator/IT.NET.SECR.P6",
+  ],
+  // ---- Debt & detailed health (World Bank) ----
+  [
+    "external_debt",
+    "External debt stocks (% of GNI)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/DT.DOD.DECT.GD.ZS",
+  ],
+  [
+    "public_debt",
+    "Central government debt (% of GDP)",
+    "%",
+    "percent",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/GC.DOD.TOTL.GD.ZS",
+  ],
+  [
+    "infant_mortality",
+    "Infant mortality rate (per 1,000 live births)",
+    "per 1000",
+    "magnitude",
+    true,
+    WB.name,
+    "https://data.worldbank.org/indicator/SP.DYN.IMRT.IN",
+  ],
+  [
+    "life_expectancy_female",
+    "Female life expectancy at birth (years)",
+    "years",
+    "percent",
+    false,
+    WB.name,
+    "https://data.worldbank.org/indicator/SP.DYN.LE00.FE.IN",
   ],
   // ---- Labor structure, health delivery, carbon, investment, trade (World Bank) ----
   [

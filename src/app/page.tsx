@@ -212,6 +212,10 @@ const HIGHLIGHT_HEADINGS: Record<string, string> = {
   rural_electricity: "Lowest rural electrification",
   domestic_credit: "Deepest private credit market",
   secure_servers: "Most secure internet servers",
+  external_debt: "Highest external debt burden",
+  public_debt: "Highest public debt (% GDP)",
+  infant_mortality: "Highest infant mortality",
+  life_expectancy_female: "Highest female life expectancy",
 };
 
 // Per-layer question suggestions for the chat (varied — not just cobalt).
@@ -753,6 +757,22 @@ const LAYER_SUGGESTIONS: Record<string, string[]> = {
     "Which countries have the most developed secure internet infrastructure?",
     "How do secure server counts relate to e-commerce, governance, and digital sovereignty?",
   ],
+  external_debt: [
+    "Which countries carry the heaviest external debt burdens relative to their income?",
+    "How does high external debt constrain a government's ability to invest in climate and people?",
+  ],
+  public_debt: [
+    "Where does government debt exceed the economy's annual output?",
+    "How does public debt level shape fiscal space for renewable energy and social investment?",
+  ],
+  infant_mortality: [
+    "Where are infants most likely to die before their first birthday, and why?",
+    "How does infant mortality map onto access to skilled birth attendants, nutrition, and water safety?",
+  ],
+  life_expectancy_female: [
+    "Where do women live longest, and what explains the variation?",
+    "How does female life expectancy compare to the overall figure — where is the gender gap widest?",
+  ],
 };
 
 const GENERAL_SUGGESTIONS = [
@@ -829,6 +849,7 @@ const LAYER_CATEGORIES: {
       "alcohol_consumption","uhc_coverage","cardiovascular_deaths",
       "homicide_rate","alcohol_deaths","drug_deaths","cancer_deaths",
       "malaria_deaths","diarrhea_deaths","immunization_dtp","rural_electricity",
+      "infant_mortality","life_expectancy_female",
       "exports_value","imports_value",
     ],
   },
@@ -868,6 +889,7 @@ const LAYER_CATEGORIES: {
       "ores_metals_exports","fuel_exports",
       "fdi_inflows","self_employment",
       "tertiary_enrollment","domestic_credit","secure_servers",
+      "external_debt","public_debt",
     ],
   },
 ];
