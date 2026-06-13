@@ -352,7 +352,7 @@ export default function GlobeMap({
 }: {
   mode: "globe" | "mercator" | "satellite" | "space";
   onSelectIso?: (iso: string | undefined) => void;
-  onCamClick?: (cam: OverlayPoint) => void; // called when a camera pin with embedUrl is clicked
+  onCamClick?: (cam: OverlayPoint, screenX: number, screenY: number) => void; // called with canvas-relative click coords
   highlightIso?: string[]; // ISO3s referenced by the current answer
   layers?: string[]; // active data filters (one OR many, combined)
   showMines?: boolean; // overlay real mine/deposit points (USGS PP1802)
@@ -2494,14 +2494,10 @@ export default function GlobeMap({
     const rect = e.currentTarget.getBoundingClientRect();
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
-    // Click a camera overlay → open viewer panel (if embedUrl) or source link
+    // Click a camera overlay → always open the in-map popup, passing screen coords
     const cam = hitOverlayPoint(cx, cy);
     if (cam && cam.kind === "camera") {
-      if (cam.embedUrl) {
-        onCamClick?.(cam);
-      } else {
-        window.open(cam.sourceUrl, "_blank", "noopener,noreferrer");
-      }
+      onCamClick?.(cam, cx, cy);
       return;
     }
     // Click a mine marker → open high-resolution satellite imagery of the

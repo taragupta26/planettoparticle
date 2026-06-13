@@ -1395,7 +1395,11 @@ export default function Home() {
   const [showCams, setShowCams] = useState(false);
   const [showClimate, setShowClimate] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
-  const [activeCam, setActiveCam] = useState<{title: string; embedUrl: string; sourceUrl: string; source: string; description?: string} | null>(null);
+  const [activeCam, setActiveCam] = useState<{
+    title: string; embedUrl?: string; sourceUrl: string;
+    source: string; description?: string; category?: string;
+    screenX: number; screenY: number;
+  } | null>(null);
   const [showWeatherPanel, setShowWeatherPanel] = useState(false);
   const [showNoaaLayer, setShowNoaaLayer] = useState(false);
   const [noaaProduct, setNoaaProduct] = useState<"GEOCOLOR" | "Water Vapor" | "Night IR">("GEOCOLOR");
@@ -1593,9 +1597,17 @@ export default function Home() {
             setCountryPanelOpen(true); // auto-reopen panel on new country click
             if (iso && isoToEvidence[iso]) setHighlight(isoToEvidence[iso]);
           }}
-          onCamClick={(cam) => {
-            if (cam.embedUrl) setActiveCam({title: cam.title, embedUrl: cam.embedUrl, sourceUrl: cam.sourceUrl, source: cam.source, description: cam.description});
-            else window.open(cam.sourceUrl, "_blank");
+          onCamClick={(cam, screenX, screenY) => {
+            setActiveCam({
+              title: cam.title,
+              embedUrl: cam.embedUrl,
+              sourceUrl: cam.sourceUrl,
+              source: cam.source,
+              description: cam.description,
+              category: cam.category,
+              screenX,
+              screenY,
+            });
           }}
           showNoaaLayer={showNoaaLayer}
           noaaProduct={noaaProduct}
@@ -2173,35 +2185,84 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* ── Camera viewer panel — positioned over the map canvas (left of right panel) ── */}
-      {activeCam && (
-        <div className="absolute bottom-20 left-[270px] z-40 flex w-[420px] flex-col rounded-xl border border-earth-200 bg-white/95 shadow-2xl backdrop-blur-sm">
-          <div className="flex items-center justify-between border-b border-earth-100 px-3 py-2">
-            <div>
-              <div className="text-[13px] font-semibold text-earth-800">{activeCam.title}</div>
-              <div className="text-[10px] text-earth-500">{activeCam.source}</div>
+      {/* ── Camera popup — floats near the pin that was clicked ── */}
+      {activeCam && (() => {
+        const PW = 370;
+        const PH = activeCam.embedUrl ? 292 : 130;
+        const GAP = 14; // px gap between popup bottom-arrow and the pin
+        // Center the popup horizontally over the pin; place above it
+        let popLeft = Math.round(activeCam.screenX - PW / 2);
+        let popTop  = Math.round(activeCam.screenY - PH - GAP);
+        // Clamp: clear left panel (260px) and right panel (~440px from right edge).
+        // Use a safe fallback width of 1200 if window isn't available (SSR guard).
+        const vw = typeof window !== "undefined" ? window.innerWidth : 1200;
+        popLeft = Math.max(268, Math.min(popLeft, vw - PW - 444));
+        popTop  = Math.max(60, popTop);
+        // Arrow offset: pin's x relative to popup left, clamped inside popup
+        const arrowOffset = Math.max(14, Math.min(PW - 14, activeCam.screenX - popLeft));
+        // Is the popup above the pin (normal) or below (clamped to top)?
+        const popupAbove = popTop < activeCam.screenY - 20;
+        return (
+          <div
+            style={{ left: popLeft, top: popTop, width: PW }}
+            className="pointer-events-auto absolute z-50 flex flex-col overflow-visible rounded-xl border border-earth-200 bg-white/97 shadow-2xl backdrop-blur-md"
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-earth-100 px-3 py-2">
+              <div className="min-w-0">
+                <div className="truncate text-[12px] font-semibold text-earth-800">{activeCam.title}</div>
+                <div className="text-[10px] text-earth-400">
+                  {activeCam.source}{activeCam.category ? ` · ${activeCam.category}` : ""}
+                </div>
+              </div>
+              <div className="ml-2 flex shrink-0 items-center gap-1">
+                <a href={activeCam.sourceUrl} target="_blank" rel="noreferrer"
+                   className="rounded px-1.5 py-0.5 text-[10px] text-earth-400 hover:bg-earth-50 hover:text-earth-700"
+                   title="Open source page">↗</a>
+                <button onClick={() => setActiveCam(null)}
+                        className="rounded px-1.5 py-0.5 text-[11px] text-earth-400 hover:bg-earth-50">✕</button>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <a href={activeCam.sourceUrl} target="_blank" rel="noreferrer"
-                 className="rounded px-1.5 py-0.5 text-[10px] text-earth-500 hover:bg-earth-50 hover:text-earth-700">
-                ↗ source
-              </a>
-              <button onClick={() => setActiveCam(null)}
-                      className="rounded px-1.5 py-0.5 text-[11px] text-earth-400 hover:bg-earth-50">✕</button>
-            </div>
+
+            {/* Content: iframe embed or description card */}
+            {activeCam.embedUrl ? (
+              <iframe
+                src={activeCam.embedUrl}
+                className="h-[220px] w-full rounded-b-xl"
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                title={activeCam.title}
+              />
+            ) : (
+              <div className="px-3 py-2.5 space-y-2">
+                {activeCam.description && (
+                  <p className="text-[11px] leading-relaxed text-earth-600">{activeCam.description}</p>
+                )}
+                <a href={activeCam.sourceUrl} target="_blank" rel="noreferrer"
+                   className="inline-flex items-center gap-1.5 rounded-lg bg-earth-700 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-earth-800">
+                  Open live camera ↗
+                </a>
+              </div>
+            )}
+
+            {/* Connector arrow pointing down toward the pin */}
+            {popupAbove && (
+              <>
+                {/* border-colored shadow arrow (slightly larger, sits behind) */}
+                <span
+                  style={{ left: arrowOffset - 8, bottom: -10 }}
+                  className="pointer-events-none absolute h-0 w-0 border-l-[8px] border-r-[8px] border-t-[10px] border-l-transparent border-r-transparent border-t-earth-200"
+                />
+                {/* white fill arrow */}
+                <span
+                  style={{ left: arrowOffset - 6, bottom: -8 }}
+                  className="pointer-events-none absolute h-0 w-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent border-t-white"
+                />
+              </>
+            )}
           </div>
-          <iframe
-            src={activeCam.embedUrl}
-            className="h-[236px] w-full rounded-b-xl"
-            allow="autoplay; fullscreen"
-            allowFullScreen
-            title={activeCam.title}
-          />
-          {activeCam.description && (
-            <div className="border-t border-earth-100 px-3 py-1.5 text-[10px] text-earth-500">{activeCam.description}</div>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       {/* ── NOAA GOES-East product selector HUD — thin pill over the map canvas ── */}
       {showNoaaLayer && (
