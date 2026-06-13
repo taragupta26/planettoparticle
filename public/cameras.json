@@ -51,7 +51,7 @@
     "category": "wildlife",
     "source": "Smithsonian National Zoo",
     "sourceUrl": "https://nationalzoo.si.edu/webcams",
-    "description": "Live cameras at the Smithsonian National Zoo including giant pandas, elephants, and lions."
+    "description": "Live cameras at the Smithsonian National Zoo including elephants, lions, and naked mole-rats. (Streams on the Zoo's own site.)"
   },
   {
     "id": "times-square-nyc",
@@ -59,9 +59,10 @@
     "lat": 40.758,
     "lng": -73.9855,
     "category": "city",
+    "embedUrl": "https://www.youtube.com/embed/z-jYdOIKcTQ?autoplay=1&mute=1",
     "source": "EarthCam",
     "sourceUrl": "https://www.earthcam.com/usa/newyork/timessquare/",
-    "description": "Live panoramic view of Times Square, the iconic crossroads of the world in Midtown Manhattan."
+    "description": "Live view of Times Square, the iconic crossroads of the world in Midtown Manhattan (EarthCam)."
   },
   {
     "id": "niagara-falls-skyline",
@@ -79,9 +80,10 @@
     "lat": 48.8584,
     "lng": 2.2945,
     "category": "city",
-    "source": "Skyline Webcams",
-    "sourceUrl": "https://www.skylinewebcams.com/en/webcam/france/ile-de-france/paris/eiffel-tower.html",
-    "description": "Live wide-angle view of the Eiffel Tower and Champ de Mars from central Paris."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1555326274&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1555326274",
+    "description": "Live timelapse view of the Eiffel Tower and Champ de Mars from central Paris (Windy Webcams network)."
   },
   {
     "id": "waikiki-beach",
@@ -89,9 +91,10 @@
     "lat": 21.2785,
     "lng": -157.8288,
     "category": "beach",
-    "source": "LiveBeaches.com",
-    "sourceUrl": "https://www.livebeaches.com/countries/",
-    "description": "Live beach cam overlooking the famous Waikiki shoreline in Honolulu, Hawaii."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1401526309&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1401526309",
+    "description": "Live HD cam overlooking the famous Waikiki shoreline in Honolulu, Hawaii (Windy Webcams network)."
   },
   {
     "id": "acropolis-athens",
@@ -109,9 +112,10 @@
     "lat": -33.8914,
     "lng": 151.2768,
     "category": "beach",
-    "source": "LiveBeaches.com",
-    "sourceUrl": "https://www.livebeaches.com",
-    "description": "Live surf cam at Sydney's iconic Bondi Beach, one of Australia's most famous coastal spots."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1721795690&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1721795690",
+    "description": "Live cam at Sydney's iconic Bondi Beach from the Bondi Pavilion (Windy Webcams network)."
   },
   {
     "id": "colosseum-rome",
@@ -129,9 +133,10 @@
     "lat": 35.6595,
     "lng": 139.7004,
     "category": "city",
-    "source": "EarthCam",
-    "sourceUrl": "https://www.earthcam.com/japan/tokyo/shibuya/",
-    "description": "Live view of Shibuya Scramble Crossing, the world's busiest pedestrian intersection in Tokyo."
+    "embedUrl": "https://www.youtube.com/embed/8H3nRCFVR6Y?autoplay=1&mute=1",
+    "source": "ANN / TV Asahi",
+    "sourceUrl": "https://www.youtube.com/watch?v=8H3nRCFVR6Y",
+    "description": "Live view of Shibuya Scramble Crossing, the world's busiest pedestrian intersection (ANN / TV Asahi)."
   },
   {
     "id": "big-ben-london",
@@ -161,7 +166,7 @@
     "category": "geology",
     "source": "NPS Yellowstone",
     "sourceUrl": "https://www.nps.gov/yell/learn/photosmultimedia/webcams.htm",
-    "description": "Live National Park Service webcam at Old Faithful Geyser, which erupts roughly every 90 minutes."
+    "description": "Live National Park Service streaming cam at Old Faithful Geyser, which erupts roughly every 90 minutes."
   },
   {
     "id": "grand-canyon-south-rim",
@@ -169,9 +174,10 @@
     "lat": 36.0544,
     "lng": -112.1401,
     "category": "geology",
+    "imageUrl": "https://cdn.pixelcaster.com/public.pixelcaster.com/snapshots/grandcanyon-2/latest.jpg",
     "source": "NPS Grand Canyon",
     "sourceUrl": "https://www.nps.gov/grca/learn/photosmultimedia/webcams.htm",
-    "description": "Live NPS webcam overlooking the vast Colorado River canyon from the South Rim visitor area."
+    "description": "Auto-refreshing NPS snapshot from Kolb Studio overlooking the Colorado River canyon (updates ~1 min)."
   },
   {
     "id": "decorah-eagles",
@@ -179,9 +185,10 @@
     "lat": 43.3009,
     "lng": -91.804,
     "category": "wildlife",
+    "embedUrl": "https://www.youtube.com/embed/live_stream?channel=UCoC_-rIBtLCzAl5l-834jZQ&autoplay=1&mute=1",
     "source": "Raptor Resource Project",
     "sourceUrl": "https://www.raptorresource.org",
-    "description": "Nest cam at an active bald eagle nest in Decorah, Iowa, operated by the Raptor Resource Project."
+    "description": "Live nest cam at an active bald eagle nest in Decorah, Iowa (Raptor Resource Project)."
   },
   {
     "id": "venice-canal-grande",
@@ -189,19 +196,21 @@
     "lat": 45.4341,
     "lng": 12.3388,
     "category": "city",
-    "source": "Skyline Webcams",
-    "sourceUrl": "https://www.skylinewebcams.com/en/webcam/italia/veneto/venezia/canal-grande.html",
-    "description": "Live HD view of Venice's Grand Canal with gondolas and historic palaces."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1576781099&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1576781099",
+    "description": "Live view of Venice's Grand Canal at San Marco with gondolas and historic palaces (Windy Webcams network)."
   },
   {
     "id": "dubai-burj-khalifa",
-    "label": "Dubai — Burj Khalifa Area",
+    "label": "Downtown Dubai — Burj Khalifa",
     "lat": 25.1972,
     "lng": 55.2744,
     "category": "city",
-    "source": "Skyline Webcams",
-    "sourceUrl": "https://www.skylinewebcams.com",
-    "description": "Live view of Dubai's skyline including the Burj Khalifa, the world's tallest building."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1169404847&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1169404847",
+    "description": "Live view of Downtown Dubai's skyline including the Burj Khalifa, the world's tallest building (Windy Webcams network)."
   },
   {
     "id": "miami-south-beach",
@@ -209,9 +218,10 @@
     "lat": 25.7823,
     "lng": -80.1301,
     "category": "beach",
-    "source": "LiveBeaches.com",
+    "embedUrl": "https://www.youtube.com/embed/41pHwchaias?autoplay=1&mute=1",
+    "source": "Live Beaches Cam",
     "sourceUrl": "https://www.livebeaches.com/countries/",
-    "description": "Live beach camera on Miami's famous South Beach strip in Florida."
+    "description": "Live 4K street cam on Collins Avenue, Miami South Beach, Florida."
   },
   {
     "id": "rio-copacabana",
@@ -225,13 +235,14 @@
   },
   {
     "id": "mauna-kea-observatory",
-    "label": "Mauna Kea Observatory, Hawaii",
+    "label": "Mauna Kea Summit Cloud Cam, Hawaii",
     "lat": 19.8207,
     "lng": -155.4681,
     "category": "space",
-    "source": "Univ. of Hawaii Institute for Astronomy",
-    "sourceUrl": "https://www.ifa.hawaii.edu/wco/",
-    "description": "Live summit webcam at Mauna Kea, one of the world's premier astronomical observing sites."
+    "imageUrl": "https://www.cfht.hawaii.edu/cloudcam2/cloudcam1/cloudcam1.jpg",
+    "source": "Canada-France-Hawaii Telescope (CFHT)",
+    "sourceUrl": "https://www.cfht.hawaii.edu/en/gallery/cloudcams/",
+    "description": "CFHT all-sky cloud camera at the Mauna Kea summit. Best at night (Hawaii time) — shows a placeholder during daylight."
   },
   {
     "id": "white-house-lawn",
@@ -259,19 +270,20 @@
     "lat": 44.428,
     "lng": -110.5885,
     "category": "wildlife",
-    "source": "explore.org",
-    "sourceUrl": "https://explore.org/livecams",
-    "description": "Live wildlife cam at Yellowstone's Lamar Valley, prime habitat for wolves and bison."
+    "source": "NPS Yellowstone",
+    "sourceUrl": "https://www.nps.gov/yell/learn/photosmultimedia/webcams.htm",
+    "description": "Yellowstone's Lamar Valley, prime habitat for wolves and bison (NPS webcams)."
   },
   {
     "id": "amazon-rainforest",
-    "label": "Amazon Rainforest Canopy Cam",
-    "lat": -3.119,
-    "lng": -60.0217,
+    "label": "Amazon Rainforest — Madre de Dios, Peru",
+    "lat": -12.5933,
+    "lng": -70.0858,
     "category": "nature",
-    "source": "explore.org",
-    "sourceUrl": "https://explore.org/livecams",
-    "description": "Live camera in the Amazon basin showing tropical forest canopy near Manaus, Brazil."
+    "embedUrl": "https://www.youtube.com/embed/MSOomqI01uU?autoplay=1&mute=1",
+    "source": "EarthCam · Junglekeepers",
+    "sourceUrl": "https://www.earthcam.com/world/peru/madrededios/",
+    "description": "Live 24/7 Amazon rainforest cam in Madre de Dios, Peru (EarthCam in partnership with Junglekeepers)."
   },
   {
     "id": "africam-tembe-elephants",
@@ -279,9 +291,10 @@
     "lat": -27.0333,
     "lng": 32.4167,
     "category": "wildlife",
-    "source": "Africam",
-    "sourceUrl": "https://www.africam.com",
-    "description": "Live waterhole and bush cam at Tembe Elephant Park near the Mozambique border."
+    "embedUrl": "https://www.youtube.com/embed/0P_LBKqVbfs?autoplay=1&mute=1",
+    "source": "Africam · explore.org",
+    "sourceUrl": "https://africam.com/lodge/tembe-elephant-park/",
+    "description": "Live elephant cam at Tembe Elephant Park near the Mozambique border (Africam)."
   },
   {
     "id": "cape-town-table-mountain",
@@ -289,9 +302,10 @@
     "lat": -33.9628,
     "lng": 18.4098,
     "category": "city",
-    "source": "Webcam Taxi",
-    "sourceUrl": "https://www.webcamtaxi.com/en/south-africa/western-cape/cape-town.html",
-    "description": "Live view of Table Mountain and Cape Town's cityscape from the Atlantic seaboard."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1170887551&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1170887551",
+    "description": "Live view toward Table Mountain and Cape Town (Windy Webcams network)."
   },
   {
     "id": "nairobi-giraffe-centre",
@@ -301,17 +315,18 @@
     "category": "wildlife",
     "source": "Africam",
     "sourceUrl": "https://www.africam.com",
-    "description": "Live camera at the African Fund for Endangered Wildlife Giraffe Centre in Nairobi, Kenya."
+    "description": "The African Fund for Endangered Wildlife Giraffe Centre in Nairobi, Kenya."
   },
   {
     "id": "kruger-park-waterhole",
-    "label": "Kruger National Park Waterhole",
-    "lat": -24.0,
-    "lng": 31.5,
+    "label": "Greater Kruger — Olifants River",
+    "lat": -24.05,
+    "lng": 31.05,
     "category": "wildlife",
+    "embedUrl": "https://www.youtube.com/embed/NapztoCaKFY?autoplay=1&mute=1",
     "source": "Africam",
-    "sourceUrl": "https://www.africam.com",
-    "description": "Live waterhole cam at Kruger National Park, South Africa's premier Big Five wildlife reserve."
+    "sourceUrl": "https://africam.com/lodge/naledi-bush-lodge/",
+    "description": "Live waterhole cam on the Olifants River in the Greater Kruger (Balule), South Africa (Africam)."
   },
   {
     "id": "machu-picchu-peru",
@@ -329,9 +344,10 @@
     "lat": -34.6037,
     "lng": -58.3816,
     "category": "city",
-    "source": "Webcam Taxi",
-    "sourceUrl": "https://www.webcamtaxi.com/en/argentina/buenos-aires/obelisk.html",
-    "description": "Live webcam of the Obelisco in Buenos Aires along the Avenida 9 de Julio."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1512420944&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1512420944",
+    "description": "Live view of the Obelisco on 9 de Julio Avenue in Buenos Aires (Windy Webcams network)."
   },
   {
     "id": "shanghai-bund",
@@ -359,19 +375,21 @@
     "lat": 35.3606,
     "lng": 138.7274,
     "category": "geology",
-    "source": "World Cams",
-    "sourceUrl": "https://www.worldcams.tv/japan",
-    "description": "Live webcam with views of Mount Fuji, Japan's iconic stratovolcano and highest peak."
+    "embedUrl": "https://www.youtube.com/embed/i3SL2jbBK2k?autoplay=1&mute=1",
+    "source": "Mount Fuji 365",
+    "sourceUrl": "https://www.youtube.com/watch?v=i3SL2jbBK2k",
+    "description": "Live 24/7 view of Mount Fuji from Fuji City, Shizuoka, Japan's iconic stratovolcano and highest peak."
   },
   {
     "id": "arctic-svalbard",
-    "label": "Svalbard Arctic Tundra",
+    "label": "Svalbard — Longyearbyen Harbour",
     "lat": 78.2232,
     "lng": 15.6267,
     "category": "nature",
-    "source": "Webcam Taxi",
-    "sourceUrl": "https://www.webcamtaxi.com/en/norway/svalbard/longyearbyen.html",
-    "description": "Live camera at Longyearbyen, Svalbard — the world's northernmost settlement in the High Arctic."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1429792745&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1429792745",
+    "description": "Live panorama of Longyearbyen Harbour and Adventfjorden, Svalbard — the High Arctic (Windy Webcams network)."
   },
   {
     "id": "iceland-geysir",
@@ -389,9 +407,10 @@
     "lat": 41.4036,
     "lng": 2.1744,
     "category": "city",
-    "source": "Skyline Webcams",
-    "sourceUrl": "https://www.skylinewebcams.com",
-    "description": "Live webcam of Gaudí's unfinished Sagrada Família basilica in Barcelona, Spain."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1448811166&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1448811166",
+    "description": "Live view of Gaudí's Sagrada Família basilica in Barcelona, Spain (Windy Webcams network)."
   },
   {
     "id": "amsterdam-canal",
@@ -405,13 +424,14 @@
   },
   {
     "id": "coral-reef-caribbean",
-    "label": "Caribbean Coral Reef (SECORE)",
-    "lat": 17.9,
-    "lng": -66.0,
+    "label": "Cayman Reef Cam, Grand Cayman",
+    "lat": 19.35,
+    "lng": -81.38,
     "category": "ocean",
-    "source": "SECORE International",
-    "sourceUrl": "https://www.secore.org",
-    "description": "Underwater camera monitoring coral reef restoration sites in the Caribbean Sea."
+    "embedUrl": "https://www.youtube.com/embed/ZpnyPXloF2U?autoplay=1&mute=1",
+    "source": "explore.org",
+    "sourceUrl": "https://explore.org/livecams/oceans/cayman-reef-cam",
+    "description": "Live solar-powered coral-reef cleaning-station cam off Grand Cayman in the Caribbean (explore.org)."
   },
   {
     "id": "hong-kong-harbour",
@@ -419,9 +439,10 @@
     "lat": 22.2855,
     "lng": 114.1577,
     "category": "city",
-    "source": "Webcam Taxi",
-    "sourceUrl": "https://www.webcamtaxi.com/en/china/hong-kong/victoria-harbour.html",
-    "description": "Live panoramic view of Victoria Harbour and Hong Kong's skyline from Kowloon."
+    "embedUrl": "https://webcams.windy.com/webcams/public/embed/player?webcamId=1166267733&playerType=day&interactive=1",
+    "source": "Windy Webcams",
+    "sourceUrl": "https://www.windy.com/webcams/1166267733",
+    "description": "Live view of Victoria Harbour from Ocean Terminal, Hong Kong (Windy Webcams network)."
   },
   {
     "id": "kilimanjaro-gate",
@@ -439,9 +460,10 @@
     "lat": 33.9887,
     "lng": -118.4723,
     "category": "beach",
-    "source": "LiveBeaches.com",
+    "embedUrl": "https://www.youtube.com/embed/BHVqBcCM4TE?autoplay=1&mute=1",
+    "source": "Live Beaches Cam",
     "sourceUrl": "https://www.livebeaches.com/countries/",
-    "description": "Live surf and boardwalk camera at Venice Beach in Los Angeles, California."
+    "description": "Live 24/7 boardwalk and ocean cam at Venice Beach in Los Angeles, California."
   },
   {
     "id": "maldives-coral-atoll",
@@ -480,18 +502,19 @@
     "lng": 166.6863,
     "category": "nature",
     "source": "US Antarctic Program",
-    "sourceUrl": "https://www.usap.gov/videoclipsandmaps/",
-    "description": "Live webcam at the United States' McMurdo Station on Ross Island, Antarctica."
+    "sourceUrl": "https://www.usap.gov/videoclipsandmaps/mcmwebcam.cfm",
+    "description": "Live webcam at the United States' McMurdo Station on Ross Island, Antarctica (updates every 30s)."
   },
   {
-    "id": "norway-northern-lights",
-    "label": "Northern Lights Cam, Tromsø",
-    "lat": 69.6489,
-    "lng": 18.9551,
+    "id": "abisko-northern-lights",
+    "label": "Aurora Cam — Abisko, Sweden",
+    "lat": 68.3597,
+    "lng": 18.7833,
     "category": "nature",
-    "source": "Webcam Taxi",
-    "sourceUrl": "https://www.webcamtaxi.com/en/norway/troms/tromso.html",
-    "description": "Live all-sky aurora camera in Tromsø, Norway, one of the best spots to see the Northern Lights."
+    "embedUrl": "https://www.youtube.com/embed/live_stream?channel=UCx6-8cW9rHGNGhELh83fcCg&autoplay=1&mute=1",
+    "source": "Lights Over Lapland",
+    "sourceUrl": "https://lightsoverlapland.com/aurora-webcam/",
+    "description": "Live aurora webcam in Abisko, Swedish Lapland (Lights Over Lapland). Seasonal & night-only — typically off during the midnight-sun summer."
   },
   {
     "id": "amazon-river-manaus",
@@ -505,13 +528,13 @@
   },
   {
     "id": "galapagos-darwin-bay",
-    "label": "Galápagos Darwin Bay",
+    "label": "Galápagos Islands",
     "lat": -0.3284,
     "lng": -90.3554,
     "category": "ocean",
-    "source": "explore.org",
-    "sourceUrl": "https://explore.org/livecams",
-    "description": "Live underwater camera at Darwin Bay on Genovesa Island in the Galápagos archipelago."
+    "source": "Skyline Webcams",
+    "sourceUrl": "https://www.skylinewebcams.com/en/webcam/ecuador/galapagos.html",
+    "description": "Live webcam in the Galápagos archipelago, one of the world's richest marine ecosystems."
   },
   {
     "id": "mount-etna-sicily",
@@ -520,8 +543,8 @@
     "lng": 14.9934,
     "category": "volcano",
     "source": "INGV — Istituto Nazionale di Geofisica e Vulcanologia",
-    "sourceUrl": "https://www.ct.ingv.it/en/webcams.html",
-    "description": "Live volcanic webcam on Mount Etna, Europe's most active volcano on Sicily's eastern flank."
+    "sourceUrl": "https://www.ct.ingv.it/index.php/monitoraggio-e-sorveglianza/segnali-in-tempo-reale/video-sorveglianza-vulcanica-etna",
+    "description": "INGV volcanic surveillance webcams on Mount Etna, Europe's most active volcano on Sicily's eastern flank."
   },
   {
     "id": "stromboli-volcano",
@@ -530,7 +553,7 @@
     "lng": 15.2139,
     "category": "volcano",
     "source": "INGV",
-    "sourceUrl": "https://www.ct.ingv.it/en/webcams.html",
-    "description": "Live summit webcam monitoring Stromboli, the 'Lighthouse of the Mediterranean,' which erupts almost continuously."
+    "sourceUrl": "https://www.ct.ingv.it/index.php/monitoraggio-e-sorveglianza/segnali-in-tempo-reale/video-sorveglianza-stromboli",
+    "description": "INGV summit webcams monitoring Stromboli, the 'Lighthouse of the Mediterranean,' which erupts almost continuously."
   }
 ]

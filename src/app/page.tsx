@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { GroundedAnswer } from "@/lib/types";
 import EvidencePanel from "@/components/EvidencePanel";
@@ -1375,6 +1375,45 @@ const NetworkGraph = dynamic(() => import("@/components/NetworkGraph"), {
   ),
 });
 
+// Auto-refreshing still-image cam (NPS / USGS / observatory JPEGs that update
+// every ~1 min). Re-fetches by appending a cache-busting timestamp on a timer.
+function RefreshingCamImage({ src, title }: { src: string; title: string }) {
+  const [tick, setTick] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const baseRef = useRef(src);
+  useEffect(() => {
+    baseRef.current = src;
+    setFailed(false);
+    setTick(0);
+    const id = setInterval(() => setTick((t) => t + 1), 30_000); // refresh every 30s
+    return () => clearInterval(id);
+  }, [src]);
+  const sep = baseRef.current.includes("?") ? "&" : "?";
+  const url = `${baseRef.current}${sep}_t=${tick}`;
+  if (failed) {
+    return (
+      <div className="flex h-[200px] w-full items-center justify-center bg-earth-50 px-4 text-center text-[11px] text-earth-500">
+        Live image couldn’t load right now. Use “source ↗” to open the operator’s page.
+      </div>
+    );
+  }
+  return (
+    <div className="relative">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt={title}
+        className="h-[200px] w-full object-cover"
+        onError={() => setFailed(true)}
+      />
+      <span className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-black/55 px-1.5 py-0.5 text-[8px] font-medium text-white">
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
+        LIVE · refreshes 30s
+      </span>
+    </div>
+  );
+}
+
 export default function Home() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<GroundedAnswer | null>(null);
@@ -1396,7 +1435,7 @@ export default function Home() {
   const [showClimate, setShowClimate] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
   const [activeCam, setActiveCam] = useState<{
-    title: string; embedUrl?: string; sourceUrl: string;
+    title: string; embedUrl?: string; imageUrl?: string; sourceUrl: string;
     source: string; description?: string; category?: string;
     screenX: number; screenY: number;
   } | null>(null);
@@ -1601,6 +1640,7 @@ export default function Home() {
             setActiveCam({
               title: cam.title,
               embedUrl: cam.embedUrl,
+              imageUrl: cam.imageUrl,
               sourceUrl: cam.sourceUrl,
               source: cam.source,
               description: cam.description,
@@ -2188,7 +2228,7 @@ export default function Home() {
       {/* ── Camera popup — floats near the pin that was clicked ── */}
       {activeCam && (() => {
         const PW = 370;
-        const PH = activeCam.embedUrl ? 292 : 130;
+        const PH = activeCam.embedUrl ? 292 : activeCam.imageUrl ? 268 : 130;
         const GAP = 14; // px gap between popup bottom-arrow and the pin
         // Center the popup horizontally over the pin; place above it
         let popLeft = Math.round(activeCam.screenX - PW / 2);
@@ -2224,7 +2264,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Content: iframe embed or description card */}
+            {/* Content: iframe embed, auto-refreshing still image, or description card */}
             {activeCam.embedUrl ? (
               <iframe
                 src={activeCam.embedUrl}
@@ -2233,6 +2273,15 @@ export default function Home() {
                 allowFullScreen
                 title={activeCam.title}
               />
+            ) : activeCam.imageUrl ? (
+              <div className="flex flex-col">
+                <RefreshingCamImage src={activeCam.imageUrl} title={activeCam.title} />
+                {activeCam.description && (
+                  <div className="border-t border-earth-100 px-3 py-1.5 text-[10px] leading-snug text-earth-500">
+                    {activeCam.description}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="px-3 py-2.5 space-y-2">
                 {activeCam.description && (

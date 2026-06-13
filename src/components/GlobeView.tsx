@@ -820,6 +820,7 @@ export default function GlobeMap({
         lines: [["Category", c.category], ["Source", c.source]],
         source: c.source, sourceUrl: c.sourceUrl,
         embedUrl: c.embedUrl ?? undefined,
+        imageUrl: c.imageUrl ?? undefined,
         category: c.category,
         description: c.description,
       })));
