@@ -499,11 +499,13 @@ export default function GlobeMap({
   const noaaTileCache = useRef<Map<string, HTMLImageElement>>(new Map()); // GIBS GOES-East tiles
   const showNoaaLayerRef = useRef(showNoaaLayer);
   const noaaProductRef = useRef(noaaProduct);
-  // Satellite globe texture: Esri World Imagery zoom-1 tiles composited into a
-  // 1024×512 pseudo-equirectangular offscreen canvas (2:1 Mercator stretch).
-  // Four tiles: zt=1 → 2×2 grid. No crossOrigin needed (drawn, not read).
+  // Satellite globe texture: Esri World Imagery zoom-1 tiles resampled into an
+  // equirectangular texture, then rendered onto the sphere with a TRUE orthographic
+  // projection (per-pixel inverse) so the imagery lines up with the country borders.
   const satGlobeTilesRef = useRef<Map<string, HTMLImageElement>>(new Map());
-  const satGlobeCanvasRef = useRef<HTMLCanvasElement | null>(null); // composited texture
+  const satGlobeCanvasRef = useRef<HTMLCanvasElement | null>(null); // equirectangular texture (fallback draw)
+  const satTexDataRef = useRef<ImageData | null>(null); // equirectangular texture pixels (for ortho sampling)
+  const satDiscRef = useRef<{ canvas: HTMLCanvasElement; img: ImageData; size: number } | null>(null); // reusable disc buffer
   const [zoomTick, setZoomTick] = useState(0); // re-render zoom readout
   const rotYRef = useRef(-18); // longitude spin
   const rotXRef = useRef(16); // equator tilt
@@ -607,14 +609,17 @@ export default function GlobeMap({
   useEffect(() => {
     const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile";
     const tiles = satGlobeTilesRef.current;
-    for (let ty = 0; ty < 2; ty++) {
-      for (let tx = 0; tx < 2; tx++) {
-        const key = `sat-globe/1/${tx}/${ty}`;
+    const Z = 2, N = 1 << Z; // zoom-2 → 4×4 = 16 tiles for a crisper globe texture
+    for (let ty = 0; ty < N; ty++) {
+      for (let tx = 0; tx < N; tx++) {
+        const key = `sat-globe/${Z}/${tx}/${ty}`;
         if (tiles.has(key)) continue;
         const img = new Image();
-        img.src = `${ESRI}/1/${ty}/${tx}`;
+        img.crossOrigin = "anonymous"; // Esri serves CORS — lets us read texture pixels
+        img.src = `${ESRI}/${Z}/${ty}/${tx}`;
         img.onload = () => {
           satGlobeCanvasRef.current = null; // invalidate cached composite on each tile load
+          satTexDataRef.current = null;
         };
         tiles.set(key, img);
       }
@@ -1986,48 +1991,104 @@ export default function GlobeMap({
         ctx!.arc(cx, cy, R * 1.2, 0, Math.PI * 2);
         ctx!.fill();
 
-        // Esri World Imagery tiles composited into a 1024×512 pseudo-equirectangular
-        // canvas, drawn clipped to the globe circle like an equirectangular texture.
-        // Rebuild the composite whenever new tiles arrive (satGlobeCanvasRef = null).
+        // Esri World Imagery tiles (Web Mercator) → resampled to an equirectangular
+        // texture so latitude maps LINEARLY onto the sphere (the way the Blue Marble
+        // image did). Without this resample the Mercator tiles get drawn as if they
+        // were equirectangular, which vertically distorts and misaligns continents.
+        // Rebuild whenever new tiles arrive (satGlobeCanvasRef = null).
         const tiles = satGlobeTilesRef.current;
-        const allFour = [
-          tiles.get("sat-globe/1/0/0"),
-          tiles.get("sat-globe/1/1/0"),
-          tiles.get("sat-globe/1/0/1"),
-          tiles.get("sat-globe/1/1/1"),
-        ];
-        const anyLoaded = allFour.some(t => t?.complete && t.naturalWidth > 0);
+        const Z = 2, N = 1 << Z; // 4×4 zoom-2 tiles
+        const MS = 256 * N; // mercator composite size (1024)
+        const anyLoaded = [...tiles.values()].some(t => t?.complete && t.naturalWidth > 0);
         if (anyLoaded && !satGlobeCanvasRef.current) {
-          // Build composite: 4 tiles (each 256×256) → 1024×512 canvas (2:1 ratio)
-          // Tile (tx, ty) drawn at screen slot (tx*512, ty*256) size 512×256
-          const sc = document.createElement("canvas");
-          sc.width = 1024; sc.height = 512;
-          const sctx = sc.getContext("2d")!;
-          for (let ty = 0; ty < 2; ty++) {
-            for (let tx = 0; tx < 2; tx++) {
-              const img = tiles.get(`sat-globe/1/${tx}/${ty}`);
+          // 1) Composite the 16 zoom-2 tiles (256×256 each) into a 1024×1024 square —
+          //    the native Web-Mercator world at zoom 2 (lng −180..180, lat ±85.05°).
+          const merc = document.createElement("canvas");
+          merc.width = MS; merc.height = MS;
+          const mctx = merc.getContext("2d")!;
+          for (let ty = 0; ty < N; ty++) {
+            for (let tx = 0; tx < N; tx++) {
+              const img = tiles.get(`sat-globe/${Z}/${tx}/${ty}`);
               if (img?.complete && img.naturalWidth > 0)
-                sctx.drawImage(img, tx * 512, ty * 256, 512, 256);
+                mctx.drawImage(img, tx * 256, ty * 256, 256, 256);
             }
           }
-          satGlobeCanvasRef.current = sc;
+          // 2) Resample Mercator → equirectangular (2048×1024, linear latitude).
+          //    For each output row, find the matching Mercator row via the inverse
+          //    Mercator formula and copy it. Poles (|lat|>85.05°) clamp to the edge.
+          const EW = 2048, EH = 1024;
+          const equi = document.createElement("canvas");
+          equi.width = EW; equi.height = EH;
+          const ectx = equi.getContext("2d")!;
+          for (let ye = 0; ye < EH; ye++) {
+            const latRad = ((90 - (180 * (ye + 0.5)) / EH) * Math.PI) / 180;
+            let mny = (1 - Math.asinh(Math.tan(latRad)) / Math.PI) / 2; // 0=top .. 1=bottom
+            mny = Math.max(0, Math.min(1, mny));
+            const srcY = mny * (MS - 1);
+            ectx.drawImage(merc, 0, srcY, MS, 1, 0, ye, EW, 1);
+          }
+          satGlobeCanvasRef.current = equi;
+          // Capture texture pixels for orthographic sampling (CORS-clean → readable).
+          try {
+            satTexDataRef.current = ectx.getImageData(0, 0, EW, EH);
+          } catch {
+            satTexDataRef.current = null; // tainted (CORS failed) → fall back to flat draw
+          }
         }
-        const satCanvas = satGlobeCanvasRef.current;
-        if (satCanvas) {
+
+        // Render the texture onto the sphere with a TRUE orthographic projection
+        // (per-pixel inverse), so the imagery aligns with the country borders.
+        const tex = satTexDataRef.current;
+        if (tex) {
+          // Disc buffer at ~0.6× the on-screen disc resolution (imagery is low-res
+          // zoom-1, so upscaling is fine and keeps the per-pixel loop cheap).
+          const size = Math.max(64, Math.min(420, Math.round(2 * R * 0.6)));
+          let disc = satDiscRef.current;
+          if (!disc || disc.size !== size) {
+            const c = document.createElement("canvas");
+            c.width = size; c.height = size;
+            const cctx = c.getContext("2d")!;
+            disc = { canvas: c, img: cctx.createImageData(size, size), size };
+            satDiscRef.current = disc;
+          }
+          const out = disc.img.data;
+          const tW = tex.width, tHt = tex.height, tD = tex.data;
+          const rx = rotXRef.current * RAD;
+          const cosrx = Math.cos(rx), sinrx = Math.sin(rx);
+          const rotY = rotYRef.current;
+          for (let by = 0; by < size; by++) {
+            const dy = 1 - (2 * (by + 0.5)) / size; // +1 (north) .. −1 (south)
+            for (let bx = 0; bx < size; bx++) {
+              const dx = (2 * (bx + 0.5)) / size - 1; // −1 .. +1
+              const o = (by * size + bx) * 4;
+              const d2 = dx * dx + dy * dy;
+              if (d2 > 1) { out[o + 3] = 0; continue; } // outside disc → transparent
+              const z = Math.sqrt(1 - d2);
+              // inverse orthographic (undo equator tilt rx), mirroring unproject()
+              const y0 = dy * cosrx + z * sinrx;
+              const z0 = -dy * sinrx + z * cosrx;
+              const lat = Math.asin(y0 < -1 ? -1 : y0 > 1 ? 1 : y0) / RAD;
+              let lng = Math.atan2(dx, z0) / RAD - rotY;
+              lng = ((((lng + 180) % 360) + 360) % 360) - 180;
+              // sample equirectangular texture (nearest neighbour)
+              let u = ((lng + 180) / 360) * tW; if (u >= tW) u -= tW; if (u < 0) u += tW;
+              const v = ((90 - lat) / 180) * tHt;
+              const sx = u | 0;
+              const sy = v >= tHt ? tHt - 1 : v < 0 ? 0 : v | 0;
+              const so = (sy * tW + sx) * 4;
+              out[o] = tD[so]; out[o + 1] = tD[so + 1]; out[o + 2] = tD[so + 2]; out[o + 3] = 255;
+            }
+          }
+          disc.canvas.getContext("2d")!.putImageData(disc.img, 0, 0);
           ctx!.save();
           ctx!.beginPath();
           ctx!.arc(cx, cy, R, 0, Math.PI * 2);
           ctx!.clip();
-          const rotFraction = ((rotYRef.current % 360) + 360) % 360;
-          const imgW = R * 2 * Math.PI;
-          const imgH = R * Math.PI;
-          const offsetX = cx - R - (rotFraction / 360) * imgW;
-          ctx!.drawImage(satCanvas, offsetX,        cy - imgH / 2, imgW, imgH);
-          ctx!.drawImage(satCanvas, offsetX + imgW, cy - imgH / 2, imgW, imgH);
-          ctx!.drawImage(satCanvas, offsetX - imgW, cy - imgH / 2, imgW, imgH);
+          (ctx as any).imageSmoothingEnabled = true;
+          ctx!.drawImage(disc.canvas, cx - R, cy - R, 2 * R, 2 * R);
           ctx!.restore();
         } else {
-          // Fallback ocean fill while tiles load
+          // Fallback ocean fill while tiles load / if texture unreadable
           ctx!.save();
           ctx!.beginPath();
           ctx!.arc(cx, cy, R, 0, Math.PI * 2);
